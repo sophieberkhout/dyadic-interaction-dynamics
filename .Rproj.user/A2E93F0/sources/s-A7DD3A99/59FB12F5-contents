@@ -28,33 +28,42 @@ VAR1 <- function(t, burnin, u_w, u_h, phi_w, phi_h, phi_wh, phi_hw){
 #             phi_w = 0.5, phi_h = 0.5, 
 #             phi_wh = 0.2, phi_hw = 0.3)
 
-I_wh <- function(x, type, 
-                 # phi_I = NULL, 
-                 k = NULL, phi_Ip = NULL, phi_In = NULL, 
-                 d = NULL){
+
+I <- function(x, type, 
+              k = NULL, parm = NULL){
   # if(type == "linear"){
   #   x <- phi_I * x
   # }
-  if(type == "no") x <- phi_Ip * x
+  if(type == "linear"){
+    beta <- parm
+  }
   if(type == "bilinear"){
+    # ifelse(x <= k, 
+    #        x <- phi_In * x - phi_In * k, 
+    #        x <- phi_Ip * x - phi_Ip * k)
+
     ifelse(x <= k, 
-           x <- phi_In * x - phi_In * k, 
-           x <- phi_Ip * x - phi_Ip * k)
+           b <- parm[1], 
+           b <- parm[2])
+    beta <- (b * (x - k))/x
+    if(x == 0) beta <- 0
   }
   if(type == "step"){
-    ifelse(x <= k, 
-           x <- d, 
-           x <- 0) 
+    ifelse(x <= k[1], 
+           beta <- parm[1],
+           ifelse(length(k) == 1 | x <= k[2],
+                  beta <- parm[2],
+                  beta <- parm[3]))
   }
-  return(x)
+  # return(x)
+  return(beta)
 }
 
 TAR1 <- function(t, burnin, u_w, u_h, phi_w, phi_h, 
                  type_w, type_h, 
-                 phi_wh_p = NULL, phi_wh_n = NULL,
-                 phi_hw_p = NULL, phi_hw_n = NULL,
-                 k_w = NULL, k_h = NULL,
-                 d_w = NULL, d_h = NULL){
+                 betas_y = NULL,
+                 betas_x = NULL,
+                 k_w = NULL, k_h = NULL){
   
   t_bi  <- t + burnin
   
@@ -66,16 +75,26 @@ TAR1 <- function(t, burnin, u_w, u_h, phi_w, phi_h,
 
   m <- matrix(c(.5, .3, .3, .5), 2, 2)
   e <- MASS::mvrnorm(t_bi, c(0, 0), Sigma = m)
-    
-  for(i in 2:t_bi){
-    wifey[i] <- u_w + phi_w * wifey[i-1] + I_wh(hubby[i-1], type_w, k_w, phi_hw_p, phi_hw_n, d_w) + e[i, 1]
-    hubby[i] <- u_h + phi_h * hubby[i-1] + I_wh(wifey[i-1], type_h, k_h, phi_wh_p, phi_wh_n, d_h) + e[i, 2]
-  }
   
+  I_x <- rep(NA, t_bi)
+  I_y <- rep(NA, t_bi)
+  
+  for(i in 2:t_bi){
+    beta_y <- I(hubby[i-1], type_w, k_w, betas_y)
+    beta_x <- I(wifey[i-1], type_h, k_h, betas_x)
+    
+    wifey[i] <- u_w + phi_w * wifey[i-1] + beta_y * hubby[i-1] + e[i, 1]
+    hubby[i] <- u_h + phi_h * hubby[i-1] + beta_x * wifey[i-1] + e[i, 2]
+    
+    I_x[i-1] <- beta_y * hubby[i-1]
+    I_y[i-1] <- beta_x * wifey[i-1]
+    
+  }
   Behavior <- c(wifey[1:t + burnin], hubby[1:t + burnin])
   Partner <- rep(c("y", "x"), each = t)
   t_total <- rep(1:t, 2)
-  dat <- data.frame(Partner = Partner, Behavior = Behavior, t = t_total)
+  I <- c(I_y[1:t + burnin], I_x[1:t + burnin])
+  dat <- data.frame(Partner = Partner, Behavior = Behavior, t = t_total, Influence = I)
   return(dat)
 }
 
