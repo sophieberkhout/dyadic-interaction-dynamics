@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1613070280948.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "B4319D22",
+    "lastKnownWriteTime" : 1613070832,
+    "last_content_update" : 1613070832583,
+    "path" : "C:/Users/Berkh011/OneDrive - Universiteit Utrecht/Interpersonal Interactions/Shiny Dyadic Interactions/myTheme.R",
+    "project_path" : "myTheme.R",
+    "properties" : {
+        "cursorPosition" : "34,0",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

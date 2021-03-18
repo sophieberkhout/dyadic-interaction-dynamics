@@ -1,0 +1,119 @@
+VAR1 <- function(t, u_w, u_h, phi_w, phi_h, phi_wh, phi_hw){
+  wifey <- numeric(t)
+  hubby <- numeric(t) 
+  
+  e_w <- rnorm(t, sd = .1)
+  e_h <- rnorm(t, sd = .1)
+  
+  for(i in 2:t){
+    wifey[i] <- u_w + phi_w * wifey[i-1] + phi_hw * hubby[i-1] + e_w[i]
+    hubby[i] <- u_h + phi_h * hubby[i-1] + phi_wh * wifey[i-1] + e_h[i]
+  }
+  
+  dat <- data.frame(W = wifey, H = hubby)
+  return(dat)
+}
+
+# dat <- VAR1(t = 100, 
+#             u_w = 0, u_h = 0, 
+#             phi_w = 0.5, phi_h = 0.5, 
+#             phi_wh = 0.2, phi_hw = 0.3)
+
+I_wh <- function(x, type, 
+                 # phi_I = NULL, 
+                 k = NULL, phi_Ip = NULL, phi_In = NULL, 
+                 d = NULL){
+  # if(type == "linear"){
+  #   x <- phi_I * x
+  # }
+  if(type == "bilinear"){
+    ifelse(x <= k, 
+           x <- phi_In * x - phi_In * k, 
+           x <- phi_Ip * x - phi_Ip * k)
+  }
+  if(type == "step"){
+    ifelse(x <= k, 
+           x <- d, 
+           x <- 0) 
+  }
+  return(x)
+}
+
+TAR1 <- function(t, u_w, u_h, phi_w, phi_h, 
+                 type_w, type_h, 
+                 phi_wh_p = NULL, phi_wh_n = NULL,
+                 phi_hw_p = NULL, phi_hw_n = NULL,
+                 k_w = NULL, k_h = NULL,
+                 d_w = NULL, d_h = NULL){
+  wifey <- numeric(t)
+  hubby <- numeric(t) 
+  
+  e_w <- rnorm(t, sd = .1)
+  e_h <- rnorm(t, sd = .1)
+  
+  for(i in 2:t){
+    wifey[i] <- u_w + phi_w * wifey[i-1] + I_wh(hubby[i-1], type_w, k_w, phi_hw_p, phi_hw_n, d_w) + e_w[i]
+    hubby[i] <- u_h + phi_h * hubby[i-1] + I_wh(wifey[i-1], type_h, k_h, phi_wh_p, phi_wh_n, d_h) + e_h[i]
+  }
+  
+  dat <- data.frame(W = wifey, H = hubby)
+  return(dat)
+}
+
+# dat <- TAR1(t = 100, u_w = 0, u_h = 0, phi_w = 0.5, phi_h = 0.5, 
+#             type_w = "bilinear", type_h = "step", 
+#             phi_hw_p = 0.2, phi_hw_n = 0.4,
+#             k_w = -0.1, k_h = 0,
+#             d_h = 0.2)
+
+# Plot influence figure
+infl <- function(x, type, 
+                 k = NULL, 
+                 phi_Ip = NULL, phi_In = NULL, 
+                 d = NULL){
+  I <- numeric()
+  for(i in 1:(length(x)-1)){
+  I[i] <- I_wh(x[i], type, k, phi_Ip, phi_In,  d)
+  }
+  return(I)
+}
+
+change <- function(x, i, t){
+  p <- numeric()
+  if(x[1] == 1){
+    p <- i * x[2]/t
+  } else if(x[1] == 2){
+    p <- x[2] * sin((2 * pi * i)/t)
+  }
+  return(p)
+}
+
+
+TVAR1 <- function(t, tv_u_w, tv_u_h,
+                  tv_phi_w, tv_phi_h,
+                  tv_phi_wh, tv_phi_hw){
+  wifey <- numeric(t)
+  hubby <- numeric(t)
+  
+  e_w <- rnorm(t, sd = .1)
+  e_h <- rnorm(t, sd = .1)
+  
+  for(i in 2:t){
+    u_w <- change(tv_u_w, i, t)
+    u_h <- change(tv_u_h, i, t)
+    phi_w <- change(tv_phi_w, i, t)
+    phi_h <- change(tv_phi_h, i, t)
+    phi_wh <- change(tv_phi_wh, i, t)
+    phi_hw <- change(tv_phi_hw, i, t)
+    
+    wifey[i] <- u_w + phi_w * wifey[i-1] + phi_hw * hubby[i-1] + e_w[i]
+    hubby[i] <- u_h + phi_h * hubby[i-1] + phi_wh * wifey[i-1] + e_h[i]
+  }
+  dat <- data.frame(W = wifey, H = hubby)
+  return(dat)
+}
+
+# dat <- TVAR1(t = 100, 
+#              tv_u_w = c(1, .1), tv_u_h = c(1, .1),
+#              tv_phi_w = c(1, .6), tv_phi_h = c(1, .6),
+#              tv_phi_wh = c(2, .3), tv_phi_hw = c(2, .4))
