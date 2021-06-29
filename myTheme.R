@@ -1,5 +1,5 @@
-myTheme <- function(p, x = NULL, y = NULL){
-  
+myTheme <- function(p, x = NULL, y = NULL, legend.position = NULL){
+  if(is.null(legend.position)) legend.position <- c(.15, .9)
   p <- p + 
     theme(panel.grid = element_blank(),
           axis.line = element_line(colour = "black", size = .75),
@@ -8,7 +8,7 @@ myTheme <- function(p, x = NULL, y = NULL){
           panel.background = element_blank(),
           text = element_text(size = 14, family = "serif"),
           axis.text = element_text(size = 12),
-          legend.position = c(.15, .9),
+          legend.position = legend.position,
           legend.key = element_rect(fill = "transparent", size = 2),
           legend.background = element_rect(fill = "transparent"),
           # legend.text = element_text(size = 12),

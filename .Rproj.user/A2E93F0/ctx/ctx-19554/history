@@ -1,0 +1,512 @@
+labs(x = "Wife's Happiness", y = "Husband's Happiness")
+p <- myTheme(p, x = x, y = y)
+p <- p +   scale_x_continuous(breaks  = c(55, 95),
+labels = c(paste0("Low\n", sprintf("\u2190")),
+paste0("High\n", sprintf("\u2192")))) +
+scale_y_continuous(breaks = c(155, 195), labels = c(paste0(sprintf("\u2193"), "\nLow"),
+paste0("High\n", sprintf("\u2191")))) +
+theme(axis.ticks = element_blank(), axis.text.y = element_text(hjust = 0.5))
+p
+x/2
+1/3*x
+x + 100
+x + 100 + x/150
+##### Relationship happiness nonlinear
+y <- x + 100 + x/150
+dat <- data.frame(x = x, y = y)
+p <- ggplot(dat, aes(x = x, y = y)) +
+geom_segment(x = 50, xend = 80, yend = 180, y = 180, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_segment(x = 80, xend = 80, yend = 150, y = 180, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_point(aes(x = 80, y = 180), size = 2) + geom_path() +
+labs(x = "Wife's Happiness", y = "Husband's Happiness")
+p <- myTheme(p, x = x, y = y)
+p <- p +   scale_x_continuous(breaks  = c(55, 95),
+labels = c(paste0("Low\n", sprintf("\u2190")),
+paste0("High\n", sprintf("\u2192")))) +
+scale_y_continuous(breaks = c(155, 195), labels = c(paste0(sprintf("\u2193"), "\nLow"),
+paste0("High\n", sprintf("\u2191")))) +
+theme(axis.ticks = element_blank(), axis.text.y = element_text(hjust = 0.5))
+p
+x.150
+x/15-
+0
+y
+x/150
+150/150
+x
+x/50
+##### Relationship happiness nonlinear
+y <- x^2
+dat <- data.frame(x = x, y = y)
+p <- ggplot(dat, aes(x = x, y = y)) +
+geom_segment(x = 50, xend = 80, yend = 180, y = 180, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_segment(x = 80, xend = 80, yend = 150, y = 180, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_point(aes(x = 80, y = 180), size = 2) + geom_path() +
+labs(x = "Wife's Happiness", y = "Husband's Happiness")
+p <- myTheme(p, x = x, y = y)
+p <- p +   scale_x_continuous(breaks  = c(55, 95),
+labels = c(paste0("Low\n", sprintf("\u2190")),
+paste0("High\n", sprintf("\u2192")))) +
+scale_y_continuous(breaks = c(155, 195), labels = c(paste0(sprintf("\u2193"), "\nLow"),
+paste0("High\n", sprintf("\u2191")))) +
+theme(axis.ticks = element_blank(), axis.text.y = element_text(hjust = 0.5))
+p
+x^2
+x <- seq(0, 100, 10)
+plot(x, x^2)
+plot(x, x^2* 2)
+plot(x, x^2)
+##### Relationship happiness nonlinear
+x <- seq(0, 100, 10)
+y <- x^2
+y
+x
+##### Relationship happiness nonlinear
+x <- seq(0, 100, 5)
+##### Relationship happiness nonlinear
+x <- seq(0, 100, 20)
+y <- x^2
+x
+y
+dat <- data.frame(x = x, y = y)
+p <- ggplot(dat, aes(x = x, y = y)) +
+geom_segment(x = 0, xend = 60, yend = 3600, y = 3600, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_segment(x = 60, xend = 60, yend = 0, y = 3600, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_point(aes(x = 60, y = 3600), size = 2) + geom_path() +
+labs(x = "Wife's Happiness", y = "Husband's Happiness")
+p <- myTheme(p, x = x, y = y)
+p <- p +   scale_x_continuous(breaks  = c(55, 95),
+labels = c(paste0("Low\n", sprintf("\u2190")),
+paste0("High\n", sprintf("\u2192")))) +
+scale_y_continuous(breaks = c(155, 195), labels = c(paste0(sprintf("\u2193"), "\nLow"),
+paste0("High\n", sprintf("\u2191")))) +
+theme(axis.ticks = element_blank(), axis.text.y = element_text(hjust = 0.5))
+p
+x <- seq(50,100,10)
+y <- seq(150,200,10)
+dat <- data.frame(x = x, y = y)
+p <- ggplot(dat, aes(x = x, y = y)) +
+geom_segment(x = 0, xend = 50, yend = 180, y = 180, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_segment(x = 80, xend = 80, yend = 150, y = 180, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_point(aes(x = 80, y = 180), size = 2) + geom_path() +
+labs(x = "Wife's Happiness", y = "Husband's Happiness")
+p <- myTheme(p, x = x, y = y)
+p <- p +   scale_x_continuous(breaks  = c(55, 95),
+labels = c(paste0("Low\n", sprintf("\u2190")),
+paste0("High\n", sprintf("\u2192")))) +
+scale_y_continuous(breaks = c(155, 195), labels = c(paste0(sprintf("\u2193"), "\nLow"),
+paste0("High\n", sprintf("\u2191")))) +
+theme(axis.ticks = element_blank(), axis.text.y = element_text(hjust = 0.5))
+p
+##### Relationship happiness nonlinear
+-5:5
+##### Relationship happiness nonlinear
+0:10
+##### Relationship happiness nonlinear
+0:10^2
+##### Relationship happiness nonlinear
+0:(10^2)
+##### Relationship happiness nonlinear
+0:10
+##### Relationship happiness nonlinear
+(0:10)^2
+##### Relationship happiness nonlinear
+-3:3
+y
+##### Relationship happiness nonlinear
+y <- c(150, 153, 157, 165, 177, 200)
+dat <- data.frame(x = x, y = y)
+p <- ggplot(dat, aes(x = x, y = y)) +
+geom_segment(x = 0, xend = 50, yend = 180, y = 180, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_segment(x = 80, xend = 80, yend = 150, y = 180, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_point(aes(x = 80, y = 180), size = 2) + geom_path() +
+labs(x = "Wife's Happiness", y = "Husband's Happiness")
+p <- myTheme(p, x = x, y = y)
+p <- p +   scale_x_continuous(breaks  = c(55, 95),
+labels = c(paste0("Low\n", sprintf("\u2190")),
+paste0("High\n", sprintf("\u2192")))) +
+scale_y_continuous(breaks = c(155, 195), labels = c(paste0(sprintf("\u2193"), "\nLow"),
+paste0("High\n", sprintf("\u2191")))) +
+theme(axis.ticks = element_blank(), axis.text.y = element_text(hjust = 0.5))
+p
+##### Relationship happiness nonlinear
+y <- c(150, 152, 155, 163, 173, 200)
+dat <- data.frame(x = x, y = y)
+p <- ggplot(dat, aes(x = x, y = y)) +
+geom_segment(x = 0, xend = 50, yend = 180, y = 180, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_segment(x = 80, xend = 80, yend = 150, y = 180, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_point(aes(x = 80, y = 180), size = 2) + geom_path() +
+labs(x = "Wife's Happiness", y = "Husband's Happiness")
+p <- myTheme(p, x = x, y = y)
+p <- p +   scale_x_continuous(breaks  = c(55, 95),
+labels = c(paste0("Low\n", sprintf("\u2190")),
+paste0("High\n", sprintf("\u2192")))) +
+scale_y_continuous(breaks = c(155, 195), labels = c(paste0(sprintf("\u2193"), "\nLow"),
+paste0("High\n", sprintf("\u2191")))) +
+theme(axis.ticks = element_blank(), axis.text.y = element_text(hjust = 0.5))
+p
+p <- ggplot(dat, aes(x = x, y = y)) +
+geom_segment(x = 0, xend = 50, yend = 180, y = 180, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_segment(x = 80, xend = 80, yend = 150, y = 180, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_point(aes(x = 80, y = 180), size = 2) + geom_smooth(se = F, col = "black") +
+labs(x = "Wife's Happiness", y = "Husband's Happiness")
+p <- myTheme(p, x = x, y = y)
+p <- p +   scale_x_continuous(breaks  = c(55, 95),
+labels = c(paste0("Low\n", sprintf("\u2190")),
+paste0("High\n", sprintf("\u2192")))) +
+scale_y_continuous(breaks = c(155, 195), labels = c(paste0(sprintf("\u2193"), "\nLow"),
+paste0("High\n", sprintf("\u2191")))) +
+theme(axis.ticks = element_blank(), axis.text.y = element_text(hjust = 0.5))
+p
+##### Relationship happiness nonlinear
+y <- c(150, 152, 155, 160, 173, 200)
+dat <- data.frame(x = x, y = y)
+p <- ggplot(dat, aes(x = x, y = y)) +
+geom_segment(x = 0, xend = 50, yend = 180, y = 180, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_segment(x = 80, xend = 80, yend = 150, y = 180, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_point(aes(x = 80, y = 180), size = 2) + geom_smooth(se = F, col = "black") +
+labs(x = "Wife's Happiness", y = "Husband's Happiness")
+p <- myTheme(p, x = x, y = y)
+p <- p +   scale_x_continuous(breaks  = c(55, 95),
+labels = c(paste0("Low\n", sprintf("\u2190")),
+paste0("High\n", sprintf("\u2192")))) +
+scale_y_continuous(breaks = c(155, 195), labels = c(paste0(sprintf("\u2193"), "\nLow"),
+paste0("High\n", sprintf("\u2191")))) +
+theme(axis.ticks = element_blank(), axis.text.y = element_text(hjust = 0.5))
+p
+x
+p <- ggplot(dat, aes(x = x, y = y)) +
+geom_segment(x = 50, xend = 80, yend = 160, y = 160, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_segment(x = 80, xend = 80, yend = 150, y = 180, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_point(aes(x = 80, y = 180), size = 2) + geom_smooth(se = F, col = "black") +
+labs(x = "Wife's Happiness", y = "Husband's Happiness")
+p <- myTheme(p, x = x, y = y)
+p <- p +   scale_x_continuous(breaks  = c(55, 95),
+labels = c(paste0("Low\n", sprintf("\u2190")),
+paste0("High\n", sprintf("\u2192")))) +
+scale_y_continuous(breaks = c(155, 195), labels = c(paste0(sprintf("\u2193"), "\nLow"),
+paste0("High\n", sprintf("\u2191")))) +
+theme(axis.ticks = element_blank(), axis.text.y = element_text(hjust = 0.5))
+p
+p <- ggplot(dat, aes(x = x, y = y)) +
+geom_segment(x = 50, xend = 80, yend = 160, y = 160, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_segment(x = 80, xend = 80, yend = 150, y = 160, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_point(aes(x = 80, y = 160), size = 2) + geom_smooth(se = F, col = "black") +
+labs(x = "Wife's Happiness", y = "Husband's Happiness")
+p <- myTheme(p, x = x, y = y)
+p <- p +   scale_x_continuous(breaks  = c(55, 95),
+labels = c(paste0("Low\n", sprintf("\u2190")),
+paste0("High\n", sprintf("\u2192")))) +
+scale_y_continuous(breaks = c(155, 195), labels = c(paste0(sprintf("\u2193"), "\nLow"),
+paste0("High\n", sprintf("\u2191")))) +
+theme(axis.ticks = element_blank(), axis.text.y = element_text(hjust = 0.5))
+p
+ggsave("eglinearwifehusband.pdf", p, device = cairo_pdf, width = 5, height = 4)
+ggsave("egnonlinearwifehusband.pdf", p, device = cairo_pdf, width = 5, height = 4)
+x <- seq(50,100,10)
+y <- seq(150,200,10)
+dat <- data.frame(x, y)
+##### Relationship happiness
+p <- ggplot(dat, aes(x = x, y = y)) +
+geom_segment(x = 50, xend = 80, yend = 180, y = 180, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_segment(x = 80, xend = 80, yend = 150, y = 180, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_point(aes(x = 80, y = 180), size = 2) + geom_line() +
+labs(x = "Wife's Happiness", y = "Husband's Happiness")
+p <- myTheme(p, x = x, y = y)
+p <- p +   scale_x_continuous(breaks  = c(55, 95),
+labels = c(paste0("Low\n", sprintf("\u2190")),
+paste0("High\n", sprintf("\u2192")))) +
+scale_y_continuous(breaks = c(155, 195), labels = c(paste0(sprintf("\u2193"), "\nLow"),
+paste0("High\n", sprintf("\u2191")))) +
+theme(axis.ticks = element_blank(), axis.text.y = element_text(hjust = 0.5))
+p
+ggsave("eglinearwifehusband.pdf", p, device = cairo_pdf, width = 5, height = 4)
+##### Relationship happiness nonlinear
+y <- c(150, 152, 155, 160, 173, 200)
+dat <- data.frame(x = x, y = y)
+p <- ggplot(dat, aes(x = x, y = y)) +
+geom_segment(x = 50, xend = 80, yend = 160, y = 160, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_segment(x = 80, xend = 80, yend = 150, y = 160, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_point(aes(x = 80, y = 160), size = 2) + geom_smooth(size = 1, se = F, col = "black") +
+labs(x = "Wife's Happiness", y = "Husband's Happiness")
+p <- myTheme(p, x = x, y = y)
+p <- p +   scale_x_continuous(breaks  = c(55, 95),
+labels = c(paste0("Low\n", sprintf("\u2190")),
+paste0("High\n", sprintf("\u2192")))) +
+scale_y_continuous(breaks = c(155, 195), labels = c(paste0(sprintf("\u2193"), "\nLow"),
+paste0("High\n", sprintf("\u2191")))) +
+theme(axis.ticks = element_blank(), axis.text.y = element_text(hjust = 0.5))
+p
+x <- seq(50,100,10)
+y <- seq(150,200,10)
+dat <- data.frame(x, y)
+##### Relationship happiness
+p <- ggplot(dat, aes(x = x, y = y)) +
+geom_segment(x = 50, xend = 80, yend = 180, y = 180, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_segment(x = 80, xend = 80, yend = 150, y = 180, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_point(aes(x = 80, y = 180), size = 2) + geom_line(size = 2) +
+labs(x = "Wife's Happiness", y = "Husband's Happiness")
+p <- myTheme(p, x = x, y = y)
+p <- p +   scale_x_continuous(breaks  = c(55, 95),
+labels = c(paste0("Low\n", sprintf("\u2190")),
+paste0("High\n", sprintf("\u2192")))) +
+scale_y_continuous(breaks = c(155, 195), labels = c(paste0(sprintf("\u2193"), "\nLow"),
+paste0("High\n", sprintf("\u2191")))) +
+theme(axis.ticks = element_blank(), axis.text.y = element_text(hjust = 0.5))
+p
+ggsave("eglinearwifehusband.pdf", p, device = cairo_pdf, width = 5, height = 4)
+##### Relationship happiness
+p <- ggplot(dat, aes(x = x, y = y)) +
+geom_segment(x = 50, xend = 80, yend = 180, y = 180, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_segment(x = 80, xend = 80, yend = 150, y = 180, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_point(aes(x = 80, y = 180), size = 2) + geom_line(size = 1.5) +
+labs(x = "Wife's Happiness", y = "Husband's Happiness")
+p <- myTheme(p, x = x, y = y)
+p <- p +   scale_x_continuous(breaks  = c(55, 95),
+labels = c(paste0("Low\n", sprintf("\u2190")),
+paste0("High\n", sprintf("\u2192")))) +
+scale_y_continuous(breaks = c(155, 195), labels = c(paste0(sprintf("\u2193"), "\nLow"),
+paste0("High\n", sprintf("\u2191")))) +
+theme(axis.ticks = element_blank(), axis.text.y = element_text(hjust = 0.5))
+p
+ggsave("eglinearwifehusband.pdf", p, device = cairo_pdf, width = 5, height = 4)
+ggsave("eglinearwifehusband.pdf", p, device = cairo_pdf, width = 5, height = 4)
+##### Relationship happiness
+p <- ggplot(dat, aes(x = x, y = y)) +
+geom_segment(x = 50, xend = 80, yend = 180, y = 180, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_segment(x = 80, xend = 80, yend = 150, y = 180, alpha = 0.1, linetype = "dashed", color = "grey") +
+geom_point(aes(x = 80, y = 180), size = 2) + geom_line(size = 1.3) +
+labs(x = "Wife's Happiness", y = "Husband's Happiness")
+p <- myTheme(p, x = x, y = y)
+p <- p +   scale_x_continuous(breaks  = c(55, 95),
+labels = c(paste0("Low\n", sprintf("\u2190")),
+paste0("High\n", sprintf("\u2192")))) +
+scale_y_continuous(breaks = c(155, 195), labels = c(paste0(sprintf("\u2193"), "\nLow"),
+paste0("High\n", sprintf("\u2191")))) +
+theme(axis.ticks = element_blank(), axis.text.y = element_text(hjust = 0.5))
+ggsave("eglinearwifehusband.pdf", p, device = cairo_pdf, width = 5, height = 4)
+##### Relationship happiness nonlinear
+y <- c(150, 152, 155, 160, 173, 200)
+plot(x,y)
+plot(y,x)
+dat <- read.table("data.txt", header = T)
+View(dat)
+install.packages("dynr")
+library("dynr")
+install.packages("stringi")
+install.packages("stringi")
+library("dynr")
+install.packages("dplyr")
+install.packages("dplyr")
+library("dynr")
+meas <- prep.measurement(
+values.load=matrix(c(1, 0), 1, 2),
+params.load=matrix(c('fixed', 'fixed'), 1, 2),
+state.names=c("Position","Velocity"),
+obs.names=c("y1"))
+ecov <- prep.noise(
+values.latent=diag(c(0, 1), 2),
+params.latent=diag(c('fixed', 'dnoise'), 2),
+values.observed=diag(1.5, 1),
+params.observed=diag('mnoise', 1))
+initial <- prep.initial(
+values.inistate=c(0, 1),
+params.inistate=c('inipos', 'fixed'),
+values.inicov=diag(1, 2),
+params.inicov=diag('fixed', 2))
+dynamics <- prep.matrixDynamics(
+values.dyn=matrix(c(0, -0.1, 1, -0.2), 2, 2),
+params.dyn=matrix(c('fixed', 'spring', 'fixed', 'friction'), 2, 2),
+isContinuousTime=TRUE)
+data(Oscillator)
+data <- dynr.data(Oscillator, id="id", time="times", observed="y1")
+model <- dynr.model(dynamics=dynamics, measurement=meas,
+noise=ecov, initial=initial, data=data)
+# Now cook the model!
+cook <- dynr.cook(model,
+verbose=FALSE, optimization_flag=FALSE, hessian_flag=FALSE)
+install.packages("Rtools")
+install.packages("Rtools40")
+R.Version()
+devtools::has_devel()
+install.packages("devtools")
+devtools::has_devel()
+1+1
+devtools::has_devel()
+# Now cook the model!
+cook <- dynr.cook(model,
+verbose=FALSE, optimization_flag=FALSE, hessian_flag=FALSE)
+writeLines('PATH="${RTOOLS40_HOME}\\usr\\bin;${PATH}"', con = "~/.Renviron")
+Sys.which("make")
+Sys.which("make")
+Sys.which("make")
+list.files("c:/Rtools40", "find\\.exe", recursive = TRUE, full.names = TRUE)
+writeLines('PATH="c:/Rtools40/usr/bin/find.exe"', con = "~/.Renviron")
+library("dynr")
+install.packages("ggplot2")
+install.packages("dynr")
+library("dynr")
+list.files("c:/Rtools40", "find\\.exe", recursive = TRUE, full.names = TRUE)
+Sys.getenv()
+Sys.getenv("PATH")
+R.Version()
+meas <- prep.measurement(
+values.load=matrix(c(1, 0), 1, 2),
+params.load=matrix(c('fixed', 'fixed'), 1, 2),
+state.names=c("Position","Velocity"),
+obs.names=c("y1"))
+ecov <- prep.noise(
+values.latent=diag(c(0, 1), 2),
+params.latent=diag(c('fixed', 'dnoise'), 2),
+values.observed=diag(1.5, 1),
+params.observed=diag('mnoise', 1))
+meas <- prep.measurement(
+values.load=matrix(c(1, 0), 1, 2),
+params.load=matrix(c('fixed', 'fixed'), 1, 2),
+state.names=c("Position","Velocity"),
+obs.names=c("y1"))
+ecov <- prep.noise(
+values.latent=diag(c(0, 1), 2),
+params.latent=diag(c('fixed', 'dnoise'), 2),
+values.observed=diag(1.5, 1),
+params.observed=diag('mnoise', 1))
+initial <- prep.initial(
+values.inistate=c(0, 1),
+params.inistate=c('inipos', 'fixed'),
+values.inicov=diag(1, 2),
+params.inicov=diag('fixed', 2))
+dynamics <- prep.matrixDynamics(
+values.dyn=matrix(c(0, -0.1, 1, -0.2), 2, 2),
+params.dyn=matrix(c('fixed', 'spring', 'fixed', 'friction'), 2, 2),
+isContinuousTime=TRUE)
+data(Oscillator)
+data <- dynr.data(Oscillator, id="id", time="times", observed="y1")
+model <- dynr.model(dynamics=dynamics, measurement=meas,
+noise=ecov, initial=initial, data=data)
+# Now cook the model!
+cook <- dynr.cook(model,
+verbose=FALSE, optimization_flag=FALSE, hessian_flag=FALSE)
+library("dynr")
+meas <- prep.measurement(
+values.load=matrix(c(1, 0), 1, 2),
+params.load=matrix(c('fixed', 'fixed'), 1, 2),
+state.names=c("Position","Velocity"),
+obs.names=c("y1"))
+ecov <- prep.noise(
+values.latent=diag(c(0, 1), 2),
+params.latent=diag(c('fixed', 'dnoise'), 2),
+values.observed=diag(1.5, 1),
+params.observed=diag('mnoise', 1))
+initial <- prep.initial(
+values.inistate=c(0, 1),
+params.inistate=c('inipos', 'fixed'),
+values.inicov=diag(1, 2),
+params.inicov=diag('fixed', 2))
+dynamics <- prep.matrixDynamics(
+values.dyn=matrix(c(0, -0.1, 1, -0.2), 2, 2),
+params.dyn=matrix(c('fixed', 'spring', 'fixed', 'friction'), 2, 2),
+isContinuousTime=TRUE)
+data(Oscillator)
+data <- dynr.data(Oscillator, id="id", time="times", observed="y1")
+model <- dynr.model(dynamics=dynamics, measurement=meas,
+noise=ecov, initial=initial, data=data)
+# Now cook the model!
+cook <- dynr.cook(model,
+verbose=FALSE, optimization_flag=FALSE, hessian_flag=FALSE)
+has_rtools()
+library("pkgbuild")
+has_rtools()
+has_rtools(debug = FALSE)
+rtools_path()
+check_rtools()
+Sys.which("make")
+Sys.getenv("HOME")
+library(devtools)
+Sys.getenv()
+Sys.getenv("PATH")
+devtools::has_rtools()
+pkgbuild::has_rtools()
+1+1
+library("dynr")
+meas <- prep.measurement(
+values.load=matrix(c(1, 0), 1, 2),
+params.load=matrix(c('fixed', 'fixed'), 1, 2),
+state.names=c("Position","Velocity"),
+obs.names=c("y1"))
+ecov <- prep.noise(
+values.latent=diag(c(0, 1), 2),
+params.latent=diag(c('fixed', 'dnoise'), 2),
+values.observed=diag(1.5, 1),
+params.observed=diag('mnoise', 1))
+initial <- prep.initial(
+values.inistate=c(0, 1),
+params.inistate=c('inipos', 'fixed'),
+values.inicov=diag(1, 2),
+params.inicov=diag('fixed', 2))
+dynamics <- prep.matrixDynamics(
+values.dyn=matrix(c(0, -0.1, 1, -0.2), 2, 2),
+params.dyn=matrix(c('fixed', 'spring', 'fixed', 'friction'), 2, 2),
+isContinuousTime=TRUE)
+data(Oscillator)
+data <- dynr.data(Oscillator, id="id", time="times", observed="y1")
+model <- dynr.model(dynamics=dynamics, measurement=meas,
+noise=ecov, initial=initial, data=data)
+# Now cook the model!
+cook <- dynr.cook(model,
+verbose=FALSE, optimization_flag=FALSE, hessian_flag=FALSE)
+Sys.getenv("PATH")
+Sys.which("mkae")
+Sys.which("make")
+writeLines('PATH="${RTOOLS40_HOME}\\usr\\bin;${PATH}"', con = "~/.Renviron")
+Sys.which("make")
+pkgbuild::rtools_path()
+1+1
+pkgbuild::rtools_path()
+Sys.which("make")
+library("dynr")
+# Now cook the model!
+cook <- dynr.cook(model,
+verbose=FALSE, optimization_flag=FALSE, hessian_flag=FALSE)
+echo $RTOOLS40_HOME
+Sys.which("make")
+writeLines('PATH="${PATH};${RTOOLS40_HOME}\\usr\\bin"', con = "~/.Renviron")
+1+1
+Sys.which("make")
+Sys.setenv(PATH = paste("C:\rtools40\usr\bin", Sys.getenv("PATH"), sep=";"))
+Sys.setenv(PATH = paste("C:/rtools40/usr/bin", Sys.getenv("PATH"), sep=";"))
+Sys.which("make")
+library("dynr")
+# Now cook the model!
+cook <- dynr.cook(model,
+verbose=FALSE, optimization_flag=FALSE, hessian_flag=FALSE)
+# Now cook the model!
+cook <- dynr.cook(model,
+verbose=FALSE, optimization_flag=FALSE, hessian_flag=FALSE)
+Sys.which("make")
+install.packages("jsonlite", type = "source")
+# Now cook the model!
+cook <- dynr.cook(model,
+verbose=FALSE, optimization_flag=FALSE, hessian_flag=FALSE)
+Sys.setenv(BINPREF = "C:/rtools40/mingw_$(WIN)/bin/")
+# Now cook the model!
+cook <- dynr.cook(model,
+verbose=FALSE, optimization_flag=FALSE, hessian_flag=FALSE)
+dynr.cook
+?dynr.cook
+?dynr.model
+model <- dynr.model(dynamics=dynamics, measurement=meas,
+noise=ecov, initial=initial, data=data,
+outfile = paste("trial.c",sep=""))
+# Now cook the model!
+cook <- dynr.cook(model,
+verbose=FALSE, optimization_flag=FALSE, hessian_flag=FALSE)
+pkgbuild::has_build_tools(debug = TRUE)
+Sys.which("gcc")
+Sys.which("mae")
+Sys.which("make")
+Sys.which("mingw")
+Sys.which("bin")
+Sys.getenv("PATH")
+Sys.getenv("BINPREF")
+Sys.which("Makeconf")
+Sys.which("make")

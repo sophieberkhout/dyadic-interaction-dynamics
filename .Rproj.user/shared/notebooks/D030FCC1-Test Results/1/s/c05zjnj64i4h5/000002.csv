@@ -1,0 +1,8 @@
+"0","library(""rstatix"")"
+"0","# dat$x <- iris$Sepal.Length"
+"0","# dat$y <- iris$Petal.Length"
+"0","# dat_long <- gather(iris, ""group"", ""x"", ""Sepal.Length"", ""Petal.Length"")"
+"0","dat <- data.frame(1:100)"
+"0","dat$v1 <- rnorm(100)"
+"0","dat$v2 <- rnorm(100)"
+"0","dat_long <- gather(dat, ""group"", ""x"", ""v1"", ""v2"")"

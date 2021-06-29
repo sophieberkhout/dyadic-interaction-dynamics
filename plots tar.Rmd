@@ -1,0 +1,114 @@
+---
+title: "TAR models"
+author: "S.W. Berkhout"
+date: "30-3-2021"
+output: html_document
+---
+
+```{r echo = F, message = F}
+source("modelFunctions.R")
+source("myTheme.R")
+source("dat tar.R")
+library("ggplot2")
+```
+
+```{r}
+set.seed(1)
+dat1 <- TAR1(t = 300, burnin = 20,
+            # linear means no threshold
+            # bilinear means two spillover parameter values and one threshold
+            # step means two or three values and one or two thresholds
+            type_u = c("linear", "linear"),   # intercept y and x both linear
+            type_b = c("bilinear", "linear"), # spillover x to  y bilinear, and y to x linear          
+            us_y = 0,                         # intercept y = 0
+            us_x = 0,                         # intercept x = 0
+            phi_y = 0.5,                      # autoregression y = 0.5
+            phi_x = 0.5,                      # autoregression x = 0.5
+            betas_y = c(0.2, 0.6),            # spillover x to y is 0.2 or 0.6 depending on threshold
+            betas_x = 0,                      # spillover y to x is 0
+            k_y = 0)                          # threshold y is 0
+```
+
+```{r echo = F, , message = F, warning = F, fig.show = "hold", fig.height = 3, fig.width = 4, out.width = "50%"}
+p1 <- tarplots(dat1, 300, 0)
+p1$timeseries
+p1$autoregressive
+p1$influence
+p1$spillover
+```
+
+
+```{r}
+set.seed(1)
+dat2 <- TAR1(t = 300, burnin = 20,
+            # linear means no threshold
+            # bilinear means two spillover parameter values and one threshold
+            # step means two or three values and one or two thresholds
+            type_u = c("step", "linear"),   # intercept y step and x linear
+            type_b = c("linear", "linear"), # spillover x to y and y to x both linear          
+            us_y = c(0, 5),                 # intercept y = 0 or y = 5 depending on threshold
+            us_x = 0,                       # intercept x = 0
+            phi_y = 0.5,                    # autoregression y = 0.5
+            phi_x = 0.5,                    # autoregression x = 0.5
+            betas_y = 0.2,                  # spillover x to y is 0.2
+            betas_x = 0,                    # spillover y to x is 0
+            k_y = 0)                        # threshold y is 0
+```
+
+```{r echo = F, , message = F, warning = F, fig.show = "hold", fig.height = 3, fig.width = 4, out.width = "50%"}
+p2 <- tarplots(dat2, 300, 0)
+p2$timeseries
+p2$autoregressive
+p2$influence
+p2$spillover
+```
+
+```{r}
+set.seed(1)
+dat3 <- TAR1(t = 300, burnin = 20,
+            # linear means no threshold
+            # bilinear means two spillover parameter values and one threshold
+            # step means two or three values and one or two thresholds
+            type_u = c("step", "linear"),     # intercept y step and x linear
+            type_b = c("bilinear", "linear"), # spillover x to y bilinear and y to x linear          
+            us_y = c(0, 5),                   # intercept y = 0 or y = 5 depending on threshold
+            us_x = 0,                         # intercept x = 0
+            phi_y = 0.5,                      # autoregression y = 0.5
+            phi_x = 0.5,                      # autoregression x = 0.5
+            betas_y = c(0.2, 0.6),            # spillover x to y is 0.2 or 0.6 depending on threshold
+            betas_x = 0,                      # spillover y to x is 0
+            k_y = 0)                          # threshold y is 0
+```
+
+```{r echo = F, , message = F, warning = F, fig.show = "hold", fig.height = 3, fig.width = 4, out.width = "50%"}
+p3 <- tarplots(dat3, 300, 0)
+p3$timeseries
+p3$autoregressive
+p3$influence
+p3$spillover
+```
+
+```{r}
+set.seed(1)
+dat4 <- TAR1(t = 300, burnin = 20,
+            # linear means no threshold
+            # bilinear means two spillover parameter values and one threshold
+            # step means two or three values and one or two thresholds
+            type_u = c("step", "linear"),     # intercept y step and x linear
+            type_b = c("bilinear", "linear"), # spillover x to y and y to x both linear          
+            us_y = c(-1, 1),                  # intercept y = -1 or y = 1 depending on threshold
+            us_x = 0,                         # intercept x = 0
+            phi_y = 0.5,                      # autoregression y = 0.5
+            phi_x = 0.5,                      # autoregression x = 0.5
+            betas_y = c(0.2, 0.6),            # spillover x to y is 0.2 or 0.6 depending on threshold
+            betas_x = 0.2,                    # spillover y to x is 0.2
+            k_y = 0)                          # threshold y is 0
+```
+
+```{r echo = F, , message = F, warning = F, fig.show = "hold", fig.height = 3, fig.width = 4, out.width = "50%"}
+p4 <- tarplots(dat4, 300, 0)
+p4$timeseries
+p4$autoregressive
+p4$influence
+p4$spillover
+```
