@@ -118,13 +118,7 @@ HMM1 <- function(occasions,
   
   y <- numeric(occasions)
   x <- numeric(occasions) 
-  
-  # sigma1 <- matrix(c(.3, .1, .1, .3), 2, 2)
-  # sigma2 <- matrix(c(.5, .3, .3, .5), 2, 2)
-  # z1 <- MASS::mvrnorm(occasions, c(0, 0), Sigma = sigma1)
-  # z2 <- MASS::mvrnorm(occasions, c(0, 0), Sigma = sigma2)
-  # z <- list(z1, z2)
-  
+
   # transition matrix
   p11 <- probs[1]
   p22 <- probs[2]
@@ -168,12 +162,6 @@ MSVAR1 <- function(occasions,
   alpha_x <- params_x[[1]]
   phi_x   <- params_x[[2]]
   beta_x  <- params_x[[3]]
-  
-  # sigma1 <- matrix(c(.5, .3, .3, .5), 2, 2)
-  # sigma2 <- matrix(c(.8, .3, .3, .8), 2, 2)
-  # z1 <- MASS::mvrnorm(occasions, c(0, 0), Sigma = sigma1)
-  # z2 <- MASS::mvrnorm(occasions, c(0, 0), Sigma = sigma2)
-  # z <- list(z1, z2)
   
   y <- numeric(occasions)
   x <- numeric(occasions) 

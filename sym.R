@@ -12,7 +12,7 @@ symVARS <- function(occasions, burnin,
   if(type == "MSVAR" | type == "HMM"){
     m2 <- matrix(c(.3, .1, .1, .3), 2, 2, dimnames = list(c("y", "x"), c("y", "x")))
     z2 <- as.data.frame(MASS::mvrnorm(o_bi, c(0, 0), Sigma = m2))
-    z <- list(z, z2)
+    z  <- list(z, z2)
   }
 
   if(type == "VAR"){
@@ -34,10 +34,10 @@ symVARS <- function(occasions, burnin,
   dat <- dat[1:occasions + burnin, ]
   
   if(longformat){
-    behavior <- c(dat$y, dat$x)
-    partner <- rep(c("y", "x"), each = occasions)
-    t_total <- rep(1:occasions, 2)
-    dat <- data.frame(partner = partner, behavior = behavior, t = t_total)
+    behavior  <- c(dat$y, dat$x)
+    partner   <- rep(c("y", "x"), each = occasions)
+    t_total   <- rep(1:occasions, 2)
+    dat       <- data.frame(partner = partner, behavior = behavior, t = t_total)
   } 
   return(dat)
 }

@@ -4,6 +4,11 @@
 source("plotFunctions.R")
 
 set.seed(1)
+dat.2 <- symVARS(occasions = 300, burnin = 20,
+                 type = "VAR", 
+                 params_y = c(0, 0.5, 0.2),
+                 params_x = c(0, 0.5, 0.2)
+                 )
 dat.2 <- symVAR1(t = 300, burnin = 20,
                  alpha = list(y = 0, x = 0),
                  phi = list(y = 0.5, x = 0.5),
@@ -11,6 +16,11 @@ dat.2 <- symVAR1(t = 300, burnin = 20,
                  )
 
 set.seed(1)
+dat.8 <- symVARS(occasions = 300, burnin = 20,
+                 type = "VAR", 
+                 params_y = c(0, 0.5, 0.8),
+                 params_x = c(0, 0.5, 0.2)
+                 )
 dat.8 <- symVAR1(t = 300, burnin = 20,
                  alpha = list(y = 0, x = 0),
                  phi = list(y = 0.5, x = 0.5),
