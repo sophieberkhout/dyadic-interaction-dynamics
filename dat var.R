@@ -37,3 +37,6 @@ myTS(dat.8, ylim = lim, filename = "../Plots/VAR/VARhigh_ts.pdf")
 mySSP(dat.8, type = "carryover", xlim = lim, ylim = lim, filename = "../Plots/VAR/VARhigh_ss.pdf")
 mySSP(dat.8, type = "spillover", xlim = lim, ylim = lim, filename = "../Plots/VAR/VARhigh_sohw.pdf")
 myCCF(dat.8, ylim = c(0, 1), filename = "../Plots/VAR/VARlow_ccf.pdf")
+
+
+

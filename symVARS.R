@@ -1,5 +1,5 @@
 symVARS <- function(occasions, burnin, 
-                    type = NULL, probs, 
+                    type, probs, 
                     params_y, params_x, # list(alpha =, phi = , beta =, k = )
                     innovations = c(.5, .3, .3, .5), # too high?
                     longformat = T){
@@ -7,19 +7,20 @@ symVARS <- function(occasions, burnin,
   source("modelFunctions.R", local = T)
   
   o_bi <- occasions + burnin # add burnin
-
+  
   # COVARYING INNOVATIONS
-  covs <- ifelse(!is.list(innovations), innovations, innovations[[1]]) # get vector indicating (co)variances
+  ifelse(!is.list(innovations), covs <- innovations, covs <- innovations[[1]]) # get vector indicating (co)variances
   m <- matrix(covs, 2, 2, dimnames = list(c("y", "x"), c("y", "x")))   # create covariance matrix
   z <- as.data.frame(MASS::mvrnorm(o_bi, c(0, 0), Sigma = m))          # simulate innovations for each occasion
-  if(type == "Markov-swithing" | type == "HMM"){ # Markov-swithing and HMM models have different variances between regimes
-    covs2 <- ifelse(!is.list(innovations), innovations, innovations[[2]])
+  
+  if(type == "Markov-swithing" | type == "HMM"){ # Markov-switching and HMM models have different variances between regimes
+    ifelse(!is.list(innovations), covs2 <- innovations, covs2 <- innovations[[2]])
     m2 <- matrix(covs2, 2, 2, dimnames = list(c("y", "x"), c("y", "x")))
     z2 <- as.data.frame(MASS::mvrnorm(o_bi, c(0, 0), Sigma = m2))
     z  <- list(z, z2)
   }
 
-  if(is.null(type) || type == "VAR"){
+  if(type == "VAR"){
     dat <- VAR1(o_bi, params_y, params_x, z)
   }
   if(type == "time-varying"){

@@ -79,7 +79,7 @@ myCCF <- function(dat,
     labs(x = "Lag", y = "CCF")
   if(is.null(xlim)) xlim <- cc$lag
   if(is.null(ylim)) ylim <- cc$ccf
-  p <- myTheme(p, x = xlim, y = ylim)
+  p <- myTheme(p, x = xlim, y = c(ylim, 0))
   if(!is.null(filename))  ggsave(filename, p, width = width, height = height)
   return(p)
 }
