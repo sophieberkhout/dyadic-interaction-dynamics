@@ -1,7 +1,42 @@
-source("modelFunctions.R")
-source("myTheme.R")
+source("symVARS.R")
+source("plotFunctions.R")
+# source("myTheme.R")
 
 set.seed(1)
+dat.s <- symVARS(occasions = 300, burnin = 20,
+                 type = "TV",
+                 params_y = list(alpha = list(2, "sine"),
+                                 phi = .5,
+                                 beta = .2),
+                 params_x = list(alpha = 0,
+                                 phi = .5,
+                                 beta = 0))
+
+set.seed(1)
+dat.l <- symVARS(occasions = 300, burnin = 20,
+                 type = "TV",
+                 params_y = list(alpha = list(2, "linear"),
+                                 phi = .5,
+                                 beta = .2),
+                 params_x = list(alpha = 0,
+                                 phi = .5,
+                                 beta = 0))
+
+lim <- c(min(c(dat.l$behavior, dat.s$behavior)), max(c(dat.l$behavior, dat.s$behavior)))
+myTS(dat.l, ylim = lim)
+mySSP(dat.l, type = "carryover", xlim = lim, ylim = lim)
+mySSP(dat.l, type = "spillover", xlim = lim, ylim = lim)
+mySSP(dat.l, type = "spillover", partner = "y", ylim = lim)
+myCCF(dat.l, ylim = c(0, 1))
+
+
+myTS(dat.s, ylim = lim)
+mySSP(dat.s, type = "carryover", xlim = lim, ylim = lim)
+mySSP(dat.s, type = "spillover", xlim = lim, ylim = lim)
+mySSP(dat.s, type = "spillover", partner = "y", ylim = lim)
+myCCF(dat.s, ylim = c(0, 1))
+myTSsimple(dat.s$t, dat.s$alpha_y)
+
 dat.s <- TVAR1(t = 300, burnin = 20,
              tv_u_w = c(2, 2), tv_u_h = 0,
              tv_phi_w = .5, tv_phi_h = .5,
@@ -11,6 +46,8 @@ dat.l <- TVAR1(t = 300, burnin = 20,
                tv_u_w = c(1, 2), tv_u_h = 0,
                tv_phi_w = .5, tv_phi_h = .5,
                tv_phi_wh = .2, tv_phi_hw = .2)
+
+
 
 
 ##### TV-VAR pars

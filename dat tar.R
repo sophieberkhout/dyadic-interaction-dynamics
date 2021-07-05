@@ -1,6 +1,43 @@
-source("modelFunctions.R")
-source("myTheme.R")
-library("ggplot2")
+source("symVARS.R")
+source("plotFunctions.R")
+# source("myTheme.R")
+# library("ggplot2")
+
+set.seed(1)
+dat.a <- symVARS(occasions = 300, burnin = 20,
+                 type = "T", 
+                 params_y = list(alpha = c(0, 5),
+                                 phi = 0.5,
+                                 beta = 0.2,
+                                 tau = 0),
+                 params_x = list(alpha = 0,
+                                 phi = 0.5,
+                                 beta = 0))
+
+set.seed(1)
+dat.b <- symVARS(occasions = 300, burnin = 20,
+                 type = "T", 
+                 params_y = list(alpha = 0,
+                                 phi = 0.5,
+                                 beta = c(0.2, 0.6),
+                                 tau = 0),
+                 params_x = list(alpha = 0,
+                                 phi = 0.5,
+                                 beta = 0))
+
+myTS(dat.a)
+mySSP(dat.a, type = "carryover")
+# mySSP(dat.a, type = "spillover", partner = "y")
+mySSP(dat.a, type = "spillover_threshold", partner = "y", tau = 0)
+
+myTS(dat.b)
+myTS(dat.b, partner = "y", regime = T)
+mySSP(dat.b, type = "carryover")
+# mySSP(dat.b, type = "spillover", partner = "y")
+mySSP(dat.b, type = "spillover_threshold", partner = "y", tau = 0)
+myInf(dat.b, partner = "x", tau = 0)
+
+
 # 
 # set.seed(1)
 # dat <- TAR1(t = 3000, burnin = 20,

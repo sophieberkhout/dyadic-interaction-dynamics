@@ -41,25 +41,25 @@ change <- function(param, t, burnin = NULL){
 
 TVVAR1 <- function(occasions, burnin, params_y, params_x, z){
   
-  alpha_y <- ifelse(length(params_y[[1]]) == 1, 
-                    rep(params_y[[1]], occasions), 
-                    change(params_y[[1]]), (occasions-burnin), burnin) 
-  phi_y   <- ifelse(length(params_y[[2]]) == 1, 
-                    rep(params_y[[2]], occasions), 
-                    change(params_y[[2]]), (occasions-burnin), burnin) 
-  beta_y  <- ifelse(length(params_y[[3]]) == 1, 
-                    rep(params_y[[3]], occasions), 
-                    change(params_y[[3]]), (occasions-burnin), burnin)
+  ifelse(length(params_y[[1]]) == 1, 
+         alpha_y <- rep(params_y[[1]], occasions), 
+         alpha_y <- change(param = params_y[[1]], t = (occasions-burnin), burnin = burnin)) 
+  ifelse(length(params_y[[2]]) == 1, 
+         phi_y   <- rep(params_y[[2]], occasions), 
+         phi_y   <- change(params_y[[2]], (occasions-burnin), burnin))
+  ifelse(length(params_y[[3]]) == 1, 
+         beta_y  <- rep(params_y[[3]], occasions), 
+         beta_y  <- change(params_y[[3]], (occasions-burnin), burnin))
   
-  alpha_x <- ifelse(length(params_x[[1]]) == 1, 
-                    rep(params_x[[1]], occasions), 
-                    change(params_x[[1]]), (occasions-burnin), burnin) 
-  phi_x   <- ifelse(length(params_x[[2]]) == 1, 
-                    rep(params_x[[2]], occasions), 
-                    change(params_x[[2]]), (occasions-burnin), burnin) 
-  beta_x  <- ifelse(length(params_x[[3]]) == 1, 
-                    rep(params_x[[3]], occasions), 
-                    change(params_x[[3]]), (occasions-burnin), burnin) 
+  ifelse(length(params_x[[1]]) == 1, 
+         alpha_x <- rep(params_x[[1]], occasions), 
+         alpha_x <- change(params_x[[1]], (occasions-burnin), burnin))
+  ifelse(length(params_x[[2]]) == 1, 
+         phi_x   <- rep(params_x[[2]], occasions), 
+         phi_x   <- change(params_x[[2]], (occasions-burnin), burnin)) 
+  ifelse(length(params_x[[3]]) == 1, 
+         beta_x  <- rep(params_x[[3]], occasions), 
+         beta_x  <- change(params_x[[3]], (occasions-burnin), burnin))
   
   y <- numeric(occasions)
   x <- numeric(occasions) 
@@ -69,43 +69,66 @@ TVVAR1 <- function(occasions, burnin, params_y, params_x, z){
     x[t] <- alpha_x[t] + phi_x[t] * x[t-1] + beta_x[t] * y[t-1] + z$x[t]
   }
   
+  params <- data.frame(alpha_y, phi_y, beta_y, alpha_x, phi_x, beta_x)
   dat <- data.frame(y = y, x = x)
+  dat <- cbind(dat, params[which(lengths(c(params_y, params_x)) > 1)])
   return(dat)
 }
 
 TVAR1 <- function(occasions, 
                   params_y, params_x,
-                  z){
+                  z, longformat){
 
-  alpha_y <- params_y[[1]]
-  phi_y   <- params_y[[2]]
-  beta_y  <- params_y[[3]]
+  ifelse(length(params_y[[1]]) == 1,
+         alpha_y <- rep(params_y[[1]], 2),
+         alpha_y <- params_y[[1]])
+  ifelse(length(params_y[[2]]) == 1,
+         phi_y <- rep(params_y[[2]], 2),
+         phi_y <- params_y[[2]])
+  ifelse(length(params_y[[3]]) == 1,
+         beta_y <- rep(params_y[[3]], 2),
+         beta_y <- params_y[[3]])
+
+  ifelse(length(params_x[[1]]) == 1,
+         alpha_x <- rep(params_x[[1]], 2),
+         alpha_x <- params_x[[1]])
+  ifelse(length(params_x[[2]]) == 1,
+         phi_x <- rep(params_x[[2]], 2),
+         phi_x <- params_x[[2]])
+  ifelse(length(params_x[[3]]) == 1,
+         beta_x <- rep(params_x[[3]], 2),
+         beta_x <- params_x[[3]])
+
+  tau_y <- if(length(params_y) == 4) params_y[[4]] else NULL
+  tau_x <- if(length(params_x) == 4) params_x[[4]] else NULL
   
-  alpha_x <- params_x[[1]]
-  phi_x   <- params_x[[2]]
-  beta_x  <- params_x[[3]]
-  
-  k_y <- if(length(params_y) == 4) params_y[[4]] else NULL
-  k_x <- if(length(params_x) == 4) params_x[[4]] else NULL
+  if(any(lengths(params_y) > 1) && is.null(tau_y)) stop("Multiple values for a y parameter are given, but no threshold is specified.")
+  if(any(lengths(params_x) > 1) && is.null(tau_x)) stop("Multiple values for an x parameter are given, but no threshold is specified.")
   
   y <- numeric(occasions)
   x <- numeric(occasions) 
   
-  I_x <- rep(NA, occasions)
-  I_y <- rep(NA, occasions)
+  influence_y <- rep(NA, occasions)
+  influence_x <- rep(NA, occasions)
   
+  regime_y <- rep(NA, occasions)
+  regime_x <- rep(NA, occasions)
+
   for(t in 2:occasions){
-    s_y <- ifelse(is.null(k_y) || hubby[t-1] <= k_y, 1, 2)
-    s_x <- ifelse(is.null(k_x) || wifey[t-1] <= k_x, 1, 2)
+    ifelse(is.null(tau_y) || x[t-1] <= tau_y, s_y <- 1, s_y <- 2)
+    ifelse(is.null(tau_x) || y[t-1] <= tau_x, s_x <- 1, s_x <- 2)
     
     y[t] <- alpha_y[s_y] + phi_y[s_y] * y[t-1] + beta_y[s_y] * x[t-1] + z$y[t]
     x[t] <- alpha_x[s_x] + phi_x[s_x] * x[t-1] + beta_x[s_x] * y[t-1] + z$x[t]
     
-    I_y[t-1] <- beta_y[s_y] * x[t-1]
-    I_x[t-1] <- beta_x[s_x] * y[t-1]
+    influence_x[t-1] <- beta_y[s_y] * x[t-1]
+    influence_y[t-1] <- beta_x[s_x] * y[t-1]
     
+    regime_y[t] <- s_y
+    regime_x[t] <- s_x
   }
-  dat <- data.frame(y, x, I_y, I_x)
+  dat <- data.frame(behavior_y = y, behavior_x = x, influence_y, influence_x, regime_y, regime_x)
+  if(!longformat) names(dat)[1:2] <- c("y", "x") 
   return(dat)
 }
 
