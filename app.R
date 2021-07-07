@@ -3,13 +3,116 @@ library(shiny)
 library(dashboardthemes)
 library(ggplot2)
 library(tidyverse)
-source("symVARS.R")
+source("simVARS.R")
 source("plotFunctions.R")
+options(shiny.autoreload = TRUE)
+
+inputUI <- function(id){
+  ns <- NS(id)
+  
+  fluidRow(
+    box(width = 12, collapsible = T,
+        title = "Input",
+        fluidRow(
+          column(4,
+                 h4("Method"),
+                 sliderInput(ns("t"), "Measurement occasions", 1, 500, 250), # 1 does not work
+                 sliderInput(ns("burnin"), "Burnin", 1, 100, 20),
+                 numericInput(ns("seed"), "Seed", 1, 1)
+          ),
+          column(4,
+                 h4("y"),
+                 sliderInput(ns("alpha_y"), "Intercept", -1, 1, 0, .1),
+                 sliderInput(ns("phi_y"), "Carryover", -1, 1, .5, .1),
+                 sliderInput(ns("beta_y"), "Spillover", -1, 1, .2, .1)
+          ),
+          column(4,
+                 h4("x"),
+                 sliderInput(ns("alpha_x"), "Intercept", -1, 1, 0, .1),
+                 sliderInput(ns("phi_x"), "Carryover", -1, 1, .5, .1),
+                 sliderInput(ns("beta_x"), "Spillover", -1, 1, .2, .1)
+          )
+        )
+    )
+  )
+  
+}
+
+plotsUI <- function(id){
+  ns <- NS(id)
+  
+  tabItem(  tabName = "var1",
+            h2("First-order vector autoregression"),
+            inputUI(ns("input")),
+          fluidRow(
+            box(title = "Time series", plotOutput(ns("ts")), width = 12)
+          ),
+          fluidRow(
+            box(title = "Carryover y state space", plotOutput(ns("carryover_y"))),
+            box(title = "Carryover x state space", plotOutput(ns("carryover_x")))
+          ),
+          fluidRow(
+            box(title = "Spillover y state space", plotOutput(ns("spillover_y"))),
+            box(title = "Spillover x state space", plotOutput(ns("spillover_x")))
+          ),
+          fluidRow(
+            box(title = "Cross-correlation function", plotOutput(ns("ccf")))
+          )
+          
+  )
+}
+
+inputServer <- function(id){
+  moduleServer(id,
+               function(input, output, session){
+                 dat <- reactive({
+                   dat <- simVARS(occasions = input$t, burnin = input$burnin,
+                                  type = "VAR",
+                                  params_y = c(input$alpha_y, input$phi_y, input$beta_y),
+                                  params_x = c(input$alpha_x, input$phi_x, input$beta_x),
+                                  seed = input$seed)
+                   
+                   dat
+                 })
+               })
+}
+
+plotsServer <- function(id){
+  moduleServer(id, function(input, output, session){
+    dat <- inputServer("input")
+
+    output$ts <- renderPlot({
+        myTS(dat())
+    })
+
+    output$carryover_y <- renderPlot({
+        mySSP(dat(), type = "carryover", partner = "y")
+    })
+
+    output$carryover_x <- renderPlot({
+      mySSP(dat(), type = "carryover", partner = "x")
+    })
+
+    output$spillover_y <- renderPlot({
+      mySSP(dat(), type = "spillover", partner = "y")
+    })
+
+    output$spillover_x <- renderPlot({
+      mySSP(dat(), type = "spillover", partner = "x")
+    })
+
+    output$ccf <- renderPlot({
+      myCCF(dat())
+    })
+  }
+  )
+}
+
 
 ui <- dashboardPage(
     dashboardHeader(title = "Dyadic Interactions"),
     dashboardSidebar(
-        sidebarMenu(
+        sidebarMenu(id = "tabs",
             menuItem("Home", tabName = "home", icon = icon("home")),
             menuItem("VAR(1)", tabName = "var1", icon = icon("chart-line")),
             menuItem("TVAR(1)", tabName = "tvar1", icon = icon("chart-line"))
@@ -24,51 +127,53 @@ ui <- dashboardPage(
             tabItem(tabName = "home",
                     box(includeMarkdown("home.Rmd"))
             ),
+            plotsUI("plots"),
             
             # Second tab content
-            tabItem(tabName = "var1",
-                    h2("First-order vector autoregression"),
-                    fluidRow(
-                        box(width = 12, collapsible = T,
-                            title = "Input",
-                            fluidRow(
-                                column(4,
-                                       h4("Method"),
-                                       sliderInput("t", "Measurement occasions", 1, 500, 250), # 1 does not work
-                                       sliderInput("burnin", "Burnin", 1, 100, 20),
-                                       numericInput("seed", "Seed", 1, 1)
-                                 ),
-                                column(4,
-                                       h4("y"),
-                                   sliderInput("alpha_y", "Intercept", -1, 1, 0, .1),
-                                   sliderInput("phi_y", "Carryover", -1, 1, .5, .1),
-                                   sliderInput("beta_y", "Spillover", -1, 1, .2, .1)
-                                ),
-                                column(4,
-                                       h4("x"),
-                                  sliderInput("alpha_x", "Intercept", -1, 1, 0, .1),
-                                  sliderInput("phi_x", "Carryover", -1, 1, .5, .1),
-                                  sliderInput("beta_x", "Spillover", -1, 1, .2, .1)
-                                )
-                            )
-                        )
-                    ),
-                    fluidRow(
-                        box(title = "Time series", plotOutput("ts"), width = 12)
-                    ),
-                    fluidRow(
-                        box(title = "Carryover y state space", plotOutput("carryover_y")),
-                        box(title = "Carryover x state space", plotOutput("carryover_x"))
-                    ),
-                    fluidRow(
-                      box(title = "Spillover y state space", plotOutput("spillover_y")),
-                      box(title = "Spillover x state space", plotOutput("spillover_x"))
-                    ),
-                    fluidRow(
-                      box(title = "Cross-correlation function", plotOutput("ccf"))
-                    )
-                    
-            ),
+            # tabItem(tabName = "var1",
+            #         h2("First-order vector autoregression"),
+            #         fluidRow(
+            #             box(width = 12, collapsible = T,
+            #                 title = "Input",
+            #                 fluidRow(
+            #                     column(4,
+            #                            h4("Method"),
+            #                            sliderInput("t", "Measurement occasions", 1, 500, 250), # 1 does not work
+            #                            sliderInput("burnin", "Burnin", 1, 100, 20),
+            #                            numericInput("seed", "Seed", 1, 1),
+            #                            textInput("text", "Text", "huh")
+            #                      ),
+            #                     column(4,
+            #                            h4("y"),
+            #                        sliderInput("alpha_y", "Intercept", -1, 1, 0, .1),
+            #                        sliderInput("phi_y", "Carryover", -1, 1, .5, .1),
+            #                        sliderInput("beta_y", "Spillover", -1, 1, .2, .1)
+            #                     ),
+            #                     column(4,
+            #                            h4("x"),
+            #                       sliderInput("alpha_x", "Intercept", -1, 1, 0, .1),
+            #                       sliderInput("phi_x", "Carryover", -1, 1, .5, .1),
+            #                       sliderInput("beta_x", "Spillover", -1, 1, .2, .1)
+            #                     )
+            #                 )
+            #             )
+            #         ),
+            #         fluidRow(
+            #             box(title = "Time series", plotOutput("ts"), width = 12)
+            #         ),
+            #         fluidRow(
+            #             box(title = "Carryover y state space", plotOutput("carryover_y")),
+            #             box(title = "Carryover x state space", plotOutput("carryover_x"))
+            #         ),
+            #         fluidRow(
+            #           box(title = "Spillover y state space", plotOutput("spillover_y")),
+            #           box(title = "Spillover x state space", plotOutput("spillover_x"))
+            #         ),
+            #         fluidRow(
+            #           box(title = "Cross-correlation function", plotOutput("ccf"))
+            #         )
+            #         
+            # ),
             # Second tab content
             tabItem(tabName = "tvar1",
                     h2("First-order threshold vector autoregression"),
@@ -123,26 +228,18 @@ ui <- dashboardPage(
                     fluidRow(
                       box(title = "Cross-correlation function", plotOutput("TVAR_ccf"))
                     )
-                    
+
             )
         )
     )
 )
 
 server <- function(input, output) {
-    dat <- reactive({
-      set.seed(input$seed)
-        dat <- symVARS(occasions = input$t, burnin = input$burnin,
-                       type = "VAR",
-                       params_y = c(input$alpha_y, input$phi_y, input$beta_y),
-                       params_x = c(input$alpha_x, input$phi_x, input$beta_x))
-        
-        dat
-    })
+
+   plotsServer("plots")
     
     TVAR_dat <- reactive({
-      set.seed(input$TVAR_seed)
-      dat <- symVARS(occasions = input$TVAR_t, burnin = input$TVAR_burnin,
+      dat <- simVARS(occasions = input$TVAR_t, burnin = input$TVAR_burnin,
                      type = "T",
                      params_y = list(c(input$TVAR_alpha_y, input$TVAR_alpha_y2), 
                                      c(input$TVAR_phi_y, input$TVAR_phi_y2), 
@@ -151,38 +248,35 @@ server <- function(input, output) {
                      params_x = list(c(input$TVAR_alpha_x, input$TVAR_alpha_x2), 
                                      c(input$TVAR_phi_x, input$TVAR_phi_x2), 
                                      c(input$TVAR_beta_x, input$TVAR_beta_x2), 
-                                     input$TVAR_k_x))
+                                     input$TVAR_k_x),
+                     seed = input$seed)
       
       dat
     })
-    # 
-    # # dif <- reactive({
-    # #     
-    # # })
-    # 
-    output$ts <- renderPlot({
-        myTS(dat())
-    })
 
-    output$carryover_y <- renderPlot({
-        mySSP(dat(), type = "carryover", partner = "y")
-    })
-    
-    output$carryover_x <- renderPlot({
-      mySSP(dat(), type = "carryover", partner = "x")
-    })
-    
-    output$spillover_y <- renderPlot({
-      mySSP(dat(), type = "spillover", partner = "y")
-    })
-    
-    output$spillover_x <- renderPlot({
-      mySSP(dat(), type = "spillover", partner = "x")
-    })
-    
-    output$ccf <- renderPlot({
-      myCCF(dat())
-    })
+    # output$ts <- renderPlot({
+    #     myTS(dat())
+    # })
+    # 
+    # output$carryover_y <- renderPlot({
+    #     mySSP(dat(), type = "carryover", partner = "y")
+    # })
+    # 
+    # output$carryover_x <- renderPlot({
+    #   mySSP(dat(), type = "carryover", partner = "x")
+    # })
+    # 
+    # output$spillover_y <- renderPlot({
+    #   mySSP(dat(), type = "spillover", partner = "y")
+    # })
+    # 
+    # output$spillover_x <- renderPlot({
+    #   mySSP(dat(), type = "spillover", partner = "x")
+    # })
+    # 
+    # output$ccf <- renderPlot({
+    #   myCCF(dat())
+    # })
     
     output$TVAR_ts <- renderPlot({
       myTS(TVAR_dat())

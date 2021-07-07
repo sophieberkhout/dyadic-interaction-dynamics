@@ -1,10 +1,12 @@
-symVARS <- function(occasions, burnin, 
+simVARS <- function(occasions, burnin, 
                     type, probs, 
                     params_y, params_x, # list(alpha =, phi = , beta =, tau = )
                     innovations = c(.5, .3, .3, .5), # too high?
-                    longformat = T){
+                    longformat = T, seed){
   
   source("modelFunctions.R", local = T)
+  
+  if(!missing(seed)) set.seed(seed)
   
   o_bi <- occasions + burnin # add burnin
   

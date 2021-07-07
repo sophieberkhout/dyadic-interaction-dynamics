@@ -1,4 +1,4 @@
-source("symVARS.R")
+source("simVARS.R")
 source("plotFunctions.R")
 # source("myTheme.R")
 # library("ggplot2")

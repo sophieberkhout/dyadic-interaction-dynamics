@@ -4,11 +4,12 @@ source("myTheme.R")
 myTS <- function(dat, partner = NULL, regime = F,
                  filename = NULL, width = 5, height = 3,
                  xlim = NULL, ylim = NULL){
+  
   if(is.null(partner)){
     p <- ggplot(dat, aes(x = t, y = behavior, color = partner)) + 
     geom_line() +
     labs(x = expression(italic("t")), y = "Behavior") +
-    scale_color_manual(values = c("grey", "black"))
+    scale_color_manual(values = c("grey50", "black"))
   } else {
     dat <- dat[dat$partner == partner, ]
     p <- ggplot(dat, aes(x = t, y = behavior)) + 
@@ -17,10 +18,14 @@ myTS <- function(dat, partner = NULL, regime = F,
   }
   
   if(regime){
-    p <- p + geom_rect(aes(xmin = t - 0.5, xmax = t + 0.5,
-                           ymin = min(behavior) - 0.5, ymax = max(behavior) + 0.5,
-                           fill = regime), alpha = 0.5) +
-      scale_fill_manual(values = c("white", "grey"), guide = "none")
+    fill <- ifelse(dat$regime == 1, "white", "grey95")
+    # p <- p + geom_rect(aes(xmin = t - 0.5, xmax = t + 0.5,
+    #                        ymin = -Inf, ymax = Inf,
+    #                        fill = regime), alpha = 0.5) +
+    #   scale_fill_manual(values = c("white", "grey"), guide = "none")
+    shades <- annotate("rect", xmin = dat$t - 0.5, xmax = dat$t + 0.5,
+                       ymin = -Inf, ymax = Inf, fill = fill)
+    p$layers <- c(shades, p$layers)
   }
   
   if(is.null(xlim)) xlim <- dat$t

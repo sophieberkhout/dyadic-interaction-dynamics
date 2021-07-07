@@ -1,28 +1,26 @@
 # library(ggplot2)
 # source("myTheme.R")
 # library(tidyverse)
-source("symVARS.R")
+source("simVARS.R")
 source("plotFunctions.R")
 
 set.seed(1)
-dat.2 <- symVARS(occasions = 300, burnin = 20,
+dat.2 <- simVARS(occasions = 300, burnin = 20,
                  type = "VAR", 
                  params_y = c(0, 0.5, 0.2),
-                 params_x = c(0, 0.5, 0.2)
+                 params_x = c(0, 0.5, 0.2),
+                 seed = 1
                  )
 
 
 set.seed(1)
-dat.8 <- symVARS(occasions = 300, burnin = 20,
+dat.8 <- simVARS(occasions = 300, burnin = 20,
                  type = "VAR", 
                  params_y = c(0, 0.5, 0.8),
-                 params_x = c(0, 0.5, 0.2)
+                 params_x = c(0, 0.5, 0.2),
+                 seed = 1
                  )
-dat.8 <- symVAR1(t = 300, burnin = 20,
-                 alpha = list(y = 0, x = 0),
-                 phi = list(y = 0.5, x = 0.5),
-                 beta = list(y = 0.8, x = 0.2)
-                 )
+
 
 lim <- c(min(c(dat.2$behavior, dat.8$behavior)), max(c(dat.2$behavior, dat.8$behavior)))
 myTS(dat.2, ylim = lim, filename = "../Plots/VAR/VARlow_ts.pdf")

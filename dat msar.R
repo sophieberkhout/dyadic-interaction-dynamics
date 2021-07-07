@@ -1,9 +1,28 @@
-library(ggplot2)
-library(tidyverse)
-source("modelFunctions.R")
-source("myTheme.R")
+# library(ggplot2)
+# library(tidyverse)
+# source("modelFunctions.R")
+# source("myTheme.R")
+source("simVARS.R")
+source("plotFunctions.R")
 
 set.seed(1)
+dat.msvar <- symVARS(occasions = 300, burnin = 20,
+                     type = "MS", probs = c(.9, .6),
+                     params_y = list(alpha = c(0, 3),
+                                     phi = .5,
+                                     beta = c(.1, .3)),
+                     params_x = list(alpha = c(0, 3),
+                                     phi = .5,
+                                     beta = 0),
+                     innovations = list(z1 = c(.5, .3, .3, .5),
+                                        z2 = c(.8, .3, .3, .8)))
+
+
+myTS(dat.msvar, regime = T)
+mySSP(dat.msvar, type = "carryover")
+mySSP(dat.msvar, type = "spillover")
+myCCF(dat.msvar)
+
 dat.msvar <- MSVAR(t = 300, burnin = 20,
             c_x = c(0, 3), c_y = c(0, 3),
             phi_x = c(.5, .5), phi_y = c(.5, .5),

@@ -135,10 +135,19 @@ TVAR1 <- function(occasions,
 HMM1 <- function(occasions,
                  params_y, params_x,
                  probs, z){
+
+    ifelse(is.list(params_y),
+         mu_y <- params_y[[1]],
+         ifelse(length(params_y) == 1,
+                mu_y <- rep(params_y, 2),
+                mu_y <- params_y))
   
-  mu_y <- params_y
-  mu_x <- params_x
-  
+  ifelse(is.list(params_x),
+         mu_x <- params_x[[1]],
+         ifelse(length(params_x) == 1,
+                mu_x <- rep(params_x, 2),
+                mu_x <- params_x))
+
   y <- numeric(occasions)
   x <- numeric(occasions) 
 
@@ -153,7 +162,7 @@ HMM1 <- function(occasions,
   ini_p <- 0.5
   s <- sample(1:2, 1, prob = c(ini_p, 1-ini_p))
   
-  save_s <- s
+  regime <- s
   
   for(t in 2:occasions){
     if(s == 1){
@@ -167,10 +176,10 @@ HMM1 <- function(occasions,
     y[t] <- mu_y[s] + z[[s]][t, 1]
     x[t] <- mu_x[s] + z[[s]][t, 2]
     
-    save_s[t] <- s
+    regime[t] <- s
   }
   
-  dat <- data.frame(y, x, s = save_s)
+  dat <- data.frame(y, x, regime = as.factor(regime))
   return(dat)
 }
 
@@ -178,13 +187,25 @@ MSVAR1 <- function(occasions,
                    params_y, params_x,
                    probs, z){
   
-  alpha_y <- params_y[[1]]
-  phi_y   <- params_y[[2]]
-  beta_y  <- params_y[[3]]
+  ifelse(length(params_y[[1]]) == 1,
+         alpha_y <- rep(params_y[[1]], 2),
+         alpha_y <- params_y[[1]])
+  ifelse(length(params_y[[2]]) == 1,
+         phi_y <- rep(params_y[[2]], 2),
+         phi_y <- params_y[[2]])
+  ifelse(length(params_y[[3]]) == 1,
+         beta_y <- rep(params_y[[3]], 2),
+         beta_y <- params_y[[3]])
   
-  alpha_x <- params_x[[1]]
-  phi_x   <- params_x[[2]]
-  beta_x  <- params_x[[3]]
+  ifelse(length(params_x[[1]]) == 1,
+         alpha_x <- rep(params_x[[1]], 2),
+         alpha_x <- params_x[[1]])
+  ifelse(length(params_x[[2]]) == 1,
+         phi_x <- rep(params_x[[2]], 2),
+         phi_x <- params_x[[2]])
+  ifelse(length(params_x[[3]]) == 1,
+         beta_x <- rep(params_x[[3]], 2),
+         beta_x <- params_x[[3]])
   
   y <- numeric(occasions)
   x <- numeric(occasions) 
@@ -200,7 +221,7 @@ MSVAR1 <- function(occasions,
   ini_p <- 0.5
   s <- sample(1:2, 1, prob = c(ini_p, 1-ini_p))
   
-  save_s <- s
+  regime <- s
 
   for(t in 2:occasions){
     if(s == 1){
@@ -214,9 +235,9 @@ MSVAR1 <- function(occasions,
     y[t] <- alpha_y[s] + phi_y[s] * y[t-1] + beta_y[s] * x[t-1] + z[[s]][t, "y"]
     x[t] <- alpha_x[s] + phi_x[s] * x[t-1] + beta_x[s] * y[t-1] + z[[s]][t, "x"]
     
-    save_s[t] <- s
+    regime[t] <- s
   }
   
-  dat <- data.frame(y, x, s = save_s)
+  dat <- data.frame(y, x, regime = as.factor(regime))
   return(dat)
 }
