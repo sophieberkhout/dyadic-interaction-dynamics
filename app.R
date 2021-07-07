@@ -3,9 +3,9 @@ library(shiny)
 library(dashboardthemes)
 library(ggplot2)
 library(tidyverse)
-source("simVARS.R")
-source("plotFunctions.R")
-source("appModules.R")
+source("simVARS.R", local = T)
+source("plotFunctions.R", local = T)
+source("appModules.R", local = T)
 options(shiny.autoreload = TRUE)
 
 ui <- dashboardPage(
@@ -13,8 +13,8 @@ ui <- dashboardPage(
     dashboardSidebar(
         sidebarMenu(id = "tabs",
             menuItem("Home", tabName = "home", icon = icon("home")),
-            menuItem("VAR(1)", tabName = "var1", icon = icon("chart-line")),
-            menuItem("TVAR(1)", tabName = "tvar1", icon = icon("chart-line"))
+            menuItem("VAR(1)", tabName = "VAR", icon = icon("chart-line")),
+            menuItem("TVAR(1)", tabName = "T", icon = icon("chart-line"))
         )
     ),
     dashboardBody(
@@ -24,11 +24,12 @@ ui <- dashboardPage(
         tabItems(
             # First tab content
             tabItem(tabName = "home",
+                    box(textOutput("text")),
                     box(includeMarkdown("home.Rmd"))
             ),
-            plotsUI("plots"),
+            plotsUI_VAR("plots"),
             # Second tab content
-            tabItem(tabName = "tvar1",
+            tabItem(tabName = "T",
                     h2("First-order threshold vector autoregression"),
                     fluidRow(
                       box(width = 12, collapsible = T,
@@ -90,7 +91,11 @@ ui <- dashboardPage(
 server <- function(input, output) {
 
    plotsServer("plots")
-    
+  
+  observeEvent(input$tabs, {
+    output$text <- renderText(input$tabs)
+  })
+  
     TVAR_dat <- reactive({
       dat <- simVARS(occasions = input$TVAR_t, burnin = input$TVAR_burnin,
                      type = "T",

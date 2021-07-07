@@ -33,7 +33,7 @@ plotsUI_VAR <- function(id){
   ns <- NS(id)
   
   tabItem(  
-    tabName = "var1",
+    tabName = "VAR",
     h2("First-order vector autoregression"),
     inputUI_VAR(ns("input_VAR")),
     fluidRow(
@@ -57,17 +57,15 @@ plotsUI_VAR <- function(id){
 inputServer <- function(id){
   moduleServer(id,
                function(input, output, session){
-                 if(input$tabs == "var1"){
-                   dat <- reactive({
-                     dat <- simVARS(occasions = input$t, burnin = input$burnin,
-                                    type = "VAR",
-                                    params_y = c(input$alpha_y, input$phi_y, input$beta_y),
-                                    params_x = c(input$alpha_x, input$phi_x, input$beta_x),
-                                    seed = input$seed)
-                     
-                     dat
-                    })
-                 }
+                 dat <- reactive({
+                      dat <- simVARS(occasions = input$t, burnin = input$burnin,
+                      type = "VAR",
+                      params_y = c(input$alpha_y, input$phi_y, input$beta_y),
+                      params_x = c(input$alpha_x, input$phi_x, input$beta_x),
+                      seed = input$seed)
+                   
+                      dat
+                  })
                })
 }
 
