@@ -14,7 +14,7 @@ myTS <- function(dat, partner = NULL, regime = F,
     dat <- dat[dat$partner == partner, ]
     p <- ggplot(dat, aes(x = t, y = behavior)) + 
       geom_line() +
-      labs(x = expression(italic("t")), y = bquote(italic(.(partner)))) 
+      labs(x = bquote(italic("t")), y = bquote(italic(.(partner)))) 
   }
   
   if(regime){

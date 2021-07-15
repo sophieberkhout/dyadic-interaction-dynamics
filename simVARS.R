@@ -44,7 +44,7 @@ simVARS <- function(occasions, burnin,
   if(longformat){ # longformat option for plotting
     dat$t <- 1:occasions
     if(type != "T") {
-      dat <- gather(dat, partner, behavior, x, y)
+      dat <- tidyr::gather(dat, partner, behavior, x, y)
     } else {
       dat <- reshape(dat, idvar = "t", 
                      varying = str_subset(names(dat), ("y|x")), 
