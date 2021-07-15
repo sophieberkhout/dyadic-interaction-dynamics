@@ -3,13 +3,15 @@ source("myTheme.R")
 
 myTS <- function(dat, partner = NULL, regime = F,
                  filename = NULL, width = 5, height = 3,
-                 xlim = NULL, ylim = NULL){
+                 xlim = NULL, ylim = NULL, cols = NULL, shiny = F){
+  
+  if(is.null(cols)) pCols <- c("grey", "black") else pCols <- cols
   
   if(is.null(partner)){
     p <- ggplot(dat, aes(x = t, y = behavior, color = partner)) + 
     geom_line() +
     labs(x = expression(italic("t")), y = "Behavior") +
-    scale_color_manual(values = c("grey50", "black"))
+    scale_color_manual(values = pCols)
   } else {
     dat <- dat[dat$partner == partner, ]
     p <- ggplot(dat, aes(x = t, y = behavior)) + 
@@ -31,14 +33,15 @@ myTS <- function(dat, partner = NULL, regime = F,
   if(is.null(xlim)) xlim <- dat$t
   if(is.null(ylim)) ylim <- dat$behavior
   
-  p <- myTheme(p, x = xlim, y = ylim)
+  p <- myTheme(p, x = xlim, y = ylim, shiny = shiny)
+  
   if(!is.null(filename))  ggsave(filename, p, width = width, height = height)
   return(p)
 }
 
 mySSP <- function(dat, type, tau, partner = NULL,
                  filename = NULL, width = 5, height = 3,
-                 xlim = NULL, ylim = NULL){
+                 xlim = NULL, ylim = NULL, shiny = F){
   t <- max(dat$t)
   dat$lag1 <- c(NA, dat$behavior[-nrow(dat)])
   dat$lag1[t+1] <- NA
@@ -98,7 +101,7 @@ mySSP <- function(dat, type, tau, partner = NULL,
   if(is.null(xlim)) xlim <- dat$behavior
   if(is.null(ylim)) ylim <- dat$behavior
   
-  p <- myTheme(p, x = xlim, y = ylim, legend.position = legend.position)
+  p <- myTheme(p, x = xlim, y = ylim, legend.position = legend.position, shiny)
   if(!is.null(filename))  ggsave(filename, p, width = width, height = height)
   return(p)
 }

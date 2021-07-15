@@ -1,4 +1,4 @@
-myTheme <- function(p, x = NULL, y = NULL, legend.position = NULL){
+myTheme <- function(p, x = NULL, y = NULL, legend.position = NULL, shiny = F){
   if(is.null(legend.position)) legend.position <- c(.15, .9)
   p <- p + 
     theme(panel.grid = element_blank(),
@@ -30,6 +30,14 @@ myTheme <- function(p, x = NULL, y = NULL, legend.position = NULL){
         geom_segment(x = x_min, xend = x_max, y = -Inf, yend = -Inf, size = .75, colour = "black", lineend = "square") +
         geom_segment(x = -Inf, xend = -Inf, y = y_min, yend = y_max, size = .75, colour = "black", lineend = "square")
   }
+  
+  if(shiny){
+    p <- p + scale_color_manual(values = viridis::viridis(2, begin = .4, end = .8, option = "A")) +
+      theme(text = element_text(size = 20, family = "serif"),
+            axis.text = element_text(size = 18),
+            legend.position = c(.1, .9))
+  }
+  
   return(p)
 }
 
