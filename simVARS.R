@@ -47,7 +47,7 @@ simVARS <- function(occasions, burnin,
       dat <- tidyr::gather(dat, partner, behavior, x, y)
     } else {
       dat <- reshape(dat, idvar = "t", 
-                     varying = str_subset(names(dat), ("y|x")), 
+                     varying = stringr::str_subset(names(dat), ("y|x")), 
                      direction = "long", sep = "_", timevar = "partner")
       dat$regime <- as.factor(dat$regime)
     }

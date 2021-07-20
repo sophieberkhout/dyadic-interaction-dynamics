@@ -1,4 +1,5 @@
 library("ggplot2")
+library("plotly")
 source("myTheme.R")
 
 myTS <- function(dat, partner = NULL, regime = F,
@@ -10,13 +11,20 @@ myTS <- function(dat, partner = NULL, regime = F,
   if(is.null(partner)){
     p <- ggplot(dat, aes(x = t, y = behavior, color = partner)) + 
     geom_line() +
-    labs(x = expression(italic("t")), y = "Behavior") +
+    labs(x = expression(italic("t")), y = "Measurement") + # measure
     scale_color_manual(values = pCols)
   } else {
     dat <- dat[dat$partner == partner, ]
+    
+    if(shiny){
+      pCols <- viridis::viridis(2, begin = .4, end = .8, option = "A")
+      if(partner == "y") pCols <- pCols[1]
+      if(partner == "x") pCols <- pCols[2]
+    } else { pCols <- "black" }    
+    
     p <- ggplot(dat, aes(x = t, y = behavior)) + 
-      geom_line() +
-      labs(x = bquote(italic("t")), y = bquote(italic(.(partner)))) 
+      labs(x = bquote(italic("t")), y = bquote(italic(.(partner)))) +
+      geom_line(col = pCols)
   }
   
   if(regime){
@@ -70,20 +78,27 @@ mySSP <- function(dat, type, tau, partner = NULL,
     dat <- dat[dat$partner == partner, ]
     other <- ifelse(partner == "y", "x", "y")
     
+    if(shiny){
+      pCols <- viridis::viridis(2, begin = .4, end = .8, option = "A")
+      if(partner == "y") pCols <- pCols[1]
+      if(partner == "x") pCols <- pCols[2]
+    } else { pCols <- "black" }
+    
+    
     if(is.null(xlim)) xlim <- dat$spillover
     if(is.null(ylim)) ylim <- dat$behavior
     
     if(type == "carryover"){
       p <-  ggplot(dat, aes(x = lag1, y = behavior)) +
-        geom_point(size = 2) + 
+        geom_point(size = 2, col = pCols) + 
         labs(x = bquote(italic(.(partner)["t-1"])), y = bquote(italic(.(partner)["t"]))) +
-        geom_smooth(method = "lm", se = F, fullrange = T, color = "black")
+        geom_smooth(method = "lm", se = F, fullrange = T, color = pCols)
     }
     if(type == "spillover"){
       p <- ggplot(dat, aes(x = spillover, y = behavior)) + 
-        geom_point(size = 2) +
+        geom_point(size = 2, col = pCols) +
         labs(x = bquote(italic(.(other)["t-1"])), y = bquote(italic(.(partner)["t"]))) +
-        geom_smooth(method = "lm", se = F, fullrange = T, color = "black") 
+        geom_smooth(method = "lm", se = F, fullrange = T, color = pCols) 
     }
     if(type == "spillover_threshold"){
       p <- ggplot(dat, aes(x = spillover, y = behavior, colour = regime)) + geom_point(size = 2) +
@@ -108,17 +123,79 @@ mySSP <- function(dat, type, tau, partner = NULL,
 
 myCCF <- function(dat, 
                   filename = NULL, width = 5, height = 3,
-                  xlim = NULL, ylim = NULL){
+                  xlim = NULL, ylim = NULL, shiny = F){
   cc <- ccf(subset(dat, partner == "y", select = "behavior"), 
             subset(dat, partner == "x", select = "behavior"))
   cc <- data.frame(lag = cc$lag, ccf = cc$acf)
-  cc <- cc[which(cc$lag == -10):which(cc$lag == 10), ]
+  # cc <- cc[which(cc$lag == -10):which(cc$lag == 10), ]
   p <- ggplot(cc, aes(x = lag, y = ccf)) + 
     geom_linerange(dat = cc, aes(ymin = 0, ymax = ccf)) +
-    labs(x = "Lag", y = "CCF")
+    labs(x = "Lag", y = expression(paste("CCF (", italic("y * x"), ")")))
   if(is.null(xlim)) xlim <- cc$lag
   if(is.null(ylim)) ylim <- cc$ccf
-  p <- myTheme(p, x = xlim, y = c(ylim, 0))
+  p <- myTheme(p, x = xlim, y = c(ylim, 0), shiny = shiny)
+  if(!is.null(filename))  ggsave(filename, p, width = width, height = height)
+  return(p)
+}
+
+myCF <- function(dat, type, partner = NULL,
+                 filename = NULL, width = 5, height = 3,
+                 xlim = NULL, ylim = NULL, shiny = F){
+  ptrue <- !is.null(partner)
+  if(ptrue) ifelse(partner == "y", other <- "x", other <- "y")
+  
+  if(type == "ACF"){
+    ccy <- acf(subset(dat, partner == "y", select = "behavior"))
+    ccx <- acf(subset(dat, partner == "x", select = "behavior"))
+    yLabs <- "ACF"
+    if(ptrue){
+      if(partner == "y"){
+        cc <- ccy
+        yLabs <- expression(paste("ACF ", italic("y")))
+      } else {
+        cc <- ccx
+        yLabs <- expression(paste("ACF ", italic("x")))
+      }
+    }
+  }
+  
+  if(type == "CCF"){
+    ccy <- ccf(subset(dat, partner == "y", select = "behavior"), 
+               subset(dat, partner == "x", select = "behavior"))
+    ccx <- ccf(subset(dat, partner == "x", select = "behavior"), 
+               subset(dat, partner == "y", select = "behavior"))
+    yLabs <- "CCF"
+    if(ptrue){
+      if(partner == "y"){
+        cc <- ccy
+        yLabs <- expression(paste("ACF ", italic("y")))
+      } else {
+        cc <- ccx
+        yLabs <- expression(paste("ACF ", italic("x")))
+      }
+    ifelse(partner == "y",
+           yLabs <- expression(paste("CCF (", italic("y * x"), ")")),
+           yLabs <- expression(paste("CCF (", italic("x * y"), ")")))
+    }
+    # cc <- cc[which(cc$lag == -10):which(cc$lag == 10), ]
+  }
+  
+  if(!ptrue){
+    cc <- rbind(data.frame(lag = ccx$lag, cf = ccx$acf), data.frame(lag = ccy$lag, cf = ccy$acf))
+    cc$partner <- rep(c("x", "y"), each = nrow(cc)/2)
+    
+    p <- ggplot(cc, aes(x = lag, y = cf, color = partner)) +
+      geom_linerange(dat = cc, aes(ymin = 0, ymax = cf), size = 1.2, alpha = .8, position = position_dodge2(.2))
+  } else {
+    cc <- data.frame(lag = cc$lag, cf = cc$acf)
+    p <- ggplot(cc, aes(x = lag, y = cf)) + 
+      geom_linerange(dat = cc, aes(ymin = 0, ymax = cf))
+  }
+  
+  p <- p + labs(x = "Lag", y = yLabs)
+  if(is.null(xlim)) xlim <- cc$lag
+  if(is.null(ylim)) ylim <- cc$cf
+  p <- myTheme(p, x = xlim, y = c(ylim, 0), shiny = shiny)
   if(!is.null(filename))  ggsave(filename, p, width = width, height = height)
   return(p)
 }
@@ -154,4 +231,44 @@ myTSsimple <- function(t, y, xlab = NULL, ylab = NULL,
   p <- myTheme(p, x = xlim, y = ylim)
   if(!is.null(filename))  ggsave(filename, p, width = width, height = height)
   return(p)
+}
+
+my3D <- function(dat, partner = NULL){
+  t <- max(dat$t)
+  dat$lag1 <- c(NA, dat$behavior[-nrow(dat)])
+  dat$lag1[t+1] <- NA
+  
+  pCols <- viridis::viridis(2, begin = .4, end = .8, option = "A")
+  if(!is.null(partner)){
+    ifelse(partner == "y", pCols <- pCols[1], pCols <- pCols[2])
+  }
+  
+  f <- list(family = "serif",
+            size = 14)
+  
+  if(is.null(partner)){
+    p <- plot_ly(dat, x = ~t, y = ~lag1, z = ~behavior, color = dat$partner, colors = pCols,
+                 type = "scatter3d", mode = "lines+markers",
+                 line = list(width = 4),
+                 marker = list(size = 4))
+    partner <- "y/x"
+  } else {
+    dat <- dat[dat$partner == partner, ]
+    p <- plot_ly(dat, x = ~t, y = ~lag1, z = ~behavior,
+                 type = "scatter3d", mode = "lines+markers",
+                 line = list(width = 4, color = pCols),
+                 marker = list(size = 4, color = pCols))
+  }
+  
+  p <- layout(p, font = f, 
+              scene = list(yaxis = list(title = paste0("<i>", partner, "<sub>t-1</sub></i>"),
+                                        showgrid = F, showbackground = F, automargin = T),
+                           xaxis = list(title = "<i>t</i>",
+                                        showgrid = F, showbackground = F, automargin = T, autorange = "reversed"),
+                           zaxis = list(title = paste0("<i>", partner, "<sub>t</sub></i>"),
+                                        showgrid = F, showbackground = F, automargin = T),
+                           aspectmode = "manual",
+                           aspectratio = list(x = 1.7, y = 0.85, z = 0.85),
+                           camera = list(eye = list(x = 1.5, y = 1.5, z = .1))))
+  p
 }

@@ -1,4 +1,5 @@
 library(shiny)
+options(shiny.autoreload = TRUE)
 source("simVARS.R")
 source("plotFunctions.R")
 
@@ -14,7 +15,7 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
               numericInput("burnin", "Burnin", 20, min = 0, step = 10),
               numericInput("seed", "Seed", 1, min = 1, max = .Machine$integer.max)
        ),
-       column(4,
+       column(3,
               tabsetPanel(id = "yTabs",
                           tabPanel("y",
                                    numericInput("alpha_y", "Intercept", 0, width = "50%"),
@@ -23,7 +24,7 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
                           )
               )
        ),
-       column(4,
+       column(3,
               tabsetPanel(id = "xTabs",
                           tabPanel("x",
                                    numericInput("alpha_x", "Intercept", 0, width = "50%"),
@@ -31,35 +32,109 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
                                    sliderInput("beta_x", "Spillover", -1, 1, .2, .1)
                           )
               )
+       ),
+       column(3,
+              h4("Plots"),
+              fluidRow(column(6, h5("Time Series")),
+                       column(3,
+                              checkboxInput("showTSy", "y", value = T)
+                       ),
+                       column(3,
+                              checkboxInput("showTSx", "x", value = T)
+                       )
+              ),
+              fluidRow(column(6, h5("Carryover")),
+                       column(3,
+                              checkboxInput("showCarryoverY", "y")
+                       ),
+                       column(3,
+                              checkboxInput("showCarryoverX", "x")
+                       )
+              ),
+              fluidRow(column(6, h5("Spillover")),
+                       column(3,
+                              checkboxInput("showSpilloverY", "y")
+                       ),
+                       column(3,
+                              checkboxInput("showSpilloverX", "x")
+                       )
+              ),
+              fluidRow(column(6, h5("3D State Space")),
+                       column(3,
+                              checkboxInput("show3Dy", "y")
+                       ),
+                       column(3,
+                              checkboxInput("show3Dx", "x")
+                       )
+              ),
+              fluidRow(column(6, h5("Autocorrelation Function")),
+                column(3,
+                       checkboxInput("showACFy", "y")
+                ),
+                column(3,
+                       checkboxInput("showACFx", "x")
+                )
+              ),
+              fluidRow(column(6, h5("Cross-correlation Function")),
+                       column(3,
+                              checkboxInput("showCCFy", "(y * x)")
+                       ),
+                       column(3,
+                              checkboxInput("showCCFx", "(x * y)")
+                       )
+              )
        )
      ),
      hr(),
      fluidRow(
-       column(6,
-              plotOutput("ts")
+       conditionalPanel(condition = "input.showTSy | input.showTSx",
+         column(8,
+                plotOutput("ts")
+         )
        ),
-       column(6,
-              plotOutput("ssp")
+       conditionalPanel(condition = "input.showCarryoverY | input.showCarryoverX",
+         column(4,
+                plotOutput("carryover")
+         )
+       ),
+       conditionalPanel(condition = "input.showSpilloverY | input.showSpilloverX",
+         column(4,
+                plotOutput("spillover")
+         )
+       ),
+       conditionalPanel(condition = "input.showACFy | input.showACFx",
+         column(4,
+                plotOutput("acf")
+         )
+       ),       conditionalPanel(condition = "input.showCCFy | input.showCCFx",
+         column(4,
+                plotOutput("ccf")
+         )
+       ),
+       conditionalPanel(condition = "input.show3Dy | input.show3Dx",
+         column(11,
+                plotly::plotlyOutput("plotly", height = 600)
+         )
        )
-     )
+     ),
   ),
   tabPanel("Data", value = "data",
-   fluidRow(
-     column(9,
-            DT::dataTableOutput("table")
-     ),
-     column(3,
+    fluidRow(
+      column(9,
+             DT::dataTableOutput("table")
+      ),
+      column(3,
             radioButtons("dataFormat", "Choose data format",
                          choices = list("Wide" = "wide", "Long" = "long")
             ),
             downloadButton("downloadData", "Download data")
-     )
-   )
+      )
+    )
   )
 )
 
-
 server <- function(input, output, session) {
+  # DYNAMIC INPUT
   observeEvent(input$seed, {
     if(!is.integer(input$seed)){
       newSeed <- round(input$seed)
@@ -128,6 +203,7 @@ server <- function(input, output, session) {
     }
   })
   
+  # GENERATE DATA
   dat <- reactive({
     params_y <- list(alpha = input$alpha_y, phi = input$phi_y, beta = input$beta_y)
     params_x <- list(alpha = input$alpha_x, phi = input$phi_x, beta = input$beta_x)
@@ -159,6 +235,7 @@ server <- function(input, output, session) {
     dat
   })
   
+  # TABLE
   output$table <- DT::renderDataTable({
     dtable <- DT::datatable(dat(), rownames = F) 
     if(input$dataFormat == "wide"){
@@ -167,16 +244,57 @@ server <- function(input, output, session) {
     dtable
   })
   
+  # PLOTS
   output$ts <- renderPlot({ 
     req(input$dataFormat == "long")
-    myTS(dat(), shiny = T)
+    ifelse(input$model == "T", regime <- T, regime <- F)
+    if(input$showTSy) p <- myTS(dat(), partner = "y", regime = regime, shiny = T)
+    if(input$showTSx) p <- myTS(dat(), partner = "x", regime = regime, shiny = T)
+    if(input$showTSy && input$showTSx) p <- myTS(dat(), shiny = T)
+    return(p)
   })
   
-  output$ssp <- renderPlot({ 
+  output$carryover <- renderPlot({ 
     req(input$dataFormat == "long")
-    mySSP(dat(), type = "carryover", shiny = T)
+    if(input$showCarryoverY) p <- mySSP(dat(), partner = "y", type = "carryover", shiny = T)
+    if(input$showCarryoverX) p <- mySSP(dat(), partner = "x", type = "carryover", shiny = T)
+    if(input$showCarryoverY && input$showCarryoverX) p <- mySSP(dat(), type = "carryover", shiny = T)
+    return(p)
   })
   
+  output$spillover <- renderPlot({ 
+    req(input$dataFormat == "long")
+    if(input$showSpilloverY) p <- mySSP(dat(), partner = "y", type = "spillover", shiny = T)
+    if(input$showSpilloverX) p <- mySSP(dat(), partner = "x", type = "spillover", shiny = T)
+    if(input$showSpilloverY && input$showSpilloverX) p <- mySSP(dat(), type = "spillover", shiny = T)
+    return(p)
+  })
+  
+  output$ccf <- renderPlot({
+    req(input$dataFormat == "long")
+    if(input$showCCFy) p <- myCF(dat(), partner = "y", type = "CCF", shiny = T)
+    if(input$showCCFx) p <- myCF(dat(), partner = "x", type = "CCF", shiny = T)
+    if(input$showCCFy && input$showCCFx) p <- myCF(dat(), type = "CCF", shiny = T)
+    return(p)
+  })
+  
+  output$acf <- renderPlot({ 
+    req(input$dataFormat == "long")
+    if(input$showACFy) p <- myCF(dat(), partner = "y", type = "ACF", shiny = T)
+    if(input$showACFx) p <- myCF(dat(), partner = "x", type = "ACF", shiny = T)
+    if(input$showACFy && input$showACFx) p <- myCF(dat(), type = "ACF", shiny = T)
+    return(p)
+  })
+  
+  output$plotly <- plotly::renderPlotly({ 
+    req(input$dataFormat == "long")
+    if(input$show3Dy) p <- my3D(dat(), partner = "y")
+    if(input$show3Dx) p <- my3D(dat(), partner = "x")
+    if(input$show3Dy && input$show3Dx) p <- my3D(dat())
+    return(p)
+  })
+  
+  # DOWNLOAD BUTTON
   output$downloadData <- downloadHandler(
     filename = "dyadicinteractions.csv",
     content = function(file){
@@ -184,6 +302,5 @@ server <- function(input, output, session) {
     }
   )
 }
-
 
 shinyApp(ui = ui, server = server)
