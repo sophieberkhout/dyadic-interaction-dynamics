@@ -17,7 +17,7 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
        ),
        column(3,
               tabsetPanel(id = "yTabs",
-                          tabPanel("y",
+                          tabPanel("Partner y",
                                    numericInput("alpha_y", "Intercept", 0, width = "50%"),
                                    sliderInput("phi_y", "Carryover", -1, 1, .5, .1),
                                    sliderInput("beta_y", "Spillover", -1, 1, .2, .1)
@@ -26,7 +26,7 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
        ),
        column(3,
               tabsetPanel(id = "xTabs",
-                          tabPanel("x",
+                          tabPanel("Partner x",
                                    numericInput("alpha_x", "Intercept", 0, width = "50%"),
                                    sliderInput("phi_x", "Carryover", -1, 1, .5, .1),
                                    sliderInput("beta_x", "Spillover", -1, 1, .2, .1)
@@ -84,6 +84,18 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
                        )
               )
        )
+     ),
+     conditionalPanel(condition = "input.model == 'MS'",
+        fluidRow(
+          column(1, offset = 5,
+                 numericInput("pi_y", "pi_y", 0),
+                 numericInput("pi_yx", "pi_yx", 0)
+          ),
+          column(1,
+                 numericInput("pi_xy", "pi_xy", 0),
+                 numericInput("pi_x", "pi_x", 0)
+          )
+        )
      ),
      hr(),
      fluidRow(
@@ -157,24 +169,41 @@ server <- function(input, output, session) {
   })
   
   observeEvent(input$model, {
-    if(input$model == "T"){
+    removeTab("yTabs", target = "Regime 2")
+    removeTab("xTabs", target = "Regime 2")
+    
+    if(input$model == "T" || input$model == "MS"){
       appendTab("yTabs",
-        tabPanel("y regime 2",
+        tabPanel("Regime 2",
                  numericInput("alpha_y_2", "Intercept", 0, width = "50%"),
                  sliderInput("phi_y_2", "Carryover", -1, 1, .5, .1),
                  sliderInput("beta_y_2", "Spillover", -1, 1, .2, .1),
                  fluidRow(
-                   column(6,
+                   column(4,
                           checkboxInput("yRegime2", "Add regime")
                    ),
-                   column(6,
-                          numericInput("tau_y", "Threshold", 0, width = "50%")
-                   )
+                   if(input$model == "T"){
+                     column(6,
+                            numericInput("tau_y", "Threshold", 0, width = "50%")
+                     )                     
+                   # } else if(input$model == "MS"){
+                   #   fluidRow(
+                   #     column(3,
+                   #            numericInput("pi_y", "pi_y", 0),
+                   #            numericInput("pi_yx", "pi_yx", 0)
+                   #     ),
+                   #     column(3,
+                   #            numericInput("pi_xy", "pi_y", 0),
+                   #            numericInput("pi_x", "pi_yx", 0)
+                   #     )
+                   #   )
+                   }
+
                  )
         )
       )
       appendTab("xTabs",
-        tabPanel("x regime 2",
+        tabPanel("Regime 2",
                  numericInput("alpha_x_2", "Intercept", 0, width = "50%"),
                  sliderInput("phi_x_2", "Carryover", -1, 1, .5, .1),
                  sliderInput("beta_x_2", "Spillover", -1, 1, .2, .1),
@@ -188,10 +217,11 @@ server <- function(input, output, session) {
                  )
         )
       )
-    } else {
-      removeTab("yTabs", target = "y regime 2")
-      removeTab("xTabs", target = "x regime 2")
     }
+    # } else {
+    #   removeTab("yTabs", target = "Regime 2")
+    #   removeTab("xTabs", target = "Regime 2")
+    # }
   })
   
   observeEvent(input$navbar, {
