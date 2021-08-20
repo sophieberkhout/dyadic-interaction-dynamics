@@ -87,13 +87,20 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
      ),
      conditionalPanel(condition = "input.model == 'MS'",
         fluidRow(
-          column(1, offset = 5,
-                 numericInput("pi_y", "pi_y", 0),
-                 numericInput("pi_yx", "pi_yx", 0)
+          column(2,
+                 strong("Transition probabilities")
+          )
+        ),
+        fluidRow(
+          column(1,
+                 numericInput("pi_o", "Stay in 1", .5, 0, 1, .1),
+                 tableOutput("pi_ot")
+                 # numericInput("pi_yx", "pi_yx", 0)
           ),
           column(1,
-                 numericInput("pi_xy", "pi_xy", 0),
-                 numericInput("pi_x", "pi_x", 0)
+                 # numericInput("pi_xy", "pi_xy", 0),
+                 tableOutput("pi_to"),
+                 numericInput("pi_t", "Stay in 2", .5, 0, 1, .1)
           )
         )
      ),
@@ -211,9 +218,11 @@ server <- function(input, output, session) {
                    column(6,
                           checkboxInput("xRegime2", "Add regime")
                    ),
+                   if(input$model == "T"){
                    column(6,
                           numericInput("tau_x", "Threshold", 0, width = "50%")
                    )
+                   }
                  )
         )
       )
@@ -233,25 +242,40 @@ server <- function(input, output, session) {
     }
   })
   
+  output$pi_to <- renderTable({
+    pi_to <- data.frame(1 - input$pi_t)
+    colnames(pi_to) <- "Switch to 1"
+    return(pi_to)
+  }, align = "l")
+  
+  output$pi_ot <- renderTable({
+    pi_ot <- data.frame(1 - input$pi_o)
+    colnames(pi_ot) <- "Switch to 2"
+    return(pi_ot)
+  }, align = "l")
+  
   # GENERATE DATA
   dat <- reactive({
     params_y <- list(alpha = input$alpha_y, phi = input$phi_y, beta = input$beta_y)
     params_x <- list(alpha = input$alpha_x, phi = input$phi_x, beta = input$beta_x)
 
-    if(input$model == "T"){
+    if(input$model == "T" || input$model == "MS"){
       if(input$yRegime2){
         params_y$alpha[2] <- input$alpha_y_2
         params_y$phi[2]   <- input$phi_y_2
         params_y$beta[2]  <- input$beta_y_2
-        params_y$tau      <- input$tau_y
+        if(input$model == "T") params_y$tau <- input$tau_y
       }
       if(input$xRegime2){
         params_x$alpha[2] <- input$alpha_x_2
         params_x$phi[2]   <- input$phi_x_2
         params_x$beta[2]  <- input$beta_x_2
-        params_x$tau      <- input$tau_x
+        if(input$model == "T") params_x$tau <- input$tau_x
       }
     }
+    
+    probs <- NULL
+    if(input$model == "MS") probs <- c(input$pi_o, input$pi_t)
     
     ifelse(input$dataFormat == "long", longformat <- T, longformat <- F)
       
@@ -259,6 +283,7 @@ server <- function(input, output, session) {
                    type = input$model,
                    params_y = params_y,
                    params_x = params_x,
+                   probs = probs,
                    seed = input$seed,
                    longformat = longformat)
     
