@@ -6,7 +6,7 @@ source("plotFunctions.R")
 ui <- navbarPage("Dyadic Interactions", id = "navbar",
   tabPanel("Simulation", value = "sim",
      fluidRow(
-       column(3,
+       column(2,
               h4("Method"),
               selectInput("model", "Data Generating Model", 
                           list("VAR" = "VAR", "LVAR" = "L", "TV-VAR" = "TV", 
@@ -15,7 +15,7 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
               numericInput("burnin", "Burnin", 20, min = 0, step = 10),
               numericInput("seed", "Seed", 1, min = 1, max = .Machine$integer.max)
        ),
-       column(3,
+       column(3, offset = 1,
               tabsetPanel(id = "yTabs",
                           tabPanel("Partner y",
                                    numericInput("alpha_y", "Intercept", 0, width = "50%"),
@@ -33,7 +33,27 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
                           )
               )
        ),
-       column(3,
+       conditionalPanel(condition = "input.model == 'MS'",
+           column(2,
+                  h4("Transition probabilities"),
+                  fluidRow(
+                    column(6,
+                           numericInput("pi_o", "Stay in 1", .5, 0, 1, .1),
+                           tableOutput("pi_ot")
+                           # numericInput("pi_yx", "pi_yx", 0)
+                    ),
+                    column(6,
+                           # numericInput("pi_xy", "pi_xy", 0),
+                           tableOutput("pi_to"),
+                           numericInput("pi_t", "Stay in 2", .5, 0, 1, .1)
+                    )
+                  )
+           )
+       ),
+     ),
+     hr(),
+     fluidRow(
+       sidebarPanel(width = 3,
               h4("Plots"),
               fluidRow(column(6, h5("Time Series")),
                        column(3,
@@ -68,12 +88,12 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
                        )
               ),
               fluidRow(column(6, h5("Autocorrelation Function")),
-                column(3,
-                       checkboxInput("showACFy", "y")
-                ),
-                column(3,
-                       checkboxInput("showACFx", "x")
-                )
+                       column(3,
+                              checkboxInput("showACFy", "y")
+                       ),
+                       column(3,
+                              checkboxInput("showACFx", "x")
+                       )
               ),
               fluidRow(column(6, h5("Cross-correlation Function")),
                        column(3,
@@ -83,29 +103,7 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
                               checkboxInput("showCCFx", "(x * y)")
                        )
               )
-       )
-     ),
-     conditionalPanel(condition = "input.model == 'MS'",
-        fluidRow(
-          column(2,
-                 strong("Transition probabilities")
-          )
-        ),
-        fluidRow(
-          column(1,
-                 numericInput("pi_o", "Stay in 1", .5, 0, 1, .1),
-                 tableOutput("pi_ot")
-                 # numericInput("pi_yx", "pi_yx", 0)
-          ),
-          column(1,
-                 # numericInput("pi_xy", "pi_xy", 0),
-                 tableOutput("pi_to"),
-                 numericInput("pi_t", "Stay in 2", .5, 0, 1, .1)
-          )
-        )
-     ),
-     hr(),
-     fluidRow(
+       ),
        conditionalPanel(condition = "input.showTSy | input.showTSx",
          column(8,
                 plotOutput("ts")
