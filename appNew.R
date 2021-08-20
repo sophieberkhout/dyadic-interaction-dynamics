@@ -176,6 +176,26 @@ server <- function(input, output, session) {
   observeEvent(input$model, {
     removeTab("yTabs", target = "Regime 2")
     removeTab("xTabs", target = "Regime 2")
+    removeTab("yTabs", target = "Time-varying")
+    
+    if(input$model == "TV"){
+      appendTab("yTabs",
+        tabPanel("Time-varying",
+                 fluidRow(
+                   column(3,
+                          checkboxInput("alpha_y_tv", "Intercept")
+                   ),
+                   column(3,
+                          numericInput("alpha_from", "From", 0),
+                   ),
+                   column(3,
+                          numericInput("alpha_to", "To", 0)
+                   )
+                 ),
+                 radioButtons("alpha_change", "", list("Linear", "Sine"))
+                )
+      )
+    }
     
     if(input$model == "T" || input$model == "MS"){
       appendTab("yTabs",
