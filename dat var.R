@@ -9,7 +9,7 @@ dat.2 <- simVARS(occasions = 300, burnin = 20,
                  type = "VAR", 
                  params_y = c(0, 0.5, 0.2),
                  params_x = c(0, 0.5, 0.2),
-                 seed = 1
+                 # seed = 1
                  )
 
 
@@ -18,7 +18,7 @@ dat.8 <- simVARS(occasions = 300, burnin = 20,
                  type = "VAR", 
                  params_y = c(0, 0.5, 0.8),
                  params_x = c(0, 0.5, 0.2),
-                 seed = 1
+                 # seed = 1
                  )
 
 

@@ -276,13 +276,13 @@ server <- function(input, output, session) {
     if(input$model == "MS") probs <- c(input$pi_o, input$pi_t)
     
     ifelse(input$dataFormat == "long", longformat <- T, longformat <- F)
-      
+    
+    set.seed(input$seed)
     dat <- simVARS(occasions = input$t, burnin = input$burnin,
                    type = input$model,
                    params_y = params_y,
                    params_x = params_x,
                    probs = probs,
-                   seed = input$seed,
                    longformat = longformat)
     
     dat
