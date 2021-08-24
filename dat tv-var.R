@@ -3,7 +3,7 @@ source("plotFunctions.R")
 # source("myTheme.R")
 
 set.seed(1)
-dat.s <- symVARS(occasions = 300, burnin = 20,
+dat.s <- simVARS(occasions = 300, burnin = 20,
                  type = "TV",
                  params_y = list(alpha = list(2, "sine"),
                                  phi = .5,
@@ -13,7 +13,7 @@ dat.s <- symVARS(occasions = 300, burnin = 20,
                                  beta = 0))
 
 set.seed(1)
-dat.l <- symVARS(occasions = 300, burnin = 20,
+dat.l <- simVARS(occasions = 300, burnin = 20,
                  type = "TV",
                  params_y = list(alpha = list(2, "linear"),
                                  phi = .5,

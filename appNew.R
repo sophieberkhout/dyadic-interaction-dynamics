@@ -16,12 +16,12 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
               numericInput("seed", "Seed", 1, min = 1, max = .Machine$integer.max)
        ),
        column(3, offset = 1,
-              tabsetPanel(id = "yTabs",
-                          tabPanel("Partner y",
-                                   numericInput("alpha_y", "Intercept", 0, width = "50%"),
-                                   sliderInput("phi_y", "Carryover", -1, 1, .5, .1),
-                                   sliderInput("beta_y", "Spillover", -1, 1, .2, .1)
-                          )
+              tabsetPanel(id = "yTabs"
+                          # tabPanel("Partner y",
+                          #          numericInput("alpha_y", "Intercept", 0, width = "50%"),
+                          #          sliderInput("phi_y", "Carryover", -1, 1, .5, .1),
+                          #          sliderInput("beta_y", "Spillover", -1, 1, .2, .1)
+                          # )
               )
        ),
        column(3,
@@ -177,6 +177,18 @@ server <- function(input, output, session) {
     removeTab("yTabs", target = "Regime 2")
     removeTab("xTabs", target = "Regime 2")
     removeTab("yTabs", target = "Time-varying")
+    removeTab("yTabs", target = "Partner y")
+    
+    
+    if(input$model != "TV" && input$model != "HMM"){
+      appendTab("yTabs",
+        tabPanel("Partner y",
+                 numericInput("alpha_y", "Intercept", 0, width = "50%"),
+                 sliderInput("phi_y", "Carryover", -1, 1, .5, .1),
+                 sliderInput("beta_y", "Spillover", -1, 1, .2, .1)
+        ), select = T,
+      )
+    }
     
     if(input$model == "TV"){
       appendTab("yTabs",
@@ -187,13 +199,17 @@ server <- function(input, output, session) {
                    ),
                    column(3,
                           numericInput("alpha_from", "From", 0),
+                          numericInput("alpha_to", "To", 0)
                    ),
                    column(3,
-                          numericInput("alpha_to", "To", 0)
+                          numericInput("alpha_a", "Range", 0),
+                          numericInput("alpha_h", "Start", 0),
+                          numericInput("alpha_b", "Freq", 0),
+                          numericInput("alpha_k", "Height", 0)
                    )
                  ),
                  radioButtons("alpha_change", "", list("Linear", "Sine"))
-                )
+                ), select = T,
       )
     }
     
