@@ -25,15 +25,15 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
               )
        ),
        column(3,
-              tabsetPanel(id = "xTabs",
-                          tabPanel("Partner x",
-                                   numericInput("alpha_x", "Intercept", 0, width = "50%"),
-                                   sliderInput("phi_x", "Carryover", -1, 1, .5, .1),
-                                   sliderInput("beta_x", "Spillover", -1, 1, .2, .1)
-                          )
+              tabsetPanel(id = "xTabs"
+                          # tabPanel("Partner x",
+                          #          numericInput("alpha_x", "Intercept", 0, width = "50%"),
+                          #          sliderInput("phi_x", "Carryover", -1, 1, .5, .1),
+                          #          sliderInput("beta_x", "Spillover", -1, 1, .2, .1)
+                          # )
               )
        ),
-       conditionalPanel(condition = "input.model == 'MS'",
+       conditionalPanel(condition = "input.model == 'MS' || input.model == 'HMM'",
            column(2,
                   h4("Transition probabilities"),
                   fluidRow(
@@ -178,7 +178,9 @@ server <- function(input, output, session) {
     removeTab("xTabs", target = "Regime 2")
     removeTab("yTabs", target = "Time-varying")
     removeTab("yTabs", target = "Partner y")
-    
+    removeTab("xTabs", target = "Partner x")
+    removeTab("yTabs", target = "Mean y")
+    removeTab("xTabs", target = "Mean x")
     
     if(input$model != "TV" && input$model != "HMM"){
       appendTab("yTabs",
@@ -186,7 +188,14 @@ server <- function(input, output, session) {
                  numericInput("alpha_y", "Intercept", 0, width = "50%"),
                  sliderInput("phi_y", "Carryover", -1, 1, .5, .1),
                  sliderInput("beta_y", "Spillover", -1, 1, .2, .1)
-        ), select = T,
+        ), select = T
+      )
+      appendTab("xTabs",
+        tabPanel("Partner x",
+                 numericInput("alpha_x", "Intercept", 0, width = "50%"),
+                 sliderInput("phi_x", "Carryover", -1, 1, .5, .1),
+                 sliderInput("beta_x", "Spillover", -1, 1, .2, .1)
+        ), select = T
       )
     }
     
@@ -210,6 +219,21 @@ server <- function(input, output, session) {
                  ),
                  radioButtons("alpha_change", "", list("Linear", "Sine"))
                 ), select = T,
+      )
+    }
+    
+    if(input$model == "HMM"){
+      appendTab("yTabs",
+        tabPanel("Mean y",
+                 numericInput("mean_y_1", "Mean regime 1", 0, width = "50%"),
+                 numericInput("mean_y_2", "Mean regime 2", 0, width = "50%")
+        ), select = T
+      )
+      appendTab("xTabs",
+                tabPanel("Mean x",
+                         numericInput("mean_x_1", "Mean regime 1", 0, width = "50%"),
+                         numericInput("mean_x_2", "Mean regime 2", 0, width = "50%")
+                ), select = T
       )
     }
     
@@ -307,9 +331,13 @@ server <- function(input, output, session) {
         if(input$model == "T") params_x$tau <- input$tau_x
       }
     }
+    if(input$model == "HMM"){
+      params_y <- list(mu = c(input$mean_y_1, input$mean_y_2))
+      params_x <- list(mu = c(input$mean_x_1, input$mean_x_2))
+    }
     
     probs <- NULL
-    if(input$model == "MS") probs <- c(input$pi_o, input$pi_t)
+    if(input$model == "MS" || input$model == "HMM") probs <- c(input$pi_o, input$pi_t)
     
     ifelse(input$dataFormat == "long", longformat <- T, longformat <- F)
     
