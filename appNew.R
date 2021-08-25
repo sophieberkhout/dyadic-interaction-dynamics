@@ -5,51 +5,53 @@ source("plotFunctions.R")
 
 ui <- navbarPage("Dyadic Interactions", id = "navbar",
   tabPanel("Simulation", value = "sim",
+           testUI("test"),
      fluidRow(
-       sidebarPanel(width = 3,
-         # column(2,
-                h4("Method"),
-                selectInput("model", "Data Generating Model", 
-                            list("First-order Vector Autoregressive VAR(1)" = "VAR", 
-                                 "Latent VAR(1)" = "L", 
-                                 "Time-Varying VAR(1)" = "TV", 
-                                 "Threshold VAR(1)" = "T", 
-                                 "Hidden Markov Model" = "HMM", 
-                                 "Markov-Switching VAR(1)" = "MS"), selected = 1, width = "95%"),
-                numericInput("t", "Measurement occasions", 300, min = 2, step = 50, width = "60%"), # 1 does not work
-                numericInput("burnin", "Burnin", 20, min = 0, step = 10, width = "60%"),
-                numericInput("seed", "Seed", 1, min = 1, max = .Machine$integer.max, width = "60%")
-         # )
-       ),
+       methodUI("method"),
        column(3,
-              tabsetPanel(id = "yTabs"
-              )
+              tabsetPanel(id = "yTabs")
        ),
        column(3,
               tabsetPanel(id = "xTabs"
               )
        ),
-       conditionalPanel(condition = "input.model == 'MS' || input.model == 'HMM'",
-           column(2,
-                  h4("Transition probabilities"),
-                  fluidRow(
-                    column(6,
-                           numericInput("pi_o", "Stay in 1", .5, 0, 1, .1),
-                           tableOutput("pi_ot")
-                    ),
-                    column(6,
-                           tableOutput("pi_to"),
-                           numericInput("pi_t", "Stay in 2", .5, 0, 1, .1)
+       column(2,
+              tabsetPanel(id = "errors"
+                # tabPanel("Innovations",
+                #          fluidRow(
+                #            column(6,
+                #                   numericInput("zeta_y", "Variance y", .1, 0, 1, .05),
+                #                   numericInput("zeta_xy", "Covariance", .05, 0, 1, .05)
+                #            ),
+                #            column(6,
+                #                   numericInput("zeta_x", "Variance x", .1, 0, 1, .05)
+                #            )
+                #          )
+                # )
+              ),
+              conditionalPanel(condition = "input.model == 'MS' || input.model == 'HMM'",
+                tabsetPanel(id = "transition",
+                  tabPanel("Transition probabilities",
+                    fluidRow(
+                      column(6,
+                             numericInput("pi_o", "Stay in 1", .5, 0, 1, .1),
+                             tableOutput("pi_ot")
+                      ),
+                      column(6,
+                             tableOutput("pi_to"),
+                             numericInput("pi_t", "Stay in 2", .5, 0, 1, .1)
+                      )
                     )
-                  )
-           )
-       ),
+                  )                            
+                )
+              )
+       )
      ),
      hr(),
      fluidRow(
        sidebarPanel(width = 3,
               h4("Plots"),
-              fluidRow(column(6, h5("Time Series")),
+              fluidRow(column(6, h5("Time series")),
                        column(3,
                               checkboxInput("showTSy", "y", value = T)
                        ),
@@ -73,7 +75,7 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
                               checkboxInput("showSpilloverX", "x")
                        )
               ),
-              fluidRow(column(6, h5("3D State Space")),
+              fluidRow(column(6, h5("3D state space")),
                        column(3,
                               checkboxInput("show3Dy", "y")
                        ),
@@ -81,7 +83,7 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
                               checkboxInput("show3Dx", "x")
                        )
               ),
-              fluidRow(column(6, h5("Autocorrelation Function")),
+              fluidRow(column(6, h5("Autocorrelation function")),
                        column(3,
                               checkboxInput("showACFy", "y")
                        ),
@@ -89,7 +91,7 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
                               checkboxInput("showACFx", "x")
                        )
               ),
-              fluidRow(column(6, h5("Cross-correlation Function")),
+              fluidRow(column(6, h5("Cross-correlation function")),
                        column(3,
                               checkboxInput("showCCFy", "(y * x)")
                        ),
@@ -126,6 +128,11 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
          column(11,
                 plotly::plotlyOutput("plotly", height = 600)
          )
+       ),
+       conditionalPanel(condition = "input.plot_alpha",
+                        column(4,
+                               plotOutput("alpha")
+                        )
        )
      ),
   ),
@@ -186,20 +193,23 @@ server <- function(input, output, session) {
   })
   
   observeEvent(input$model, {
-    removeTab("yTabs", target = "Second Regime")
-    removeTab("xTabs", target = "Second Regime")
+    removeTab("yTabs", target = "Second regime")
+    removeTab("xTabs", target = "Second regime")
     removeTab("yTabs", target = "Intercept")
     removeTab("yTabs", target = "Parameters y")
     removeTab("xTabs", target = "Parameters x")
     removeTab("yTabs", target = "Means y")
     removeTab("xTabs", target = "Means x")
+    removeTab("errors", target = "Innovations")
+    removeTab("errors", target = "Measurement error")
     
     if(input$model != "TV" && input$model != "HMM"){
       appendTab("yTabs",
         tabPanel("Parameters y",
-                 numericInput("alpha_y", "Intercept", 0, width = "50%"),
-                 sliderInput("phi_y", "Carryover", -1, 1, .5, .1),
-                 sliderInput("beta_y", "Spillover", -1, 1, .2, .1)
+                 inputVARUI("yParameters")
+                 # numericInput("alpha_y", "Intercept", 0, width = "50%"),
+                 # sliderInput("phi_y", "Carryover", -1, 1, .5, .1),
+                 # sliderInput("beta_y", "Spillover", -1, 1, .2, .1)
         ), select = T
       )
       appendTab("xTabs",
@@ -209,6 +219,39 @@ server <- function(input, output, session) {
                  sliderInput("beta_x", "Spillover", -1, 1, .2, .1)
         ), select = T
       )
+    }
+    
+    if(input$model != "HMM"){
+      appendTab("errors",
+        tabPanel("Innovations",
+                 fluidRow(
+                   column(6,
+                          numericInput("zeta_y", "Variance y", .1, 0, 1, .05),
+                          numericInput("zeta_yx", "Covariance", .05, 0, 1, .05)
+                   ),
+                   column(6,
+                          numericInput("zeta_x", "Variance x", .1, 0, 1, .05)
+                   )
+                 )
+        ), select = T
+      )
+    }
+    
+    if(input$model == "L" | input$model == "HMM"){
+      appendTab("errors",
+                tabPanel("Measurement error",
+                         fluidRow(
+                           column(6,
+                                  numericInput("epsilon_y", "Variance y", .1, 0, 1, .05),
+                                  numericInput("epsilon_yx", "Covariance", .05, 0, 1, .05)
+                           ),
+                           column(6,
+                                  numericInput("epsilon_x", "Variance x", .1, 0, 1, .05)
+                           )
+                         )
+                ), select = ifelse(input$model == "L", F, T)
+      )
+      
     }
     
     if(input$model == "TV"){
@@ -241,12 +284,12 @@ server <- function(input, output, session) {
                      ),
                      conditionalPanel(condition = "input.alpha_change == 'Sine'",
                        column(3,
-                              numericInput("alpha_a", "Range", 0),
-                              numericInput("alpha_h", "Start", 0),
+                              numericInput("alpha_amp", "Amplitude", 1),
+                              numericInput("alpha_phase", "Phase", 0),
                        ),
                        column(3,
-                              numericInput("alpha_b", "Freq", 0),
-                              numericInput("alpha_k", "Height", 0)
+                              numericInput("alpha_freq", "Frequency", 1),
+                              numericInput("alpha_dev", "Deviation", 0)
                        )
                      ),
                     ),
@@ -259,21 +302,21 @@ server <- function(input, output, session) {
     if(input$model == "HMM"){
       appendTab("yTabs",
         tabPanel("Means y",
-                 numericInput("mean_y_1", "First Regime", 0, width = "50%"),
-                 numericInput("mean_y_2", "Second Regime", 0, width = "50%")
+                 numericInput("mean_y_1", "First regime", 0, width = "50%"),
+                 numericInput("mean_y_2", "Second regime", 0, width = "50%")
         ), select = T
       )
       appendTab("xTabs",
                 tabPanel("Means x",
-                         numericInput("mean_x_1", "First Regime", 0, width = "50%"),
-                         numericInput("mean_x_2", "Second Regime", 0, width = "50%")
+                         numericInput("mean_x_1", "First regime", 0, width = "50%"),
+                         numericInput("mean_x_2", "Second regime", 0, width = "50%")
                 ), select = T
       )
     }
     
     if(input$model == "T" || input$model == "MS"){
       appendTab("yTabs",
-        tabPanel("Second Regime",
+        tabPanel("Second regime",
                  numericInput("alpha_y_2", "Intercept", 0, width = "50%"),
                  sliderInput("phi_y_2", "Carryover", -1, 1, .5, .1),
                  sliderInput("beta_y_2", "Spillover", -1, 1, .2, .1),
@@ -291,7 +334,7 @@ server <- function(input, output, session) {
         )
       )
       appendTab("xTabs",
-        tabPanel("Second Regime",
+        tabPanel("Second regime",
                  numericInput("alpha_x_2", "Intercept", 0, width = "50%"),
                  sliderInput("phi_x_2", "Carryover", -1, 1, .5, .1),
                  sliderInput("beta_x_2", "Spillover", -1, 1, .2, .1),
@@ -331,9 +374,14 @@ server <- function(input, output, session) {
     return(pi_ot)
   }, align = "l")
   
+  
   # GENERATE DATA
   dat <- reactive({
-    params_y <- list(alpha = input$alpha_y, phi = input$phi_y, beta = input$beta_y)
+    
+    params_y <- inputVARServer("yParameters")
+    # params_y <- list(alpha = params_y$alpha(), phi = params_y$phi(), beta = params_y$beta())
+    
+    # params_y <- list(alpha = input$alpha_y, phi = input$phi_y, beta = input$beta_y)
     params_x <- list(alpha = input$alpha_x, phi = input$phi_x, beta = input$beta_x)
 
     if(input$model == "T" || input$model == "MS"){
@@ -355,6 +403,12 @@ server <- function(input, output, session) {
       params_x <- list(mu = c(input$mean_x_1, input$mean_x_2))
     }
     
+    if(input$model != "HMM" && input$model != "L"){
+      errors <- c(input$zeta_y, input$zeta_yx, input$zeta_yx, input$zeta_x)
+    } else {
+      errors <- c(input$epsilon_y, input$epsilon_yx, input$epsilon_yx, input$epsilon_x)
+    }
+    
     probs <- NULL
     if(input$model == "MS" || input$model == "HMM") probs <- c(input$pi_o, input$pi_t)
     
@@ -366,6 +420,7 @@ server <- function(input, output, session) {
                    params_y = params_y,
                    params_x = params_x,
                    probs = probs,
+                   innovations = errors,
                    longformat = longformat)
     
     dat
@@ -428,6 +483,21 @@ server <- function(input, output, session) {
     if(input$show3Dx) p <- my3D(dat(), partner = "x")
     if(input$show3Dy && input$show3Dx) p <- my3D(dat())
     return(p)
+  })
+  
+  tv_alpha <- reactive({
+    if(input$alpha_change == "Linear"){
+      a <- change_linear(input$alpha_from, input$alpha_to, input$t, input$burnin)
+    } else if(input$alpha_change == "Sine"){
+      a <- change_sine(amplitude = input$alpha_amp, freq = input$alpha_freq,
+                       phase = input$alpha_phase, deviation = input$alpha_dev,
+                       t = input$t)
+    }
+    return(a)
+  })
+  
+  output$alpha <- renderPlot({
+    plot(tv_alpha(), type = "l")
   })
   
   # DOWNLOAD BUTTON

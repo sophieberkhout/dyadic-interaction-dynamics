@@ -53,3 +53,15 @@ simVARS <- function(occasions, burnin,
   row.names(dat) <- NULL
   return(dat)
 }
+
+## Time-varying
+change_linear <- function(from, to, t, burnin = NULL){
+  x <- seq(from, to, length.out = t)
+  return(x)
+}
+
+change_sine <- function(amplitude, freq, phase, deviation, t){
+  n <- 1:t
+  x <- amplitude  * sin(2 * pi * (freq/t) * n + phase) + deviation
+  return(x)
+}

@@ -40,26 +40,63 @@ change <- function(param, t, burnin = NULL){
 }
 
 TVVAR1 <- function(occasions, burnin, params_y, params_x, z){
+  ####### NEW SPECIFICATION
+  ####### WHAT TO DO WITH BURNIN
+  # alpha_y <- params_y[[1]]
+  # phi_y   <- params_y[[2]]
+  # beta_y  <- params_y[[3]]
+  # 
+  # alpha_x <- params_x[[1]]
+  # phi_x   <- params_x[[2]]
+  # beta_x  <- params_x[[3]]
+  
+  ### if length == 1, repeat
+  ### if length > 1, take average? paste before
+  
+  # like this?
+  # ifelse(length(params_y[[1]]) == 1, 
+  #        alpha_y <- rep(params_y[[1]], occasions), 
+  #        alpha_y <- c(rep(mean(params_y[[1]]), burnin), params_y[[1]])) 
   
   ifelse(length(params_y[[1]]) == 1, 
          alpha_y <- rep(params_y[[1]], occasions), 
-         alpha_y <- change(param = params_y[[1]], t = (occasions-burnin), burnin = burnin)) 
+         alpha_y <- c(rep(params_y[[1]][1], burnin), params_y[[1]]))
   ifelse(length(params_y[[2]]) == 1, 
          phi_y   <- rep(params_y[[2]], occasions), 
-         phi_y   <- change(params_y[[2]], (occasions-burnin), burnin))
+         phi_y   <- c(rep(params_y[[2]][1], burnin), params_y[[2]]))
   ifelse(length(params_y[[3]]) == 1, 
          beta_y  <- rep(params_y[[3]], occasions), 
-         beta_y  <- change(params_y[[3]], (occasions-burnin), burnin))
+         beta_y  <- c(rep(params_y[[3]][1], burnin), params_y[[3]]))
   
   ifelse(length(params_x[[1]]) == 1, 
          alpha_x <- rep(params_x[[1]], occasions), 
-         alpha_x <- change(params_x[[1]], (occasions-burnin), burnin))
+         alpha_x <- c(rep(params_x[[1]][1], burnin), params_x[[1]]))
   ifelse(length(params_x[[2]]) == 1, 
          phi_x   <- rep(params_x[[2]], occasions), 
-         phi_x   <- change(params_x[[2]], (occasions-burnin), burnin)) 
+         phi_x   <- c(rep(params_x[[2]][1], burnin), params_x[[2]]))
   ifelse(length(params_x[[3]]) == 1, 
          beta_x  <- rep(params_x[[3]], occasions), 
-         beta_x  <- change(params_x[[3]], (occasions-burnin), burnin))
+         beta_x  <- c(rep(params_x[[3]][1], burnin), params_x[[3]]))
+  
+  # ifelse(length(params_y[[1]]) == 1, 
+  #        alpha_y <- rep(params_y[[1]], occasions), 
+  #        alpha_y <- change(param = params_y[[1]], t = (occasions-burnin), burnin = burnin)) 
+  # ifelse(length(params_y[[2]]) == 1, 
+  #        phi_y   <- rep(params_y[[2]], occasions), 
+  #        phi_y   <- change(params_y[[2]], (occasions-burnin), burnin))
+  # ifelse(length(params_y[[3]]) == 1, 
+  #        beta_y  <- rep(params_y[[3]], occasions), 
+  #        beta_y  <- change(params_y[[3]], (occasions-burnin), burnin))
+  # 
+  # ifelse(length(params_x[[1]]) == 1, 
+  #        alpha_x <- rep(params_x[[1]], occasions), 
+  #        alpha_x <- change(params_x[[1]], (occasions-burnin), burnin))
+  # ifelse(length(params_x[[2]]) == 1, 
+  #        phi_x   <- rep(params_x[[2]], occasions), 
+  #        phi_x   <- change(params_x[[2]], (occasions-burnin), burnin)) 
+  # ifelse(length(params_x[[3]]) == 1, 
+  #        beta_x  <- rep(params_x[[3]], occasions), 
+  #        beta_x  <- change(params_x[[3]], (occasions-burnin), burnin))
   
   y <- numeric(occasions)
   x <- numeric(occasions) 
