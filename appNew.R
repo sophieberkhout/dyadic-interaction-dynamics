@@ -6,16 +6,22 @@ source("plotFunctions.R")
 ui <- navbarPage("Dyadic Interactions", id = "navbar",
   tabPanel("Simulation", value = "sim",
      fluidRow(
-       column(2,
-              h4("Method"),
-              selectInput("model", "Data Generating Model", 
-                          list("VAR" = "VAR", "LVAR" = "L", "TV-VAR" = "TV", 
-                               "TVAR" = "T", "HMM" = "HMM", "MSVAR" = "MS"), selected = 1),
-              numericInput("t", "Measurement occasions", 300, min = 2, step = 50), # 1 does not work
-              numericInput("burnin", "Burnin", 20, min = 0, step = 10),
-              numericInput("seed", "Seed", 1, min = 1, max = .Machine$integer.max)
+       sidebarPanel(width = 3,
+         # column(2,
+                h4("Method"),
+                selectInput("model", "Data Generating Model", 
+                            list("First-order Vector Autoregressive VAR(1)" = "VAR", 
+                                 "Latent VAR(1)" = "L", 
+                                 "Time-Varying VAR(1)" = "TV", 
+                                 "Threshold VAR(1)" = "T", 
+                                 "Hidden Markov Model" = "HMM", 
+                                 "Markov-Switching VAR(1)" = "MS"), selected = 1, width = "95%"),
+                numericInput("t", "Measurement occasions", 300, min = 2, step = 50, width = "60%"), # 1 does not work
+                numericInput("burnin", "Burnin", 20, min = 0, step = 10, width = "60%"),
+                numericInput("seed", "Seed", 1, min = 1, max = .Machine$integer.max, width = "60%")
+         # )
        ),
-       column(3, offset = 1,
+       column(3,
               tabsetPanel(id = "yTabs"
               )
        ),
@@ -239,17 +245,6 @@ server <- function(input, output, session) {
                      column(6,
                             numericInput("tau_y", "Threshold", 0, width = "50%")
                      )                     
-                   # } else if(input$model == "MS"){
-                   #   fluidRow(
-                   #     column(3,
-                   #            numericInput("pi_y", "pi_y", 0),
-                   #            numericInput("pi_yx", "pi_yx", 0)
-                   #     ),
-                   #     column(3,
-                   #            numericInput("pi_xy", "pi_y", 0),
-                   #            numericInput("pi_x", "pi_yx", 0)
-                   #     )
-                   #   )
                    }
 
                  )
@@ -273,10 +268,6 @@ server <- function(input, output, session) {
         )
       )
     }
-    # } else {
-    #   removeTab("yTabs", target = "Regime 2")
-    #   removeTab("xTabs", target = "Regime 2")
-    # }
   })
   
   observeEvent(input$navbar, {
