@@ -188,7 +188,7 @@ server <- function(input, output, session) {
   observeEvent(input$model, {
     removeTab("yTabs", target = "Second Regime")
     removeTab("xTabs", target = "Second Regime")
-    removeTab("yTabs", target = "Time-varying")
+    removeTab("yTabs", target = "Intercept")
     removeTab("yTabs", target = "Parameters y")
     removeTab("xTabs", target = "Parameters x")
     removeTab("yTabs", target = "Means y")
@@ -213,23 +213,45 @@ server <- function(input, output, session) {
     
     if(input$model == "TV"){
       appendTab("yTabs",
-        tabPanel("Time-varying",
-                 fluidRow(
-                   column(3,
-                          checkboxInput("alpha_y_tv", "Intercept")
-                   ),
-                   column(3,
-                          numericInput("alpha_from", "From", 0),
-                          numericInput("alpha_to", "To", 0)
-                   ),
-                   column(3,
-                          numericInput("alpha_a", "Range", 0),
-                          numericInput("alpha_h", "Start", 0),
-                          numericInput("alpha_b", "Freq", 0),
-                          numericInput("alpha_k", "Height", 0)
-                   )
+        tabPanel("Intercept",
+                 radioButtons("alpha_y_tv", "", list("Stable", "Time-varying"), inline = T),
+                 # fluidRow(
+                 #   column(6,
+                 #          radioButtons("alpha_y_tv", "", list("Stable", "Time-varying")),
+                 #   ),
+                 #   column(6,
+                 #          numericInput("alpha_y_stable", "", 0)
+                 #   )
+                 # ),
+                 conditionalPanel(condition = "input.alpha_y_tv == 'Stable'",
+                   numericInput("alpha_y_stable", "Value", 0, width = "50%")
                  ),
-                 radioButtons("alpha_change", "", list("Linear", "Sine"))
+                 conditionalPanel(condition = "input.alpha_y_tv == 'Time-varying'",
+                   fluidRow(
+                     column(3,
+                       radioButtons("alpha_change", "", list("Linear", "Sine"))
+                     ),
+                     conditionalPanel(condition = "input.alpha_change == 'Linear'",
+                       column(3,
+                              numericInput("alpha_from", "From", 0),
+                       ),
+                       column(3,
+                              numericInput("alpha_to", "To", 0)
+                       )
+                     ),
+                     conditionalPanel(condition = "input.alpha_change == 'Sine'",
+                       column(3,
+                              numericInput("alpha_a", "Range", 0),
+                              numericInput("alpha_h", "Start", 0),
+                       ),
+                       column(3,
+                              numericInput("alpha_b", "Freq", 0),
+                              numericInput("alpha_k", "Height", 0)
+                       )
+                     ),
+                    ),
+                   checkboxInput("plot_alpha", "Plot intercept")
+                  )
                 ), select = T,
       )
     }
