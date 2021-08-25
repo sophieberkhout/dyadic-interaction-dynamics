@@ -16,6 +16,7 @@ methodUI <- function(id){
   )
 }
 
+
 inputVARUI <- function(id){
   ns <- NS(id)
   

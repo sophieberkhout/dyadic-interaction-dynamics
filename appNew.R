@@ -38,91 +38,8 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
      ),
      hr(),
      fluidRow(
-       sidebarPanel(width = 3,
-              h4("Plots"),
-              fluidRow(column(6, h5("Time series")),
-                       column(3,
-                              checkboxInput("showTSy", "y", value = T)
-                       ),
-                       column(3,
-                              checkboxInput("showTSx", "x", value = T)
-                       )
-              ),
-              fluidRow(column(6, h5("Carryover")),
-                       column(3,
-                              checkboxInput("showCarryoverY", "y")
-                       ),
-                       column(3,
-                              checkboxInput("showCarryoverX", "x")
-                       )
-              ),
-              fluidRow(column(6, h5("Spillover")),
-                       column(3,
-                              checkboxInput("showSpilloverY", "y")
-                       ),
-                       column(3,
-                              checkboxInput("showSpilloverX", "x")
-                       )
-              ),
-              fluidRow(column(6, h5("3D state space")),
-                       column(3,
-                              checkboxInput("show3Dy", "y")
-                       ),
-                       column(3,
-                              checkboxInput("show3Dx", "x")
-                       )
-              ),
-              fluidRow(column(6, h5("Autocorrelation function")),
-                       column(3,
-                              checkboxInput("showACFy", "y")
-                       ),
-                       column(3,
-                              checkboxInput("showACFx", "x")
-                       )
-              ),
-              fluidRow(column(6, h5("Cross-correlation function")),
-                       column(3,
-                              checkboxInput("showCCFy", "(y * x)")
-                       ),
-                       column(3,
-                              checkboxInput("showCCFx", "(x * y)")
-                       )
-              )
-       ),
-       conditionalPanel(condition = "input.showTSy | input.showTSx",
-         column(8,
-                plotOutput("ts")
-         )
-       ),
-       conditionalPanel(condition = "input.showCarryoverY | input.showCarryoverX",
-         column(4,
-                plotOutput("carryover")
-         )
-       ),
-       conditionalPanel(condition = "input.showSpilloverY | input.showSpilloverX",
-         column(4,
-                plotOutput("spillover")
-         )
-       ),
-       conditionalPanel(condition = "input.showACFy | input.showACFx",
-         column(4,
-                plotOutput("acf")
-         )
-       ),       conditionalPanel(condition = "input.showCCFy | input.showCCFx",
-         column(4,
-                plotOutput("ccf")
-         )
-       ),
-       conditionalPanel(condition = "input.show3Dy | input.show3Dx",
-         column(11,
-                plotly::plotlyOutput("plotly", height = 600)
-         )
-       ),
-       conditionalPanel(condition = "input.plot_alpha",
-                        column(4,
-                               plotOutput("alpha")
-                        )
-       )
+       plotsInputUI("inputPlots"),
+       plotsOutputUI("outputPlots")
      ),
   ),
   tabPanel("Data", value = "data",
@@ -208,7 +125,7 @@ server <- function(input, output, session) {
     if(input$model != "HMM"){
       appendTab("errors",
         tabPanel("Innovations",
-                 errorsUI("inv")
+                 errorsUI("innovations")
         ), select = T
       )
     }
@@ -216,7 +133,7 @@ server <- function(input, output, session) {
     if(input$model == "L" | input$model == "HMM"){
       appendTab("errors",
                 tabPanel("Measurement error",
-                         errorsUI("me")
+                         errorsUI("measurementError")
                 ), select = ifelse(input$model == "L", F, T)
       )
     }
@@ -363,9 +280,9 @@ server <- function(input, output, session) {
     }
     
     if(input$model != "HMM" && input$model != "L"){
-      errors <- errorsServer("inv")
+      errors <- errorsServer("innovations")
     } else {
-      errors <- errorsServer("me")
+      errors <- errorsServer("measurementError")
     }
     
     probs <- NULL
@@ -395,6 +312,7 @@ server <- function(input, output, session) {
   })
   
   # PLOTS
+  # plotsServer("inputPlots")
   output$ts <- renderPlot({ 
     req(input$dataFormat == "long")
     ifelse(input$model == "T", regime <- T, regime <- F)
