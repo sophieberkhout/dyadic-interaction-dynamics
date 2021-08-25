@@ -167,9 +167,27 @@ server <- function(input, output, session) {
     }
   })
   
+  observeEvent(input$yNoSwitch, {
+    if(input$yNoSwitch){
+      updateNumericInput(session, "alpha_y_2", value = input$alpha_y)
+      updateNumericInput(session, "phi_y_2", value = input$phi_y)
+      updateNumericInput(session, "beta_y_2", value = input$beta_y)
+      
+    }
+  })
+  
+  observeEvent(input$xNoSwitch, {
+    if(input$xNoSwitch){
+      updateNumericInput(session, "alpha_x_2", value = input$alpha_x)
+      updateNumericInput(session, "phi_x_2", value = input$phi_x)
+      updateNumericInput(session, "beta_x_2", value = input$beta_x)
+      
+    }
+  })
+  
   observeEvent(input$model, {
-    removeTab("yTabs", target = "Regime 2")
-    removeTab("xTabs", target = "Regime 2")
+    removeTab("yTabs", target = "Second Regime")
+    removeTab("xTabs", target = "Second Regime")
     removeTab("yTabs", target = "Time-varying")
     removeTab("yTabs", target = "Parameters y")
     removeTab("xTabs", target = "Parameters x")
@@ -219,27 +237,27 @@ server <- function(input, output, session) {
     if(input$model == "HMM"){
       appendTab("yTabs",
         tabPanel("Means y",
-                 numericInput("mean_y_1", "Regime 1", 0, width = "50%"),
-                 numericInput("mean_y_2", "Regime 2", 0, width = "50%")
+                 numericInput("mean_y_1", "First Regime", 0, width = "50%"),
+                 numericInput("mean_y_2", "Second Regime", 0, width = "50%")
         ), select = T
       )
       appendTab("xTabs",
                 tabPanel("Means x",
-                         numericInput("mean_x_1", "Regime 1", 0, width = "50%"),
-                         numericInput("mean_x_2", "Regime 2", 0, width = "50%")
+                         numericInput("mean_x_1", "First Regime", 0, width = "50%"),
+                         numericInput("mean_x_2", "Second Regime", 0, width = "50%")
                 ), select = T
       )
     }
     
     if(input$model == "T" || input$model == "MS"){
       appendTab("yTabs",
-        tabPanel("Regime 2",
+        tabPanel("Second Regime",
                  numericInput("alpha_y_2", "Intercept", 0, width = "50%"),
                  sliderInput("phi_y_2", "Carryover", -1, 1, .5, .1),
                  sliderInput("beta_y_2", "Spillover", -1, 1, .2, .1),
                  fluidRow(
-                   column(4,
-                          checkboxInput("yRegime2", "Add regime")
+                   column(6,
+                          actionButton("yNoSwitch", HTML("Same as first regime <br> (no regime-switching)"))
                    ),
                    if(input$model == "T"){
                      column(6,
@@ -251,13 +269,13 @@ server <- function(input, output, session) {
         )
       )
       appendTab("xTabs",
-        tabPanel("Regime 2",
+        tabPanel("Second Regime",
                  numericInput("alpha_x_2", "Intercept", 0, width = "50%"),
                  sliderInput("phi_x_2", "Carryover", -1, 1, .5, .1),
                  sliderInput("beta_x_2", "Spillover", -1, 1, .2, .1),
                  fluidRow(
                    column(6,
-                          checkboxInput("xRegime2", "Add regime")
+                          actionButton("xNoSwitch", HTML("Same as first regime <br> (no regime-switching)"))
                    ),
                    if(input$model == "T"){
                    column(6,
@@ -297,18 +315,18 @@ server <- function(input, output, session) {
     params_x <- list(alpha = input$alpha_x, phi = input$phi_x, beta = input$beta_x)
 
     if(input$model == "T" || input$model == "MS"){
-      if(input$yRegime2){
+      # if(input$yRegime2){
         params_y$alpha[2] <- input$alpha_y_2
         params_y$phi[2]   <- input$phi_y_2
         params_y$beta[2]  <- input$beta_y_2
         if(input$model == "T") params_y$tau <- input$tau_y
-      }
-      if(input$xRegime2){
+      # }
+      # if(input$xRegime2){
         params_x$alpha[2] <- input$alpha_x_2
         params_x$phi[2]   <- input$phi_x_2
         params_x$beta[2]  <- input$beta_x_2
         if(input$model == "T") params_x$tau <- input$tau_x
-      }
+      # }
     }
     if(input$model == "HMM"){
       params_y <- list(mu = c(input$mean_y_1, input$mean_y_2))
