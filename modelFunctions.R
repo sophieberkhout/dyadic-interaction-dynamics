@@ -136,7 +136,7 @@ HMM1 <- function(occasions,
                  params_y, params_x,
                  probs, z){
 
-    ifelse(is.list(params_y),
+  ifelse(is.list(params_y),
          mu_y <- params_y[[1]],
          ifelse(length(params_y) == 1,
                 mu_y <- rep(params_y, 2),

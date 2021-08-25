@@ -17,20 +17,10 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
        ),
        column(3, offset = 1,
               tabsetPanel(id = "yTabs"
-                          # tabPanel("Partner y",
-                          #          numericInput("alpha_y", "Intercept", 0, width = "50%"),
-                          #          sliderInput("phi_y", "Carryover", -1, 1, .5, .1),
-                          #          sliderInput("beta_y", "Spillover", -1, 1, .2, .1)
-                          # )
               )
        ),
        column(3,
               tabsetPanel(id = "xTabs"
-                          # tabPanel("Partner x",
-                          #          numericInput("alpha_x", "Intercept", 0, width = "50%"),
-                          #          sliderInput("phi_x", "Carryover", -1, 1, .5, .1),
-                          #          sliderInput("beta_x", "Spillover", -1, 1, .2, .1)
-                          # )
               )
        ),
        conditionalPanel(condition = "input.model == 'MS' || input.model == 'HMM'",
@@ -40,10 +30,8 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
                     column(6,
                            numericInput("pi_o", "Stay in 1", .5, 0, 1, .1),
                            tableOutput("pi_ot")
-                           # numericInput("pi_yx", "pi_yx", 0)
                     ),
                     column(6,
-                           # numericInput("pi_xy", "pi_xy", 0),
                            tableOutput("pi_to"),
                            numericInput("pi_t", "Stay in 2", .5, 0, 1, .1)
                     )
@@ -177,21 +165,21 @@ server <- function(input, output, session) {
     removeTab("yTabs", target = "Regime 2")
     removeTab("xTabs", target = "Regime 2")
     removeTab("yTabs", target = "Time-varying")
-    removeTab("yTabs", target = "Partner y")
-    removeTab("xTabs", target = "Partner x")
-    removeTab("yTabs", target = "Mean y")
-    removeTab("xTabs", target = "Mean x")
+    removeTab("yTabs", target = "Parameters y")
+    removeTab("xTabs", target = "Parameters x")
+    removeTab("yTabs", target = "Means y")
+    removeTab("xTabs", target = "Means x")
     
     if(input$model != "TV" && input$model != "HMM"){
       appendTab("yTabs",
-        tabPanel("Partner y",
+        tabPanel("Parameters y",
                  numericInput("alpha_y", "Intercept", 0, width = "50%"),
                  sliderInput("phi_y", "Carryover", -1, 1, .5, .1),
                  sliderInput("beta_y", "Spillover", -1, 1, .2, .1)
         ), select = T
       )
       appendTab("xTabs",
-        tabPanel("Partner x",
+        tabPanel("Parameters x",
                  numericInput("alpha_x", "Intercept", 0, width = "50%"),
                  sliderInput("phi_x", "Carryover", -1, 1, .5, .1),
                  sliderInput("beta_x", "Spillover", -1, 1, .2, .1)
@@ -224,15 +212,15 @@ server <- function(input, output, session) {
     
     if(input$model == "HMM"){
       appendTab("yTabs",
-        tabPanel("Mean y",
-                 numericInput("mean_y_1", "Mean regime 1", 0, width = "50%"),
-                 numericInput("mean_y_2", "Mean regime 2", 0, width = "50%")
+        tabPanel("Means y",
+                 numericInput("mean_y_1", "Regime 1", 0, width = "50%"),
+                 numericInput("mean_y_2", "Regime 2", 0, width = "50%")
         ), select = T
       )
       appendTab("xTabs",
-                tabPanel("Mean x",
-                         numericInput("mean_x_1", "Mean regime 1", 0, width = "50%"),
-                         numericInput("mean_x_2", "Mean regime 2", 0, width = "50%")
+                tabPanel("Means x",
+                         numericInput("mean_x_1", "Regime 1", 0, width = "50%"),
+                         numericInput("mean_x_2", "Regime 2", 0, width = "50%")
                 ), select = T
       )
     }
