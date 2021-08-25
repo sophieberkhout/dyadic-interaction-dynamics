@@ -40,4 +40,28 @@ inputVARServer <- function(id){
     }
   )
 }
+
+errorsUI <- function(id){
+  ns <- NS(id)
   
+  fluidRow(
+    column(6,
+           numericInput(ns("y"), "Variance y", .1, 0, 1, .05),
+           numericInput(ns("yx"), "Covariance", .05, 0, 1, .05)
+    ),
+    column(6,
+           numericInput(ns("x"), "Variance x", .1, 0, 1, .05)
+    )
+  )
+}
+
+errorsServer <- function(id){
+  moduleServer(
+    id,
+    function(input, output, server){
+      return(
+        c(input$y, input$yx, input$yx, input$x)
+      )
+    }
+  )
+}

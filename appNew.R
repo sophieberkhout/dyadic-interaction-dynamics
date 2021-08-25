@@ -17,17 +17,6 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
        ),
        column(2,
               tabsetPanel(id = "errors"
-                # tabPanel("Innovations",
-                #          fluidRow(
-                #            column(6,
-                #                   numericInput("zeta_y", "Variance y", .1, 0, 1, .05),
-                #                   numericInput("zeta_xy", "Covariance", .05, 0, 1, .05)
-                #            ),
-                #            column(6,
-                #                   numericInput("zeta_x", "Variance x", .1, 0, 1, .05)
-                #            )
-                #          )
-                # )
               ),
               conditionalPanel(condition = "input.model == 'MS' || input.model == 'HMM'",
                 tabsetPanel(id = "transition",
@@ -207,16 +196,11 @@ server <- function(input, output, session) {
       appendTab("yTabs",
         tabPanel("Parameters y",
                  inputVARUI("yParameters")
-                 # numericInput("alpha_y", "Intercept", 0, width = "50%"),
-                 # sliderInput("phi_y", "Carryover", -1, 1, .5, .1),
-                 # sliderInput("beta_y", "Spillover", -1, 1, .2, .1)
         ), select = T
       )
       appendTab("xTabs",
         tabPanel("Parameters x",
-                 numericInput("alpha_x", "Intercept", 0, width = "50%"),
-                 sliderInput("phi_x", "Carryover", -1, 1, .5, .1),
-                 sliderInput("beta_x", "Spillover", -1, 1, .2, .1)
+                 inputVARUI("xParameters")
         ), select = T
       )
     }
@@ -224,15 +208,7 @@ server <- function(input, output, session) {
     if(input$model != "HMM"){
       appendTab("errors",
         tabPanel("Innovations",
-                 fluidRow(
-                   column(6,
-                          numericInput("zeta_y", "Variance y", .1, 0, 1, .05),
-                          numericInput("zeta_yx", "Covariance", .05, 0, 1, .05)
-                   ),
-                   column(6,
-                          numericInput("zeta_x", "Variance x", .1, 0, 1, .05)
-                   )
-                 )
+                 errorsUI("inv")
         ), select = T
       )
     }
@@ -240,18 +216,9 @@ server <- function(input, output, session) {
     if(input$model == "L" | input$model == "HMM"){
       appendTab("errors",
                 tabPanel("Measurement error",
-                         fluidRow(
-                           column(6,
-                                  numericInput("epsilon_y", "Variance y", .1, 0, 1, .05),
-                                  numericInput("epsilon_yx", "Covariance", .05, 0, 1, .05)
-                           ),
-                           column(6,
-                                  numericInput("epsilon_x", "Variance x", .1, 0, 1, .05)
-                           )
-                         )
+                         errorsUI("me")
                 ), select = ifelse(input$model == "L", F, T)
       )
-      
     }
     
     if(input$model == "TV"){
@@ -317,9 +284,7 @@ server <- function(input, output, session) {
     if(input$model == "T" || input$model == "MS"){
       appendTab("yTabs",
         tabPanel("Second regime",
-                 numericInput("alpha_y_2", "Intercept", 0, width = "50%"),
-                 sliderInput("phi_y_2", "Carryover", -1, 1, .5, .1),
-                 sliderInput("beta_y_2", "Spillover", -1, 1, .2, .1),
+                 inputVARUI("ySecondRegime"),
                  fluidRow(
                    column(6,
                           actionButton("yNoSwitch", HTML("Same as first regime <br> (no regime-switching)"))
@@ -335,9 +300,7 @@ server <- function(input, output, session) {
       )
       appendTab("xTabs",
         tabPanel("Second regime",
-                 numericInput("alpha_x_2", "Intercept", 0, width = "50%"),
-                 sliderInput("phi_x_2", "Carryover", -1, 1, .5, .1),
-                 sliderInput("beta_x_2", "Spillover", -1, 1, .2, .1),
+                 inputVARUI("xSecondRegime"),
                  fluidRow(
                    column(6,
                           actionButton("xNoSwitch", HTML("Same as first regime <br> (no regime-switching)"))
@@ -379,24 +342,20 @@ server <- function(input, output, session) {
   dat <- reactive({
     
     params_y <- inputVARServer("yParameters")
-    # params_y <- list(alpha = params_y$alpha(), phi = params_y$phi(), beta = params_y$beta())
+    params_x <- inputVARServer("xParameters")
     
-    # params_y <- list(alpha = input$alpha_y, phi = input$phi_y, beta = input$beta_y)
-    params_x <- list(alpha = input$alpha_x, phi = input$phi_x, beta = input$beta_x)
-
     if(input$model == "T" || input$model == "MS"){
-      # if(input$yRegime2){
-        params_y$alpha[2] <- input$alpha_y_2
-        params_y$phi[2]   <- input$phi_y_2
-        params_y$beta[2]  <- input$beta_y_2
-        if(input$model == "T") params_y$tau <- input$tau_y
-      # }
-      # if(input$xRegime2){
-        params_x$alpha[2] <- input$alpha_x_2
-        params_x$phi[2]   <- input$phi_x_2
-        params_x$beta[2]  <- input$beta_x_2
-        if(input$model == "T") params_x$tau <- input$tau_x
-      # }
+      params_y2 <- inputVARServer("ySecondRegime")
+      params_y$alpha[2] <- params_y2$alpha
+      params_y$phi[2]   <- params_y2$phi
+      params_y$beta[2]  <- params_y2$beta
+      if(input$model == "T") params_y$tau <- input$tau_y
+
+      params_x2 <- inputVARServer("xSecondRegime")
+      params_x$alpha[2] <- params_x2$alpha
+      params_x$phi[2]   <- params_x2$phi
+      params_x$beta[2]  <- params_x2$beta
+      if(input$model == "T") params_x$tau <- input$tau_x
     }
     if(input$model == "HMM"){
       params_y <- list(mu = c(input$mean_y_1, input$mean_y_2))
@@ -404,9 +363,9 @@ server <- function(input, output, session) {
     }
     
     if(input$model != "HMM" && input$model != "L"){
-      errors <- c(input$zeta_y, input$zeta_yx, input$zeta_yx, input$zeta_x)
+      errors <- errorsServer("inv")
     } else {
-      errors <- c(input$epsilon_y, input$epsilon_yx, input$epsilon_yx, input$epsilon_x)
+      errors <- errorsServer("me")
     }
     
     probs <- NULL
