@@ -70,6 +70,7 @@ server <- function(input, output, session) {
     removeTab("xTabs", target = "Means x")
     removeTab("errors", target = "Innovations")
     removeTab("errors", target = "Measurement error")
+    removeTab("errors", target = "Second regime")
     
     # method <- methodServer("method")
     
@@ -83,11 +84,13 @@ server <- function(input, output, session) {
                      column(6,
                        checkboxInput("add_regime_y", "Add second regime", value = T)
                      ),
-                     conditionalPanel(condition = "input.add_regime_y",
-                       column(6,
-                              numericInput("tau_y", "Threshold", 0, width = "50%")
-                       )
-                     )
+                     if(method()$model == "T"){
+                       conditionalPanel(condition = "input.add_regime_y",
+                         column(6,
+                                numericInput("tau_y", "Threshold", 0, width = "50%")
+                         )
+                       )                       
+                     }
                    )
                  }
         ), select = T
@@ -100,11 +103,13 @@ server <- function(input, output, session) {
                      column(6,
                             checkboxInput("add_regime_x", "Add second regime", value = T)
                      ),
-                     conditionalPanel(condition = "input.add_regime_x",
-                                      column(6,
-                                             numericInput("tau_x", "Threshold", 0, width = "50%")
-                                      )
-                     )
+                     if(method()$model == "T"){
+                       conditionalPanel(condition = "input.add_regime_x",
+                                        column(6,
+                                               numericInput("tau_x", "Threshold", 0, width = "50%")
+                                        )
+                       )
+                     }
                    )
                  }
         ), select = T
@@ -125,6 +130,13 @@ server <- function(input, output, session) {
                          errorsUI("measurementError")
                 ), select = ifelse(method()$model == "L", F, T)
       )
+      if(method()$model == "HMM"){
+        appendTab("errors",
+                  tabPanel("Second regime",
+                           errorsUI("measurementErrorSecondRegime")
+                  )
+        )
+      }
     }
     
     if(method()$model == "TV"){
@@ -199,8 +211,6 @@ server <- function(input, output, session) {
         }
       })
 
-      # }
-
       observeEvent(input$add_regime_x, {
         removeTab("xTabs", target = "Second regime")
         if(input$add_regime_x){
@@ -208,6 +218,19 @@ server <- function(input, output, session) {
             tabPanel("Second regime",
                      inputVARUI("xSecondRegime")
             )
+          )
+        }
+      })
+      
+      observeEvent({
+        input$add_regime_y
+        input$add_regime_x}, {
+        removeTab("errors", target = "Second regime")
+        if(input$add_regime_y | input$add_regime_x){
+          appendTab("errors",
+                    tabPanel("Second regime",
+                             errorsUI("innovationsSecondRegime")
+                    )
           )
         }
       })
@@ -267,10 +290,20 @@ server <- function(input, output, session) {
       params_x <- list(mu = c(input$mean_x_1, input$mean_x_2))
     }
     
-    if(method()$model != "HMM" && method()$model != "L"){
+    ###### TO DO:
+    ###### TVAR second regime innovations
+    ###### Latent both measurement error and innovations
+    if(method()$model == "VAR" || method()$model == "TV" || method()$model == "T"){
       errors <- errorsServer("innovations")
-    } else {
-      errors <- errorsServer("measurementError")
+    }
+    if(method()$model == "L") errors <- errorsServer("measurementError")
+    if(method()$model == "HMM"){
+      errors <- list(firstRegime = errorsServer("measurementError"),
+                     secondRegime = errorsServer("measurementErrorSecondRegime"))
+    }
+    if(method()$model == "MS"){
+      errors <- list(firstRegime = errorsServer("innovations"),
+                     secondRegime = errorsServer("innovationsSecondRegime"))
     }
     
     probs <- NULL
