@@ -32,7 +32,7 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
                       )
                     )
                   )                            
-                )
+                ), ns = NS("method")
               )
        )
      ),
@@ -61,49 +61,6 @@ server <- function(input, output, session) {
   # DYNAMIC INPUT
   method <- reactive({ methodServer("method") })
   
-  # updateInputServer("method", method())
-  
-  # observeEvent(method()$seed, {
-  #   if(!is.integer(method()$seed)){
-  #     newSeed <- round(method()$seed)
-  #     updateNumericInput(session, "seed", value = newSeed)
-  #   }
-  # })
-  # 
-  # observeEvent(method()$burnin, {
-  #   if(!is.integer(method()$burnin)){
-  #     newBurnin <- round(method()$burnin)
-  #     updateNumericInput(session, "burnin", value = newBurnin)
-  #   }
-  # })
-  # 
-  # observeEvent(method()$t, {
-  #   if(!is.integer(method()$t)){
-  #     newT <- round(method()$t)
-  #     updateNumericInput(session, "t", value = newT)
-  #   }
-  # })
-  
-  ################NEEDS UPDATING as alpha_y_2 no longer exists
-  observeEvent(input$yNoSwitch, {
-    if(input$yNoSwitch){
-      updateNumericInput(session, "alpha_y_2", value = input$alpha_y)
-      updateNumericInput(session, "phi_y_2", value = input$phi_y)
-      updateNumericInput(session, "beta_y_2", value = input$beta_y)
-      
-    }
-  })
-  
-  observeEvent(input$xNoSwitch, {
-    if(input$xNoSwitch){
-      updateNumericInput(session, "alpha_x_2", value = input$alpha_x)
-      updateNumericInput(session, "phi_x_2", value = input$phi_x)
-      updateNumericInput(session, "beta_x_2", value = input$beta_x)
-      
-    }
-  })
-  #########################
-  
   observeEvent(method()$model, {
     removeTab("yTabs", target = "Second regime")
     removeTab("xTabs", target = "Second regime")
@@ -120,12 +77,37 @@ server <- function(input, output, session) {
     if(method()$model != "TV" && method()$model != "HMM"){
       appendTab("yTabs",
         tabPanel("Parameters y",
-                 inputVARUI("yParameters")
+                 inputVARUI("yParameters"),
+                 # conditionalPanel(condition = "input.model == 'T' || input.model == 'MS'",
+                 if(method()$model == "T" || method()$model == "MS"){
+                   fluidRow(
+                     column(6,
+                       checkboxInput("add_regime_y", "Add second regime", value = T)
+                     ),
+                     conditionalPanel(condition = "input.add_regime_y",
+                       column(6,
+                              numericInput("tau_y", "Threshold", 0, width = "50%")
+                       )
+                     )
+                   )
+                 }
         ), select = T
       )
       appendTab("xTabs",
         tabPanel("Parameters x",
-                 inputVARUI("xParameters")
+                 inputVARUI("xParameters"),
+                 if(method()$model == "T" || method()$model == "MS"){
+                   fluidRow(
+                     column(6,
+                            checkboxInput("add_regime_x", "Add second regime", value = T)
+                     ),
+                     conditionalPanel(condition = "input.add_regime_x",
+                                      column(6,
+                                             numericInput("tau_x", "Threshold", 0, width = "50%")
+                                      )
+                     )
+                   )
+                 }
         ), select = T
       )
     }
@@ -207,36 +189,29 @@ server <- function(input, output, session) {
     }
     
     if(method()$model == "T" || method()$model == "MS"){
-      appendTab("yTabs",
-        tabPanel("Second regime",
-                 inputVARUI("ySecondRegime"),
-                 fluidRow(
-                   column(6,
-                          actionButton("yNoSwitch", HTML("Same as first regime <br> (no regime-switching)"))
-                   ),
-                   if(method()$model == "T"){
-                     column(6,
-                            numericInput("tau_y", "Threshold", 0, width = "50%")
-                     )                     
-                   }
-                 )
-        )
-      )
-      appendTab("xTabs",
-        tabPanel("Second regime",
-                 inputVARUI("xSecondRegime"),
-                 fluidRow(
-                   column(6,
-                          actionButton("xNoSwitch", HTML("Same as first regime <br> (no regime-switching)"))
-                   ),
-                   if(method()$model == "T"){
-                     column(6,
-                            numericInput("tau_x", "Threshold", 0, width = "50%")
-                     )
-                   }
-                 )
-        )
-      )
+      observeEvent(input$add_regime_y, {
+        removeTab("yTabs", target = "Second regime")
+        if(input$add_regime_y){
+          appendTab("yTabs",
+            tabPanel("Second regime",
+                     inputVARUI("ySecondRegime")
+            )
+          )          
+        }
+      })
+
+      # }
+
+      observeEvent(input$add_regime_x, {
+        removeTab("xTabs", target = "Second regime")
+        if(input$add_regime_x){
+          appendTab("xTabs",
+            tabPanel("Second regime",
+                     inputVARUI("xSecondRegime")
+            )
+          )
+        }
+      })
     }
   })
   
@@ -271,17 +246,22 @@ server <- function(input, output, session) {
     params_x <- inputVARServer("xParameters")
     
     if(method()$model == "T" || method()$model == "MS"){
-      params_y2 <- inputVARServer("ySecondRegime")
-      params_y$alpha[2] <- params_y2$alpha
-      params_y$phi[2]   <- params_y2$phi
-      params_y$beta[2]  <- params_y2$beta
-      if(method()$model == "T") params_y$tau <- input$tau_y
+      if(input$add_regime_y){
+        params_y2 <- inputVARServer("ySecondRegime")
+        params_y$alpha[2] <- params_y2$alpha
+        params_y$phi[2]   <- params_y2$phi
+        params_y$beta[2]  <- params_y2$beta
+        if(method()$model == "T") params_y$tau <- input$tau_y        
+      }
 
-      params_x2 <- inputVARServer("xSecondRegime")
-      params_x$alpha[2] <- params_x2$alpha
-      params_x$phi[2]   <- params_x2$phi
-      params_x$beta[2]  <- params_x2$beta
-      if(method()$model == "T") params_x$tau <- input$tau_x
+
+      if(input$add_regime_x){
+        params_x2 <- inputVARServer("xSecondRegime")
+        params_x$alpha[2] <- params_x2$alpha
+        params_x$phi[2]   <- params_x2$phi
+        params_x$beta[2]  <- params_x2$beta
+        if(method()$model == "T") params_x$tau <- input$tau_x
+      }
     }
     if(method()$model == "HMM"){
       params_y <- list(mu = c(input$mean_y_1, input$mean_y_2))
