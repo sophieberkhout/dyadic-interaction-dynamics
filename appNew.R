@@ -61,26 +61,28 @@ server <- function(input, output, session) {
   # DYNAMIC INPUT
   method <- reactive({ methodServer("method") })
   
-  observeEvent(method()$seed, {
-    if(!is.integer(method()$seed)){
-      newSeed <- round(method()$seed)
-      updateNumericInput(session, "seed", value = newSeed)
-    }
-  })
+  # updateInputServer("method", method())
   
-  observeEvent(method()$burnin, {
-    if(!is.integer(method()$burnin)){
-      newBurnin <- round(method()$burnin)
-      updateNumericInput(session, "burnin", value = newBurnin)
-    }
-  })
-  
-  observeEvent(method()$t, {
-    if(!is.integer(method()$t)){
-      newT <- round(method()$t)
-      updateNumericInput(session, "t", value = newT)
-    }
-  })
+  # observeEvent(method()$seed, {
+  #   if(!is.integer(method()$seed)){
+  #     newSeed <- round(method()$seed)
+  #     updateNumericInput(session, "seed", value = newSeed)
+  #   }
+  # })
+  # 
+  # observeEvent(method()$burnin, {
+  #   if(!is.integer(method()$burnin)){
+  #     newBurnin <- round(method()$burnin)
+  #     updateNumericInput(session, "burnin", value = newBurnin)
+  #   }
+  # })
+  # 
+  # observeEvent(method()$t, {
+  #   if(!is.integer(method()$t)){
+  #     newT <- round(method()$t)
+  #     updateNumericInput(session, "t", value = newT)
+  #   }
+  # })
   
   ################NEEDS UPDATING as alpha_y_2 no longer exists
   observeEvent(input$yNoSwitch, {
@@ -217,7 +219,6 @@ server <- function(input, output, session) {
                             numericInput("tau_y", "Threshold", 0, width = "50%")
                      )                     
                    }
-
                  )
         )
       )
@@ -229,9 +230,9 @@ server <- function(input, output, session) {
                           actionButton("xNoSwitch", HTML("Same as first regime <br> (no regime-switching)"))
                    ),
                    if(method()$model == "T"){
-                   column(6,
-                          numericInput("tau_x", "Threshold", 0, width = "50%")
-                   )
+                     column(6,
+                            numericInput("tau_x", "Threshold", 0, width = "50%")
+                     )
                    }
                  )
         )

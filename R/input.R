@@ -19,7 +19,28 @@ methodUI <- function(id){
 methodServer <- function(id){
   moduleServer(
     id,
-    function(input, output, server){
+    function(input, output, session){
+      observeEvent(input$seed, {
+        if(!is.integer(input$seed)){
+          newSeed <- round(input$seed)
+          updateNumericInput(session, "seed", value = newSeed)
+        }
+      })
+      
+      observeEvent(input$burnin, {
+        if(!is.integer(input$burnin)){
+          newBurnin <- round(input$burnin)
+          updateNumericInput(session, "burnin", value = newBurnin)
+        }
+      })
+      
+      observeEvent(input$t, {
+        if(!is.integer(input$t)){
+          newT <- round(input$t)
+          updateNumericInput(session, "t", value = newT)
+        }
+      })
+      
       return(
         list(
           model  = input$model,
@@ -55,7 +76,7 @@ inputVARUI <- function(id){
 inputVARServer <- function(id){
   moduleServer(
     id,
-    function(input, output, server){
+    function(input, output, session){
       return(
         list(
           alpha = input$alpha,
@@ -84,7 +105,7 @@ errorsUI <- function(id){
 errorsServer <- function(id){
   moduleServer(
     id,
-    function(input, output, server){
+    function(input, output, session){
       return(
         c(input$y, input$yx, input$yx, input$x)
       )

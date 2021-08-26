@@ -85,7 +85,7 @@ plotsOutputUI <- function(id){
 plotsServer <- function(id){
   moduleServer(
     id,
-    function(input, output, server){
+    function(input, output, session){
       output$ts <- renderPlot({ 
         req(input$dataFormat == "long")
         ifelse(input$model == "T", regime <- T, regime <- F)
