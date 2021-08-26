@@ -5,7 +5,6 @@ source("plotFunctions.R")
 
 ui <- navbarPage("Dyadic Interactions", id = "navbar",
   tabPanel("Simulation", value = "sim",
-           testUI("test"),
      fluidRow(
        methodUI("method"),
        column(3,
