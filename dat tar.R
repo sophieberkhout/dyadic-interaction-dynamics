@@ -4,7 +4,7 @@ source("plotFunctions.R")
 # library("ggplot2")
 
 set.seed(1)
-dat.a <- symVARS(occasions = 300, burnin = 20,
+dat.a <- simVARS(occasions = 300, burnin = 20,
                  type = "T", 
                  params_y = list(alpha = c(0, 5),
                                  phi = 0.5,
@@ -15,7 +15,7 @@ dat.a <- symVARS(occasions = 300, burnin = 20,
                                  beta = 0))
 
 set.seed(1)
-dat.b <- symVARS(occasions = 300, burnin = 20,
+dat.b <- simVARS(occasions = 300, burnin = 20,
                  type = "T", 
                  params_y = list(alpha = 0,
                                  phi = 0.5,

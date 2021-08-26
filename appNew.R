@@ -15,7 +15,7 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
               tabsetPanel(id = "xTabs"
               )
        ),
-       column(2,
+       column(3,
               tabsetPanel(id = "errors"
               ),
               conditionalPanel(condition = "input.model == 'MS' || input.model == 'HMM'",
@@ -59,27 +59,30 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
 
 server <- function(input, output, session) {
   # DYNAMIC INPUT
-  observeEvent(input$seed, {
-    if(!is.integer(input$seed)){
-      newSeed <- round(input$seed)
+  method <- reactive({ methodServer("method") })
+  
+  observeEvent(method()$seed, {
+    if(!is.integer(method()$seed)){
+      newSeed <- round(method()$seed)
       updateNumericInput(session, "seed", value = newSeed)
     }
   })
   
-  observeEvent(input$burnin, {
-    if(!is.integer(input$burnin)){
-      newBurnin <- round(input$burnin)
+  observeEvent(method()$burnin, {
+    if(!is.integer(method()$burnin)){
+      newBurnin <- round(method()$burnin)
       updateNumericInput(session, "burnin", value = newBurnin)
     }
   })
   
-  observeEvent(input$t, {
-    if(!is.integer(input$t)){
-      newT <- round(input$t)
+  observeEvent(method()$t, {
+    if(!is.integer(method()$t)){
+      newT <- round(method()$t)
       updateNumericInput(session, "t", value = newT)
     }
   })
   
+  ################NEEDS UPDATING as alpha_y_2 no longer exists
   observeEvent(input$yNoSwitch, {
     if(input$yNoSwitch){
       updateNumericInput(session, "alpha_y_2", value = input$alpha_y)
@@ -97,8 +100,9 @@ server <- function(input, output, session) {
       
     }
   })
+  #########################
   
-  observeEvent(input$model, {
+  observeEvent(method()$model, {
     removeTab("yTabs", target = "Second regime")
     removeTab("xTabs", target = "Second regime")
     removeTab("yTabs", target = "Intercept")
@@ -109,7 +113,9 @@ server <- function(input, output, session) {
     removeTab("errors", target = "Innovations")
     removeTab("errors", target = "Measurement error")
     
-    if(input$model != "TV" && input$model != "HMM"){
+    # method <- methodServer("method")
+    
+    if(method()$model != "TV" && method()$model != "HMM"){
       appendTab("yTabs",
         tabPanel("Parameters y",
                  inputVARUI("yParameters")
@@ -122,7 +128,7 @@ server <- function(input, output, session) {
       )
     }
     
-    if(input$model != "HMM"){
+    if(method()$model != "HMM"){
       appendTab("errors",
         tabPanel("Innovations",
                  errorsUI("innovations")
@@ -130,15 +136,15 @@ server <- function(input, output, session) {
       )
     }
     
-    if(input$model == "L" | input$model == "HMM"){
+    if(method()$model == "L" | method()$model == "HMM"){
       appendTab("errors",
                 tabPanel("Measurement error",
                          errorsUI("measurementError")
-                ), select = ifelse(input$model == "L", F, T)
+                ), select = ifelse(method()$model == "L", F, T)
       )
     }
     
-    if(input$model == "TV"){
+    if(method()$model == "TV"){
       appendTab("yTabs",
         tabPanel("Intercept",
                  radioButtons("alpha_y_tv", "", list("Stable", "Time-varying"), inline = T),
@@ -183,7 +189,7 @@ server <- function(input, output, session) {
       )
     }
     
-    if(input$model == "HMM"){
+    if(method()$model == "HMM"){
       appendTab("yTabs",
         tabPanel("Means y",
                  numericInput("mean_y_1", "First regime", 0, width = "50%"),
@@ -191,14 +197,14 @@ server <- function(input, output, session) {
         ), select = T
       )
       appendTab("xTabs",
-                tabPanel("Means x",
-                         numericInput("mean_x_1", "First regime", 0, width = "50%"),
-                         numericInput("mean_x_2", "Second regime", 0, width = "50%")
-                ), select = T
+        tabPanel("Means x",
+                 numericInput("mean_x_1", "First regime", 0, width = "50%"),
+                 numericInput("mean_x_2", "Second regime", 0, width = "50%")
+        ), select = T
       )
     }
     
-    if(input$model == "T" || input$model == "MS"){
+    if(method()$model == "T" || method()$model == "MS"){
       appendTab("yTabs",
         tabPanel("Second regime",
                  inputVARUI("ySecondRegime"),
@@ -206,7 +212,7 @@ server <- function(input, output, session) {
                    column(6,
                           actionButton("yNoSwitch", HTML("Same as first regime <br> (no regime-switching)"))
                    ),
-                   if(input$model == "T"){
+                   if(method()$model == "T"){
                      column(6,
                             numericInput("tau_y", "Threshold", 0, width = "50%")
                      )                     
@@ -222,7 +228,7 @@ server <- function(input, output, session) {
                    column(6,
                           actionButton("xNoSwitch", HTML("Same as first regime <br> (no regime-switching)"))
                    ),
-                   if(input$model == "T"){
+                   if(method()$model == "T"){
                    column(6,
                           numericInput("tau_x", "Threshold", 0, width = "50%")
                    )
@@ -258,41 +264,43 @@ server <- function(input, output, session) {
   # GENERATE DATA
   dat <- reactive({
     
+    # method <- methodServer("method")
+    
     params_y <- inputVARServer("yParameters")
     params_x <- inputVARServer("xParameters")
     
-    if(input$model == "T" || input$model == "MS"){
+    if(method()$model == "T" || method()$model == "MS"){
       params_y2 <- inputVARServer("ySecondRegime")
       params_y$alpha[2] <- params_y2$alpha
       params_y$phi[2]   <- params_y2$phi
       params_y$beta[2]  <- params_y2$beta
-      if(input$model == "T") params_y$tau <- input$tau_y
+      if(method()$model == "T") params_y$tau <- input$tau_y
 
       params_x2 <- inputVARServer("xSecondRegime")
       params_x$alpha[2] <- params_x2$alpha
       params_x$phi[2]   <- params_x2$phi
       params_x$beta[2]  <- params_x2$beta
-      if(input$model == "T") params_x$tau <- input$tau_x
+      if(method()$model == "T") params_x$tau <- input$tau_x
     }
-    if(input$model == "HMM"){
+    if(method()$model == "HMM"){
       params_y <- list(mu = c(input$mean_y_1, input$mean_y_2))
       params_x <- list(mu = c(input$mean_x_1, input$mean_x_2))
     }
     
-    if(input$model != "HMM" && input$model != "L"){
+    if(method()$model != "HMM" && method()$model != "L"){
       errors <- errorsServer("innovations")
     } else {
       errors <- errorsServer("measurementError")
     }
     
     probs <- NULL
-    if(input$model == "MS" || input$model == "HMM") probs <- c(input$pi_o, input$pi_t)
+    if(method()$model == "MS" || method()$model == "HMM") probs <- c(input$pi_o, input$pi_t)
     
     ifelse(input$dataFormat == "long", longformat <- T, longformat <- F)
     
-    set.seed(input$seed)
-    dat <- simVARS(occasions = input$t, burnin = input$burnin,
-                   type = input$model,
+    set.seed(method()$seed)
+    dat <- simVARS(occasions = method()$t, burnin = method()$burnin,
+                   type = method()$model,
                    params_y = params_y,
                    params_x = params_x,
                    probs = probs,
@@ -315,7 +323,7 @@ server <- function(input, output, session) {
   # plotsServer("inputPlots")
   output$ts <- renderPlot({ 
     req(input$dataFormat == "long")
-    ifelse(input$model == "T", regime <- T, regime <- F)
+    ifelse(method()$model == "T", regime <- T, regime <- F)
     if(input$showTSy) p <- myTS(dat(), partner = "y", regime = regime, shiny = T)
     if(input$showTSx) p <- myTS(dat(), partner = "x", regime = regime, shiny = T)
     if(input$showTSy && input$showTSx) p <- myTS(dat(), shiny = T)
