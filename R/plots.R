@@ -137,7 +137,7 @@ plotsServer <- function(id){
       
       tv_alpha <- reactive({
         if(input$alpha_change == "Linear"){
-          a <- change_linear(input$alpha_from, input$alpha_to, input$t, input$burnin)
+          a <- change_linear(input$alpha_from, input$alpha_to, nrow(dat())/2)
         } else if(input$alpha_change == "Sine"){
           a <- change_sine(amplitude = input$alpha_amp, freq = input$alpha_freq,
                            phase = input$alpha_phase, deviation = input$alpha_dev,

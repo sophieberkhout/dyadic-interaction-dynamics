@@ -219,7 +219,7 @@ myInf <- function(dat, partner, tau,
 }
 
 myTSsimple <- function(t, y, xlab = NULL, ylab = NULL,
-                       filename = NULL, width = 5, height = 3){
+                       filename = NULL, width = 5, height = 3, shiny = F){
   xlim <- t
   ylim <- y
   if(is.null(xlab)) xlab <- expression(italic("t"))
@@ -228,7 +228,7 @@ myTSsimple <- function(t, y, xlab = NULL, ylab = NULL,
   p <- ggplot(dat, aes(x = x, y = y)) +
     geom_line() +
     labs(x = xlab, y = ylab)
-  p <- myTheme(p, x = xlim, y = ylim)
+  p <- myTheme(p, x = xlim, y = ylim, shiny = shiny)
   if(!is.null(filename))  ggsave(filename, p, width = width, height = height)
   return(p)
 }

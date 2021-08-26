@@ -385,17 +385,18 @@ server <- function(input, output, session) {
   
   tv_alpha <- reactive({
     if(input$alpha_change == "Linear"){
-      a <- change_linear(input$alpha_from, input$alpha_to, input$t, input$burnin)
+      a <- change_linear(input$alpha_from, input$alpha_to, method()$t)
     } else if(input$alpha_change == "Sine"){
       a <- change_sine(amplitude = input$alpha_amp, freq = input$alpha_freq,
                        phase = input$alpha_phase, deviation = input$alpha_dev,
-                       t = input$t)
+                       t = method()$t)
     }
     return(a)
   })
   
   output$alpha <- renderPlot({
-    plot(tv_alpha(), type = "l")
+    myTSsimple(1:method()$t, tv_alpha(), ylab = "Intercept", shiny = T)
+    # plot(tv_alpha(), type = "l")
   })
   
   # DOWNLOAD BUTTON

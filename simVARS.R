@@ -55,7 +55,7 @@ simVARS <- function(occasions, burnin,
 }
 
 ## Time-varying
-change_linear <- function(from, to, t, burnin = NULL){
+change_linear <- function(from, to, t){
   x <- seq(from, to, length.out = t)
   return(x)
 }
