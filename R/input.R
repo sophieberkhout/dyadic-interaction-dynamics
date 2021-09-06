@@ -94,7 +94,7 @@ errorsUI <- function(id){
   fluidRow(
     column(4,
            numericInput(ns("y"), "Variance y", .1, 0, 1, .05),
-           numericInput(ns("yx"), "Covariance", .05, 0, 1, .05)
+           numericInput(ns("yx"), "Correlation", .3, -1, 1, .1)
     ),
     column(4,
            numericInput(ns("x"), "Variance x", .1, 0, 1, .05)
@@ -106,8 +106,9 @@ errorsServer <- function(id){
   moduleServer(
     id,
     function(input, output, session){
+      cov_yx <- input$yx * sqrt(input$y) * sqrt(input$x)
       return(
-        c(input$y, input$yx, input$yx, input$x)
+        c(input$y, cov_yx, cov_yx, input$x)
       )
     }
   )

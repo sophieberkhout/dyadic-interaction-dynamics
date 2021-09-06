@@ -222,6 +222,10 @@ server <- function(input, output, session) {
         }
       })
       
+      ######################
+      ######################
+      ### WHAT TO DO? ######
+      ### correlation the same for both regimes?
       observeEvent({
         input$add_regime_y
         input$add_regime_x}, {
