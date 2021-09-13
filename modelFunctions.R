@@ -21,6 +21,52 @@ VAR1 <- function(occasions, params_y, params_x, z){
   return(dat)
 }
 
+LVAR1 <- function(occasions, params_y, params_x, indicators, z){
+  
+  alpha_y <- params_y[[1]]
+  phi_y   <- params_y[[2]]
+  beta_y  <- params_y[[3]]
+  # indicators <- list(y = means = c(), lambdas = c(), error_variance = c())
+  # there should be an option to correlate errors
+  # indicators for y and x....
+  means_y   <- indicators$y[[1]]
+  q_y       <- length(means_y)
+  lambdas_y <- matrix(indicators$y[[2]]) # one should be 1 for scaling?
+  epsilon_y <- MASS::mvrnorm(occasions, rep(0, q_y), 
+                             diag(indicators$y[[3]]))
+  
+  
+  alpha_x <- params_x[[1]]
+  phi_x   <- params_x[[2]]
+  beta_x  <- params_x[[3]]
+  
+  means_x   <- indicators$x[[1]]
+  q_x       <- length(means_x)
+  lambdas_x <- matrix(indicators$x[[2]]) # one should be 1 for scaling?
+  epsilon_x <- MASS::mvrnorm(occasions, rep(0, q_x), 
+                             diag(indicators$x[[3]]))
+  
+  
+  y <- numeric(occasions)
+  x <- numeric(occasions) 
+  
+  for(t in 2:occasions){
+    y[t] <- alpha_y + phi_y * y[t-1] + beta_y * x[t-1] + z$y[t]
+    x[t] <- alpha_x + phi_x * x[t-1] + beta_x * y[t-1] + z$x[t]
+  }
+  
+  # mu + lambda * F + e
+  ys <- t(means_y + lambdas_y %*% t(matrix(y)) + t(epsilon_y))
+  xs <- t(means_x + lambdas_x %*% t(matrix(x)) + t(epsilon_x))
+
+  colnames(ys) <- paste0("y", 1:q_y)
+  colnames(xs) <- paste0("x", 1:q_x)
+  
+  dat <- data.frame(ys, xs)
+  
+  return(dat)
+}
+
 change <- function(param, t, burnin = NULL){
   p <- numeric()
   

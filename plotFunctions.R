@@ -9,7 +9,7 @@ myTS <- function(dat, partner = NULL, regime = F,
   if(is.null(cols)) pCols <- c("grey", "black") else pCols <- cols
   
   if(is.null(partner)){
-    p <- ggplot(dat, aes(x = t, y = behavior, color = partner)) + 
+    p <- ggplot(dat, aes(x = t, y = behavior, color = as.factor(partner))) + 
     geom_line() +
     labs(x = expression(italic("t")), y = "Measurement") + # measure
     scale_color_manual(values = pCols)
@@ -29,12 +29,26 @@ myTS <- function(dat, partner = NULL, regime = F,
   
   if(regime){
     fill <- ifelse(dat$regime == 1, "white", "grey95")
+    
+    dat1 <- dat[dat$regime == 1, ]
+    dat2 <- dat[dat$regime == 2, ]
+    
+    
     # p <- p + geom_rect(aes(xmin = t - 0.5, xmax = t + 0.5,
     #                        ymin = -Inf, ymax = Inf,
     #                        fill = regime), alpha = 0.5) +
     #   scale_fill_manual(values = c("white", "grey"), guide = "none")
-    shades <- annotate("rect", xmin = dat$t - 0.5, xmax = dat$t + 0.5,
-                       ymin = -Inf, ymax = Inf, fill = fill)
+    
+    # shades <- annotate("rect", xmin = dat$t - 0.5, xmax = dat$t + 0.5,
+    #                    ymin = -Inf, ymax = Inf, fill = fill)
+
+    shades <- annotate("rect", xmin = dat2$t - 0.5, xmax = dat2$t + 0.5,
+                       ymin = -Inf, ymax = Inf, fill = "grey")
+    # with both partners, there are four regimes (y1, y2, x1, x2)
+    # four colours or only second regime??
+    # shades1 <- annotate("rect", xmin = dat1$t - 0.5, xmax = dat1$t + 0.5,
+    #                     ymin = -Inf, ymax = Inf, fill = "black")
+    
     p$layers <- c(shades, p$layers)
   }
   
@@ -271,4 +285,28 @@ my3D <- function(dat, partner = NULL){
                            aspectratio = list(x = 1.7, y = 0.85, z = 0.85),
                            camera = list(eye = list(x = 1.5, y = 1.5, z = .1))))
   p
+}
+
+myTVpars <- function(tvFit){
+  # option to suppress plot with oddsratio::no_plot(tvFit)
+  plt <- plot(tvFit)
+  
+  tvpars <- data.frame(x = c(plt[[1]]$x, plt[[2]]$x, plt[[3]]$x), 
+                       y = c(plt[[1]]$fit, plt[[2]]$fit, plt[[3]]$fit), 
+                       se = c(plt[[1]]$se, plt[[2]]$se, plt[[3]]$se),
+                       p = rep(1:3, each = length(plt[[1]]$x)))
+  
+  p <- ggplot(tvpars, aes(x = x, y = y, fill = as.factor(p), color = as.factor(p))) +
+    geom_line() +
+    geom_ribbon(aes(ymin = y - se,
+                    ymax = y + se,
+                    fill = as.factor(p),
+                    color = as.factor(p)),
+                alpha = .5) +
+    scale_color_manual(values = c("grey40", "grey80", "black")) +
+    scale_fill_manual(values = c("grey40", "grey80", "black"))
+  
+  
+  p <- myTheme(p, x = tvpars$x, y = c(tvpars$y + tvpars$se, tvpars$y - tvpars$se))
+  return(p)
 }
