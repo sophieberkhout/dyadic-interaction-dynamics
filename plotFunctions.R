@@ -2,7 +2,7 @@ library("ggplot2")
 library("plotly")
 source("myTheme.R")
 
-myTS <- function(dat, partner = NULL, regime = F,
+myTS <- function(dat, partner = NULL, regime = F, regimeType = NULL,
                  filename = NULL, width = 5, height = 3,
                  xlim = NULL, ylim = NULL, cols = NULL, shiny = F, legend.position = NULL){
   
@@ -31,14 +31,14 @@ myTS <- function(dat, partner = NULL, regime = F,
     if(is.null(partner)){
       partners <- unique(dat$partner)
       
-      regy <- dat$regime[dat$partner == partners[1]]
-      regx <- dat$regime[dat$partner == partners[2]]
+      regy <- dat[dat$partner == partners[1], c("t", "regime")]
+      regx <- dat[dat$partner == partners[2], c("t", "regime")]
       
-      fill <- rep("Both in 1", length(regy)) # make NA regimes white
-      fill[regy == 2 & regx == 1] <- "y in 2, x in 1"
-      fill[regx == 2 & regy == 1] <- "x in 2, y in 1"
-      fill[regy == 2 & regx == 2] <- "Both in 2"
-      fill[regy == 1 & regx == 1] <- "Both in 1"
+      fill <- rep("Both in 1", nrow(regy)) # make NA regimes white
+      fill[regy$regime == 2 & regx$regime == 1] <- "y in 2, x in 1"
+      fill[regx$regime == 2 & regy$regime == 1] <- "x in 2, y in 1"
+      fill[regy$regime == 2 & regx$regime == 2] <- "Both in 2"
+      fill[regy$regime == 1 & regx$regime == 1] <- "Both in 1"
       
       colShades <- c("white", "black", shinyCols[2], shinyCols[1])
       
@@ -46,14 +46,28 @@ myTS <- function(dat, partner = NULL, regime = F,
       dat <- cbind(dat, dfShades)
       shades <- geom_rect(aes(xmin = tleft, xmax = tright, fill = g), 
                           ymin = -Inf, ymax = Inf, data = dat, color = NA, alpha = 0.05)
-
-      p$layers <- c(shades, p$layers)
-      p <- p + scale_fill_manual(values = colShades)
+      
+      if(!is.null(regimeType)){
+        if(regimeType == "shades"){
+          p$layers <- c(shades, p$layers)
+          p <- p + scale_fill_manual(values = colShades)        
+        }        
+      } else {
+        sameRegime <- all(regy$regime == regx$regime)
+        if(!sameRegime){
+          p <- p + 
+            annotate("point", x = regy$t[regy$regime == 2], y = 0.1, colour = pCols[1]) +
+            annotate("point", x = regx$t[regx$regime == 2], y = 0, colour = pCols[2])
+        } else {
+          p <- p + 
+            annotate("point", x = regy$t[regy$regime == 2], y = 0.1, colour = pCols[2])            
+          }
+      }
     } else {
       dat2 <- dat[dat$regime == 2, ]
       shades <- annotate("rect", xmin = dat2$t - 0.5, xmax = dat2$t + 0.49,
                          ymin = -Inf, ymax = Inf, fill = "grey95")
-      p$layers <- c(shades, p$layers)
+      p$layers <- c(shades, p$layers)    
     }
   }
   
@@ -292,14 +306,17 @@ my3D <- function(dat, partner = NULL){
   p
 }
 
-myTVpars <- function(tvFit){
-  # option to suppress plot with oddsratio::no_plot(tvFit)
-  plt <- plot(tvFit)
+myTVpars <- function(tvFit, partner = NULL){
+  # option to suppress plot
+  plt <- oddsratio::no_plot(tvFit)
+  # plt <- plot(tvFit)
   
   tvpars <- data.frame(x = c(plt[[1]]$x, plt[[2]]$x, plt[[3]]$x), 
                        y = c(plt[[1]]$fit, plt[[2]]$fit, plt[[3]]$fit), 
                        se = c(plt[[1]]$se, plt[[2]]$se, plt[[3]]$se),
                        p = rep(1:3, each = length(plt[[1]]$x)))
+  
+  labels <- c(bquote(alpha[.(partner)]), bquote(phi[.(partner)]), bquote(beta[.(partner)]))
   
   p <- ggplot(tvpars, aes(x = x, y = y, fill = as.factor(p), color = as.factor(p))) +
     geom_line() +
@@ -308,8 +325,9 @@ myTVpars <- function(tvFit){
                     fill = as.factor(p),
                     color = as.factor(p)),
                 alpha = .5) +
-    scale_color_manual(values = c("grey40", "grey80", "black")) +
-    scale_fill_manual(values = c("grey40", "grey80", "black"))
+    scale_color_manual(values = c("grey40", "grey80", "black"), labels = labels) +
+    scale_fill_manual(values = c("grey40", "grey80", "black"), labels = labels) +
+    labs(x = expression(italic("t")), y = "Parameter Value")
   
   
   p <- myTheme(p, x = tvpars$x, y = c(tvpars$y + tvpars$se, tvpars$y - tvpars$se))
