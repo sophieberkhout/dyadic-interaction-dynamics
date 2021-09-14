@@ -4,22 +4,22 @@ source("myTheme.R")
 
 myTS <- function(dat, partner = NULL, regime = F,
                  filename = NULL, width = 5, height = 3,
-                 xlim = NULL, ylim = NULL, cols = NULL, shiny = F){
+                 xlim = NULL, ylim = NULL, cols = NULL, shiny = F, legend.position = NULL){
   
   if(is.null(cols)) pCols <- c("grey", "black") else pCols <- cols
+  shinyCols <- viridis::viridis(2, begin = .4, end = .8, option = "A")
   
   if(is.null(partner)){
     p <- ggplot(dat, aes(x = t, y = behavior, color = as.factor(partner))) + 
-    geom_line() +
+    geom_line(size = 1) +
     labs(x = expression(italic("t")), y = "Measurement") + # measure
     scale_color_manual(values = pCols)
   } else {
     dat <- dat[dat$partner == partner, ]
     
     if(shiny){
-      pCols <- viridis::viridis(2, begin = .4, end = .8, option = "A")
-      if(partner == "y") pCols <- pCols[1]
-      if(partner == "x") pCols <- pCols[2]
+      if(partner == "y") pCols <- shinyCols[1]
+      if(partner == "x") pCols <- shinyCols[2]
     } else { pCols <- "black" }    
     
     p <- ggplot(dat, aes(x = t, y = behavior)) + 
@@ -28,34 +28,39 @@ myTS <- function(dat, partner = NULL, regime = F,
   }
   
   if(regime){
-    fill <- ifelse(dat$regime == 1, "white", "grey95")
-    
-    dat1 <- dat[dat$regime == 1, ]
-    dat2 <- dat[dat$regime == 2, ]
-    
-    
-    # p <- p + geom_rect(aes(xmin = t - 0.5, xmax = t + 0.5,
-    #                        ymin = -Inf, ymax = Inf,
-    #                        fill = regime), alpha = 0.5) +
-    #   scale_fill_manual(values = c("white", "grey"), guide = "none")
-    
-    # shades <- annotate("rect", xmin = dat$t - 0.5, xmax = dat$t + 0.5,
-    #                    ymin = -Inf, ymax = Inf, fill = fill)
+    if(is.null(partner)){
+      partners <- unique(dat$partner)
+      
+      regy <- dat$regime[dat$partner == partners[1]]
+      regx <- dat$regime[dat$partner == partners[2]]
+      
+      fill <- rep("Both in 1", length(regy)) # make NA regimes white
+      fill[regy == 2 & regx == 1] <- "y in 2, x in 1"
+      fill[regx == 2 & regy == 1] <- "x in 2, y in 1"
+      fill[regy == 2 & regx == 2] <- "Both in 2"
+      fill[regy == 1 & regx == 1] <- "Both in 1"
+      
+      colShades <- c("white", "black", shinyCols[2], shinyCols[1])
+      
+      dfShades <- data.frame(tleft = dat$t - 0.5, tright = dat$t + 0.5, g = fill)
+      dat <- cbind(dat, dfShades)
+      shades <- geom_rect(aes(xmin = tleft, xmax = tright, fill = g), 
+                          ymin = -Inf, ymax = Inf, data = dat, color = NA, alpha = 0.05)
 
-    shades <- annotate("rect", xmin = dat2$t - 0.5, xmax = dat2$t + 0.5,
-                       ymin = -Inf, ymax = Inf, fill = "grey")
-    # with both partners, there are four regimes (y1, y2, x1, x2)
-    # four colours or only second regime??
-    # shades1 <- annotate("rect", xmin = dat1$t - 0.5, xmax = dat1$t + 0.5,
-    #                     ymin = -Inf, ymax = Inf, fill = "black")
-    
-    p$layers <- c(shades, p$layers)
+      p$layers <- c(shades, p$layers)
+      p <- p + scale_fill_manual(values = colShades)
+    } else {
+      dat2 <- dat[dat$regime == 2, ]
+      shades <- annotate("rect", xmin = dat2$t - 0.5, xmax = dat2$t + 0.49,
+                         ymin = -Inf, ymax = Inf, fill = "grey95")
+      p$layers <- c(shades, p$layers)
+    }
   }
   
   if(is.null(xlim)) xlim <- dat$t
   if(is.null(ylim)) ylim <- dat$behavior
   
-  p <- myTheme(p, x = xlim, y = ylim, shiny = shiny)
+  p <- myTheme(p, x = xlim, y = ylim, shiny = shiny, legend.position = legend.position)
   
   if(!is.null(filename))  ggsave(filename, p, width = width, height = height)
   return(p)
