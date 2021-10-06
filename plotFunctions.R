@@ -6,10 +6,14 @@ myTS <- function(dat, partner = NULL, regime = F, regimeType = NULL,
                  filename = NULL, width = 5, height = 3,
                  xlim = NULL, ylim = NULL, cols = NULL, shiny = F, legend.position = NULL){
   
+  if(is.null(xlim)) xlim <- dat$t
+  if(is.null(ylim)) ylim <- dat$behavior
+  
   if(is.null(cols)) pCols <- c("grey", "black") else pCols <- cols
   shinyCols <- viridis::viridis(2, begin = .4, end = .8, option = "A")
   
   if(is.null(partner)){
+    if(shiny) pCols <- shinyCols
     p <- ggplot(dat, aes(x = t, y = behavior, color = partner)) + 
     geom_line(size = 1) +
     labs(x = expression(italic("t")), y = "Measurement") + # measure
@@ -51,17 +55,20 @@ myTS <- function(dat, partner = NULL, regime = F, regimeType = NULL,
         if(regimeType == "shades"){
           p$layers <- c(shades, p$layers)
           p <- p + scale_fill_manual(values = colShades)        
-        }        
-      } else {
-        sameRegime <- all(regy$regime == regx$regime)
-        if(!sameRegime){
-          p <- p + 
-            annotate("point", x = regy$t[regy$regime == 2], y = 0.1, colour = pCols[1]) +
-            annotate("point", x = regx$t[regx$regime == 2], y = 0, colour = pCols[2])
         } else {
-          p <- p + 
-            annotate("point", x = regy$t[regy$regime == 2], y = 0.1, colour = pCols[2])            
+          sameRegime <- all(regy$regime == regx$regime)
+          x_breaks <- pretty(xlim)
+          y_breaks <- pretty(ylim)
+          bottom <- min(c(x_breaks, y_breaks))
+          if(!sameRegime){
+            p <- p + 
+              annotate("point", x = regy$t[regy$regime == 2], y = bottom + 0.1, colour = pCols[1]) +
+              annotate("point", x = regx$t[regx$regime == 2], y = bottom, colour = pCols[2])
+          } else {
+            p <- p + 
+              annotate("point", x = regy$t[regy$regime == 2], y = bottom + 0.1, colour = pCols[2])            
           }
+        }
       }
     } else {
       dat2 <- dat[dat$regime == 2, ]
@@ -70,9 +77,6 @@ myTS <- function(dat, partner = NULL, regime = F, regimeType = NULL,
       p$layers <- c(shades, p$layers)    
     }
   }
-  
-  if(is.null(xlim)) xlim <- dat$t
-  if(is.null(ylim)) ylim <- dat$behavior
   
   p <- myTheme(p, x = xlim, y = ylim, shiny = shiny, legend.position = legend.position)
   

@@ -244,8 +244,6 @@ server <- function(input, output, session) {
   # GENERATE DATA
   dat <- reactive({
     
-    # method <- methodServer("method()")
-    
     params_y <- inputVARServer("yParameters")
     params_x <- inputVARServer("xParameters")
     

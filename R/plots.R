@@ -85,11 +85,17 @@ plotsServer <- function(id, dataFormat, method, dat, intercept_y){
     function(input, output, session){
       output$ts <- renderPlot({
         req(dataFormat() == "long")
-        ifelse(method() == "T", regime <- T, regime <- F)
+        if(method() == "T"){
+          regime <- T
+          regimeType <- "points"
+        } else {
+          regime <- F
+          regimeType <- NULL
+        }
         if(input$showTSy) p <- myTS(dat(), partner = "y", regime = regime, shiny = T)
         if(input$showTSx) p <- myTS(dat(), partner = "x", regime = regime, shiny = T)
-        if(input$showTSy && input$showTSx) p <- myTS(dat(), shiny = T)
-        # p <- plot.ts(rnorm(100))
+        if(input$showTSy && input$showTSx) 
+          p <- myTS(dat(), regime = regime, regimeType = regimeType, shiny = T)
         return(p)
       })
       
