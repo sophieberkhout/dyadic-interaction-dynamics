@@ -6,12 +6,25 @@ source("simVARS.R")
 source("plotFunctions.R")
 
 set.seed(1)
-dat.hmm <- symVARS(occasions = 300, burnin = 20,
+dat.hmm <- simVARS(occasions = 300, burnin = 20,
                    type = "HMM", probs = c(.9, .6),
                    params_y = list(mu = c(0, 3)),
                    params_x = list(mu = c(0, 3)))
 
+set.seed(1)
+params_y <- c(0, 3)
+params_x <- c(0, 3)
+probs <- c(.9, .6)
+datHMM <- simVARS(occasions = 100, burnin = 20,
+                  type = "HMM", probs = probs,
+                  params_y = params_y,
+                  params_x = params_x,
+                  innovations = innovations,
+                  longformat = F
+)
+
 myTS(dat.hmm, regime = T, partner = "y")
+
 
 myTS(dat.hmm, regime = T)
 mySSP(dat.hmm, type = "carryover")

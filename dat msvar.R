@@ -6,7 +6,7 @@ source("simVARS.R")
 source("plotFunctions.R")
 
 set.seed(1)
-dat.msvar <- symVARS(occasions = 300, burnin = 20,
+dat.msvar <- simVARS(occasions = 300, burnin = 20,
                      type = "MS", probs = c(.9, .6),
                      params_y = list(alpha = c(0, 3),
                                      phi = .5,

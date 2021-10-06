@@ -43,10 +43,10 @@ methodServer <- function(id){
       
       return(
         list(
-          model  = input$model,
-          t      = input$t,
-          burnin = input$burnin,
-          seed   = input$seed
+          model  = reactive({ input$model }),
+          t      = reactive({ input$t }),
+          burnin = reactive({ input$burnin }),
+          seed   = reactive({ input$seed })
         )
       )
     }
@@ -79,9 +79,13 @@ inputVARServer <- function(id){
     function(input, output, session){
       return(
         list(
+          # alpha = reactive({ input$alpha }),
+          # phi   = reactive({ input$phi }),
+          # beta  = reactive({ input$beta })
           alpha = input$alpha,
           phi   = input$phi,
           beta  = input$beta
+          
         )
       )
     }
@@ -108,7 +112,67 @@ errorsServer <- function(id){
     function(input, output, session){
       cov_yx <- input$yx * sqrt(input$y) * sqrt(input$x)
       return(
-        c(input$y, cov_yx, cov_yx, input$x)
+        c(input$y, cov_yx, input$x)
+      )
+    }
+  )
+}
+
+tvUI <- function(id){
+  ns <- NS(id)
+  
+  tagList(
+    radioButtons("tv", "", list("Stable", "Time-varying"), inline = T),
+    conditionalPanel(condition = "input.tv == 'Stable'",
+                     numericInput("stable", "Value", 0, width = "50%")
+    ),
+    conditionalPanel(condition = "input.tv == 'Time-varying'",
+                     fluidRow(
+                       column(3,
+                              radioButtons("change", "", list("Linear", "Sine"))
+                       ),
+                       conditionalPanel(condition = "input.change == 'Linear'",
+                                        column(3,
+                                               numericInput("from", "From", 0),
+                                        ),
+                                        column(3,
+                                               numericInput("to", "To", 0)
+                                        )
+                       ),
+                       conditionalPanel(condition = "input.change == 'Sine'",
+                                        column(3,
+                                               numericInput("amp", "Amplitude", 1),
+                                               numericInput("phase", "Phase", 0),
+                                        ),
+                                        column(3,
+                                               numericInput("freq", "Frequency", 1),
+                                               numericInput("dev", "Deviation", 0)
+                                        )
+                       ),
+                     ),
+                     checkboxInput("plot", "Plot intercept")
+    )
+  )
+}
+
+
+tvServer <- function(id){
+  moduleServer(
+    id,
+    function(input, output, session){
+      return(
+        list(
+          tv       = reactive({ input$tv }),
+          change   = reactive({ input$change }),
+          beta     = reactive({ input$beta }),
+          from     = reactive({ input$from }),
+          to       = reactive({ input$to }),
+          amp      = reactive({ input$amp }),
+          phase    = reactive({ input$phase }),
+          freq     = reactive({ input$freq }),
+          dev      = reactive({ input$dev }),
+          plot     = reactive({ input$plot })
+        )
       )
     }
   )

@@ -10,7 +10,7 @@ myTS <- function(dat, partner = NULL, regime = F, regimeType = NULL,
   shinyCols <- viridis::viridis(2, begin = .4, end = .8, option = "A")
   
   if(is.null(partner)){
-    p <- ggplot(dat, aes(x = t, y = behavior, color = as.factor(partner))) + 
+    p <- ggplot(dat, aes(x = t, y = behavior, color = partner)) + 
     geom_line(size = 1) +
     labs(x = expression(italic("t")), y = "Measurement") + # measure
     scale_color_manual(values = pCols)
@@ -24,7 +24,7 @@ myTS <- function(dat, partner = NULL, regime = F, regimeType = NULL,
     
     p <- ggplot(dat, aes(x = t, y = behavior)) + 
       labs(x = bquote(italic("t")), y = bquote(italic(.(partner)))) +
-      geom_line(col = pCols)
+      geom_line(col = pCols, size = 1)
   }
   
   if(regime){
@@ -81,8 +81,8 @@ myTS <- function(dat, partner = NULL, regime = F, regimeType = NULL,
 }
 
 mySSP <- function(dat, type, tau, partner = NULL,
-                 filename = NULL, width = 5, height = 3,
-                 xlim = NULL, ylim = NULL, shiny = F){
+                  filename = NULL, width = 5, height = 3,
+                  xlim = NULL, ylim = NULL, shiny = F){
   t <- max(dat$t)
   dat$lag1 <- c(NA, dat$behavior[-nrow(dat)])
   dat$lag1[t+1] <- NA
@@ -174,12 +174,13 @@ myCCF <- function(dat,
 myCF <- function(dat, type, partner = NULL,
                  filename = NULL, width = 5, height = 3,
                  xlim = NULL, ylim = NULL, shiny = F){
+  dat$partner <- ifelse(dat$partner == dat$partner[1], "x", "y")
   ptrue <- !is.null(partner)
   if(ptrue) ifelse(partner == "y", other <- "x", other <- "y")
   
   if(type == "ACF"){
-    ccy <- acf(subset(dat, partner == "y", select = "behavior"))
-    ccx <- acf(subset(dat, partner == "x", select = "behavior"))
+    ccy <- acf(subset(dat, partner == "y", select = "behavior"), plot = F)
+    ccx <- acf(subset(dat, partner == "x", select = "behavior"), plot = F)
     yLabs <- "ACF"
     if(ptrue){
       if(partner == "y"){
@@ -194,9 +195,9 @@ myCF <- function(dat, type, partner = NULL,
   
   if(type == "CCF"){
     ccy <- ccf(subset(dat, partner == "y", select = "behavior"), 
-               subset(dat, partner == "x", select = "behavior"))
+               subset(dat, partner == "x", select = "behavior"), plot = F)
     ccx <- ccf(subset(dat, partner == "x", select = "behavior"), 
-               subset(dat, partner == "y", select = "behavior"))
+               subset(dat, partner == "y", select = "behavior"), plot = F)
     yLabs <- "CCF"
     if(ptrue){
       if(partner == "y"){

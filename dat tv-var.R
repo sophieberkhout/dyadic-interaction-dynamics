@@ -2,6 +2,22 @@ source("symVARS.R")
 source("plotFunctions.R")
 # source("myTheme.R")
 
+## NEW
+
+set.seed(1)
+alpha <- change_sine(amplitude = 2, freq = 3, phase = 1, deviation = 0, 10000)
+datTVVAR <- simVARS(occasions = 10000, burnin = 20,
+                    type = "TV",
+                    params_y = list(alpha = alpha,
+                                    phi = .5,
+                                    beta = .2),
+                    params_x = list(alpha = 0,
+                                    phi = .5,
+                                    beta = 0)
+)
+
+
+## OLD
 set.seed(1)
 dat.s <- simVARS(occasions = 300, burnin = 20,
                  type = "TV",
