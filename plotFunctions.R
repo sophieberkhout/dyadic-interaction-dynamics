@@ -59,14 +59,14 @@ myTS <- function(dat, partner = NULL, regime = F, regimeType = NULL,
           sameRegime <- all(regy$regime == regx$regime)
           x_breaks <- pretty(xlim)
           y_breaks <- pretty(ylim)
-          bottom <- min(c(x_breaks, y_breaks))
+          bottom <- min(as.numeric(c(x_breaks, y_breaks)))
           if(!sameRegime){
             p <- p + 
               annotate("point", x = regy$t[regy$regime == 2], y = bottom + 0.1, colour = pCols[1]) +
               annotate("point", x = regx$t[regx$regime == 2], y = bottom, colour = pCols[2])
           } else {
             p <- p + 
-              annotate("point", x = regy$t[regy$regime == 2], y = bottom + 0.1, colour = pCols[2])            
+              annotate("point", x = regy$t[regy$regime == 2], y = bottom, colour = "black")            
           }
         }
       }

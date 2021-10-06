@@ -85,7 +85,7 @@ plotsServer <- function(id, dataFormat, method, dat, intercept_y){
     function(input, output, session){
       output$ts <- renderPlot({
         req(dataFormat() == "long")
-        if(method() == "T"){
+        if(method() == "T" || method() == "MS" || method() == "HMM"){
           regime <- T
           regimeType <- "points"
         } else {
