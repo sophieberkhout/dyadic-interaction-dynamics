@@ -367,21 +367,21 @@ server <- function(input, output, session) {
     dat
   })
   
-  
-  # TABLE
-  output$table <- DT::renderDataTable({
-    dtable <- DT::datatable(dat(), rownames = F) 
-    if(input$dataFormat == "wide"){
-      dtable <- DT::formatRound(dtable, columns = c("x", "y"), digits = 3)
-    }
-    dtable
-  })
-  
   # PLOTS
   dataFormat <- reactive({ input$dataFormat })
   plotsServer("inputPlots", dataFormat, method$model, method$t, dat,
               tv = list(alpha_y = tv_alpha_y, phi_y = tv_phi_y, beta_y = tv_beta_y,
                         alpha_x = tv_alpha_x, phi_x = tv_phi_x, beta_x = tv_beta_x))
+  
+  # TABLE
+  output$table <- DT::renderDataTable({
+    dtable <- DT::datatable(dat(), rownames = F,
+                            options = list(dom = "pt", pageLength = 15)) 
+    if(input$dataFormat == "wide"){
+      dtable <- DT::formatRound(dtable, columns = c("x", "y"), digits = 3)
+    }
+    dtable
+  })
 
   # DOWNLOAD BUTTON
   output$downloadData <- downloadHandler(
