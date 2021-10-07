@@ -65,6 +65,11 @@ server <- function(input, output, session) {
     removeTab("yTabs", target = "Second regime")
     removeTab("xTabs", target = "Second regime")
     removeTab("yTabs", target = "Intercept y")
+    removeTab("yTabs", target = "Carryover")
+    removeTab("yTabs", target = "Spillover")
+    removeTab("xTabs", target = "Intercept x")
+    removeTab("xTabs", target = "Carryover")
+    removeTab("xTabs", target = "Spillover")
     removeTab("yTabs", target = "Parameters y")
     removeTab("xTabs", target = "Parameters x")
     removeTab("yTabs", target = "Means y")
@@ -145,6 +150,32 @@ server <- function(input, output, session) {
         tabPanel("Intercept y",
                  tvUI("intercept_y"),
                 ), select = T
+      )
+      appendTab("yTabs",
+                tabPanel("Carryover",
+                         tvUI("carryover_y"),
+                )
+      )
+      appendTab("yTabs",
+                tabPanel("Spillover",
+                         tvUI("spillover_y"),
+                )
+      )
+      
+      appendTab("xTabs",
+                tabPanel("Intercept x",
+                         tvUI("intercept_x"),
+                ), select = T
+      )
+      appendTab("xTabs",
+                tabPanel("Carryover",
+                         tvUI("carryover_x"),
+                )
+      )
+      appendTab("xTabs",
+                tabPanel("Spillover",
+                         tvUI("spillover_x"),
+                )
       )
     }
     
@@ -239,7 +270,14 @@ server <- function(input, output, session) {
     return(pi_ot)
   }, align = "l")
   
-  intercept_y <- tvServer("intercept_y")
+  # intercept_y <- tvServer("intercept_y")
+  tv_alpha_y <- tvServer("intercept_y", method$t)
+  tv_phi_y   <- tvServer("carryover_y", method$t)
+  tv_beta_y  <- tvServer("spillover_y", method$t)
+
+  tv_alpha_x <- tvServer("intercept_x", method$t)
+  tv_phi_x   <- tvServer("carryover_x", method$t)
+  tv_beta_x  <- tvServer("spillover_x", method$t)
   
   # GENERATE DATA
   dat <- reactive({
@@ -270,8 +308,8 @@ server <- function(input, output, session) {
       params_x <- list(mu = c(input$mean_x_1, input$mean_x_2))
     }
     if(method$model() == "TV"){
-      params_y <- list(alpha = tv_alpha(), phi = 0.3, beta = 0)
-      params_x <- list(alpha = 0, phi = 0.3, beta = 0)
+      params_y <- list(alpha = tv_alpha_y$p(), phi = tv_phi_y$p(), beta = tv_beta_y$p())
+      params_x <- list(alpha = tv_alpha_x$p(), phi = tv_phi_x$p(), beta = tv_beta_x$p())
     }
     
     ###### TO DO:
@@ -328,7 +366,9 @@ server <- function(input, output, session) {
   
   # PLOTS
   dataFormat <- reactive({ input$dataFormat })
-  plotsServer("inputPlots", dataFormat, method$model, dat, intercept_y)
+  plotsServer("inputPlots", dataFormat, method$model, method$t, dat,
+              tv = list(alpha_y = tv_alpha_y, phi_y = tv_phi_y, beta_y = tv_beta_y,
+                        alpha_x = tv_alpha_x, phi_x = tv_phi_x, beta_x = tv_beta_x))
 
   # DOWNLOAD BUTTON
   output$downloadData <- downloadHandler(

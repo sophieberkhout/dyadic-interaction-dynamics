@@ -56,7 +56,6 @@ plotsInputUI <- function(id){
     conditionalPanel(condition = "input.showTSy | input.showTSx",
                      column(8, plotOutput(ns("ts"))), ns = ns
     ),
-    # column(8, plotOutput(ns("ts"))),
     conditionalPanel(condition = "input.showCarryoverY | input.showCarryoverX",
                      column(4, plotOutput(ns("carryover"))), ns = ns
     ),
@@ -72,20 +71,46 @@ plotsInputUI <- function(id){
     conditionalPanel(condition = "input.show3Dy | input.show3Dx", ns = ns,
                      column(11, plotly::plotlyOutput(ns("plotly"), height = 600))
     ),
-    conditionalPanel(condition = "input['plot']",
-                     column(4, plotOutput(ns("alpha"))),
+    conditionalPanel(condition = "input.plot & input.tv == 'tv'",
+                     column(4, plotOutput(ns("alpha_y"))),
                      ns = NS("intercept_y")
+
+    ),
+    conditionalPanel(condition = "input.plot & input.tv == 'tv'",
+                     column(4, plotOutput(ns("phi_y"))),
+                     ns = NS("carryover_y")
+                     
+    ),
+    conditionalPanel(condition = "input.plot & input.tv == 'tv'",
+                     column(4, plotOutput(ns("beta_y"))),
+                     ns = NS("spillover_y")
+                     
+    ),
+    conditionalPanel(condition = "input.plot & input.tv == 'tv'",
+                     column(4, plotOutput(ns("alpha_x"))),
+                     ns = NS("intercept_x")
+                     
+    ),
+    conditionalPanel(condition = "input.plot & input.tv == 'tv'",
+                     column(4, plotOutput(ns("phi_x"))),
+                     ns = NS("carryover_x")
+                     
+    ),
+    conditionalPanel(condition = "input.plot & input.tv == 'tv'",
+                     column(4, plotOutput(ns("beta_x"))),
+                     ns = NS("spillover_x")
+                     
     )
   )
 }
 
-plotsServer <- function(id, dataFormat, method, dat, intercept_y){
+plotsServer <- function(id, dataFormat, model, t, dat, tv){
   moduleServer(
     id,
     function(input, output, session){
       output$ts <- renderPlot({
         req(dataFormat() == "long")
-        if(method() == "T" || method() == "MS" || method() == "HMM"){
+        if(model() == "T" || model() == "MS" || model() == "HMM"){
           regime <- T
           regimeType <- "points"
         } else {
@@ -139,25 +164,45 @@ plotsServer <- function(id, dataFormat, method, dat, intercept_y){
         return(p)
       })
 
-      tv_alpha <- reactive({
-        if(intercept_y()$tv == "Stable"){
-          a <- intercept_y()$stable
-        } else {
-          if(intercept_y()$change == "Linear"){
-            a <- change_linear(intercept_y()$from, intercept_y()$to, method()$t)
-          } else if(input$change == "Sine"){
-            a <- change_sine(amplitude = intercept_y()$amp, freq = intercept_y()$freq,
-                             phase = intercept_y()$phase, deviation = intercept_y()$dev,
-                             t = method()$t)
-          }
-        }
-        return(a)
-      })
+      # tv_alpha <- reactive({
+      #   if(intercept_y()$tv == "Stable"){
+      #     a <- intercept_y()$stable
+      #   } else {
+      #     if(intercept_y()$change == "Linear"){
+      #       a <- change_linear(intercept_y()$from, intercept_y()$to, method()$t)
+      #     } else if(input$change == "Sine"){
+      #       a <- change_sine(amplitude = intercept_y()$amp, freq = intercept_y()$freq,
+      #                        phase = intercept_y()$phase, deviation = intercept_y()$dev,
+      #                        t = method()$t)
+      #     }
+      #   }
+      #   return(a)
+      # })
 
-      output$alpha <- renderPlot({
-        if(intercept_y()$tv == "Time-varying"){
-          myTSsimple(1:method()$t, tv_alpha(), ylab = "Intercept", shiny = T)
-        }
+      output$alpha_y <- renderPlot({
+        p <- myTSsimple(1:t(), tv$alpha_y$p(), ylab = "Intercept y", shiny = T)
+        return(p)
+      })
+      output$phi_y <- renderPlot({
+        p <- myTSsimple(1:t(), tv$phi_y$p(), ylab = "Carryover y", shiny = T)
+        return(p)
+      })
+      output$beta_y <- renderPlot({
+        p <- myTSsimple(1:t(), tv$beta_y$p(), ylab = "Spillover y", shiny = T)
+        return(p)
+      })
+      
+      output$alpha_x <- renderPlot({
+        p <- myTSsimple(1:t(), tv$alpha_x$p(), ylab = "Intercept x", shiny = T)
+        return(p)
+      })
+      output$phi_x <- renderPlot({
+        p <- myTSsimple(1:t(), tv$phi_x$p(), ylab = "Carryover x", shiny = T)
+        return(p)
+      })
+      output$beta_x <- renderPlot({
+        p <- myTSsimple(1:t(), tv$beta_x$p(), ylab = "Spillover x", shiny = T)
+        return(p)
       })
     }
   )
