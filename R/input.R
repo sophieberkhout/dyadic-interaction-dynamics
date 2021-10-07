@@ -9,7 +9,7 @@ methodUI <- function(id){
                                 "Time-Varying VAR(1)" = "TV",
                                 "Threshold VAR(1)" = "T",
                                 "Hidden Markov Model" = "HMM",
-                                "Markov-Switching VAR(1)" = "MS"), selected = "TV", width = "95%"),
+                                "Markov-Switching VAR(1)" = "MS"), selected = "VAR", width = "95%"),
                numericInput(ns("t"), "Measurement occasions", 300, min = 2, step = 50, width = "60%"), # 1 does not work
                numericInput(ns("burnin"), "Burnin", 20, min = 0, step = 10, width = "60%"),
                numericInput(ns("seed"), "Seed", 1, min = 1, max = .Machine$integer.max, width = "60%")
@@ -66,10 +66,12 @@ methodServer <- function(id){
 inputVARUI <- function(id){
   ns <- NS(id)
   
-  tagList(
-    numericInput(ns("alpha"), "Intercept", 0, width = "50%"),
-    sliderInput(ns("phi"), "Carryover", -1, 1, .5, .1),
-    sliderInput(ns("beta"), "Spillover", -1, 1, .2, .1)
+  fluidRow(style = "padding-top:5px",
+    column(12,
+      numericInput(ns("alpha"), "Intercept", 0, width = "50%"),
+      sliderInput(ns("phi"), "Carryover", -1, 1, .5, .1),
+      sliderInput(ns("beta"), "Spillover", -1, 1, .2, .1)
+    )
   )
 }
 
@@ -79,9 +81,6 @@ inputVARServer <- function(id){
     function(input, output, session){
       return(
         list(
-          # alpha = reactive({ input$alpha }),
-          # phi   = reactive({ input$phi }),
-          # beta  = reactive({ input$beta })
           alpha = input$alpha,
           phi   = input$phi,
           beta  = input$beta
@@ -95,7 +94,7 @@ inputVARServer <- function(id){
 errorsUI <- function(id){
   ns <- NS(id)
   
-  fluidRow(
+  fluidRow(style = "padding-top:5px",
     column(4,
            numericInput(ns("y"), "Variance y", .1, 0, 1, .05),
            numericInput(ns("yx"), "Correlation", .3, -1, 1, .1)
@@ -121,42 +120,44 @@ errorsServer <- function(id){
 tvUI <- function(id){
   ns <- NS(id)
   
-  tagList(
-    radioButtons(ns("tv"), "", list("Stable" = "stable", "Time-varying" = "tv"), 
-                 selected = "stable", inline = T),
-    conditionalPanel(condition = "input.tv == 'stable'",
-                     numericInput(ns("stable"), "Value", 0, width = "50%"),
-                     ns = ns
-    ),
-    conditionalPanel(condition = "input.tv == 'tv'",
-                     fluidRow(
-                       column(3,
-                              radioButtons(ns("change"), "", 
-                                           list("Linear" = "linear", "Sine" = "sine"), 
-                                           selected = "linear")
+  fluidRow(style = "padding-top:5px",
+    column(12,
+      radioButtons(ns("tv"), "", list("Stable" = "stable", "Time-varying" = "tv"), 
+                   selected = "stable", inline = T),
+      conditionalPanel(condition = "input.tv == 'stable'",
+                       numericInput(ns("stable"), "Value", 0, width = "50%"),
+                       ns = ns
+      ),
+      conditionalPanel(condition = "input.tv == 'tv'",
+                       fluidRow(
+                         column(3,
+                                radioButtons(ns("change"), "", 
+                                             list("Linear" = "linear", "Sine" = "sine"), 
+                                             selected = "linear")
+                         ),
+                         conditionalPanel(condition = "input.change == 'linear'",
+                                          column(3,
+                                                 numericInput(ns("from"), "From", 0),
+                                          ),
+                                          column(3,
+                                                 numericInput(ns("to"), "To", 0)
+                                          ),
+                                          ns = ns
+                         ),
+                         conditionalPanel(condition = "input.change == 'sine'",
+                                          column(3,
+                                                 numericInput(ns("amp"), "Amplitude", 1),
+                                                 numericInput(ns("phase"), "Phase", 0),
+                                          ),
+                                          column(3,
+                                                 numericInput(ns("freq"), "Frequency", 1),
+                                                 numericInput(ns("dev"), "Deviation", 0)
+                                          ),
+                                          ns = ns
+                         ),
                        ),
-                       conditionalPanel(condition = "input.change == 'linear'",
-                                        column(3,
-                                               numericInput(ns("from"), "From", 0),
-                                        ),
-                                        column(3,
-                                               numericInput(ns("to"), "To", 0)
-                                        ),
-                                        ns = ns
-                       ),
-                       conditionalPanel(condition = "input.change == 'sine'",
-                                        column(3,
-                                               numericInput(ns("amp"), "Amplitude", 1),
-                                               numericInput(ns("phase"), "Phase", 0),
-                                        ),
-                                        column(3,
-                                               numericInput(ns("freq"), "Frequency", 1),
-                                               numericInput(ns("dev"), "Deviation", 0)
-                                        ),
-                                        ns = ns
-                       ),
-                     ),
-                     checkboxInput(ns("plot"), "Plot"), ns = ns
+                       checkboxInput(ns("plot"), "Plot"), ns = ns
+      )
     )
   )
 }

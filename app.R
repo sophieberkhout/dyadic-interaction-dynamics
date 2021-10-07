@@ -8,19 +8,21 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
      fluidRow(
        methodUI("method"),
        column(3,
+              h3(em("y"), align = "right"),
               tabsetPanel(id = "yTabs")
        ),
        column(3,
+              h3(em("x"), align = "right"),
               tabsetPanel(id = "xTabs"
               )
        ),
-       column(3,
+       column(3, style = "padding-top:57px",
               tabsetPanel(id = "errors"
               ),
               conditionalPanel(condition = "input.model == 'MS' || input.model == 'HMM'",
                 tabsetPanel(id = "transition",
                   tabPanel("Transition probabilities",
-                    fluidRow(
+                    fluidRow(style = "padding-top:5px",
                       column(6,
                              numericInput("pi_o", "Stay in 1", .5, 0, 1, .1),
                              tableOutput("pi_ot")
@@ -36,10 +38,7 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
        )
      ),
      hr(),
-     # fluidRow(
-       plotsInputUI("inputPlots"),
-       # plotsOutputUI("outputPlots")
-     # ),
+     plotsInputUI("inputPlots"),
   ),
   tabPanel("Data", value = "data",
     fluidRow(
@@ -58,22 +57,21 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
 
 server <- function(input, output, session) {
   # DYNAMIC INPUT
-  # method <- reactive({ methodServer("method") })
   method <- methodServer("method")
   
   observeEvent(method$model(), {
     removeTab("yTabs", target = "Second regime")
     removeTab("xTabs", target = "Second regime")
-    removeTab("yTabs", target = "Intercept y")
+    removeTab("yTabs", target = "Intercept")
     removeTab("yTabs", target = "Carryover")
     removeTab("yTabs", target = "Spillover")
-    removeTab("xTabs", target = "Intercept x")
+    removeTab("xTabs", target = "Intercept")
     removeTab("xTabs", target = "Carryover")
     removeTab("xTabs", target = "Spillover")
-    removeTab("yTabs", target = "Parameters y")
-    removeTab("xTabs", target = "Parameters x")
-    removeTab("yTabs", target = "Means y")
-    removeTab("xTabs", target = "Means x")
+    removeTab("yTabs", target = "Parameters")
+    removeTab("xTabs", target = "Parameters")
+    removeTab("yTabs", target = "Means")
+    removeTab("xTabs", target = "Means")
     removeTab("yTabs", target = "Indicator")
     removeTab("xTabs", target = "Indicator")
     removeTab("errors", target = "Innovations")
@@ -82,7 +80,7 @@ server <- function(input, output, session) {
     
     if(method$model() != "TV" && method$model() != "HMM"){
       appendTab("yTabs",
-        tabPanel("Parameters y",
+        tabPanel("Parameters",
                  inputVARUI("yParameters"),
                  # conditionalPanel(condition = "input.model == 'T' || input.model == 'MS'",
                  if(method$model() == "T" || method$model() == "MS"){
@@ -102,7 +100,7 @@ server <- function(input, output, session) {
         ), select = T
       )
       appendTab("xTabs",
-        tabPanel("Parameters x",
+        tabPanel("Parameters",
                  inputVARUI("xParameters"),
                  if(method$model() == "T" || method$model() == "MS"){
                    fluidRow(
@@ -147,7 +145,7 @@ server <- function(input, output, session) {
     
     if(method$model() == "TV"){
       appendTab("yTabs",
-        tabPanel("Intercept y",
+        tabPanel("Intercept",
                  tvUI("intercept_y"),
                 ), select = T
       )
@@ -163,7 +161,7 @@ server <- function(input, output, session) {
       )
       
       appendTab("xTabs",
-                tabPanel("Intercept x",
+                tabPanel("Intercept",
                          tvUI("intercept_x"),
                 ), select = T
       )
@@ -181,15 +179,23 @@ server <- function(input, output, session) {
     
     if(method$model() == "HMM"){
       appendTab("yTabs",
-        tabPanel("Means y",
-                 numericInput("mean_y_1", "First regime", 0, width = "50%"),
-                 numericInput("mean_y_2", "Second regime", 0, width = "50%")
+        tabPanel("Means",
+                 fluidRow(style = "padding-top:5px",
+                   column(12,
+                     numericInput("mean_y_1", "First regime", 0, width = "50%"),
+                     numericInput("mean_y_2", "Second regime", 0, width = "50%")
+                   )
+                 )
         ), select = T
       )
       appendTab("xTabs",
-        tabPanel("Means x",
-                 numericInput("mean_x_1", "First regime", 0, width = "50%"),
-                 numericInput("mean_x_2", "Second regime", 0, width = "50%")
+        tabPanel("Means",
+                 fluidRow(style = "padding-top:5px",
+                   column(12,
+                     numericInput("mean_x_1", "First regime", 0, width = "50%"),
+                     numericInput("mean_x_2", "Second regime", 0, width = "50%")
+                   )
+                 )
         ), select = T
       )
     }
@@ -197,12 +203,20 @@ server <- function(input, output, session) {
     if(method$model() == "L"){
       appendTab("yTabs",
                 tabPanel("Indicator",
-                         numericInput("mean_i_y", "Mean", 0, width = "50%")
+                         fluidRow(style = "padding-top:5px",
+                           column(12,
+                             numericInput("mean_i_y", "Mean", 0, width = "50%")
+                           )
+                         )
                 )
       )
       appendTab("xTabs",
                 tabPanel("Indicator",
-                         numericInput("mean_i_x", "Mean", 0, width = "50%")
+                         fluidRow(style = "padding-top:5px",
+                           column(12,
+                             numericInput("mean_i_x", "Mean", 0, width = "50%")
+                           )
+                         )
                 )
       )
     }
@@ -270,7 +284,6 @@ server <- function(input, output, session) {
     return(pi_ot)
   }, align = "l")
   
-  # intercept_y <- tvServer("intercept_y")
   tv_alpha_y <- tvServer("intercept_y", method$t)
   tv_phi_y   <- tvServer("carryover_y", method$t)
   tv_beta_y  <- tvServer("spillover_y", method$t)
