@@ -82,7 +82,6 @@ server <- function(input, output, session) {
       appendTab("yTabs",
         tabPanel("Parameters",
                  inputVARUI("yParameters"),
-                 # conditionalPanel(condition = "input.model == 'T' || input.model == 'MS'",
                  if(method$model() == "T" || method$model() == "MS"){
                    fluidRow(
                      column(6,
@@ -180,22 +179,12 @@ server <- function(input, output, session) {
     if(method$model() == "HMM"){
       appendTab("yTabs",
         tabPanel("Means",
-                 fluidRow(style = "padding-top:5px",
-                   column(12,
-                     numericInput("mean_y_1", "First regime", 0, width = "50%"),
-                     numericInput("mean_y_2", "Second regime", 0, width = "50%")
-                   )
-                 )
+                 meansUI("means_y")
         ), select = T
       )
       appendTab("xTabs",
         tabPanel("Means",
-                 fluidRow(style = "padding-top:5px",
-                   column(12,
-                     numericInput("mean_x_1", "First regime", 0, width = "50%"),
-                     numericInput("mean_x_2", "Second regime", 0, width = "50%")
-                   )
-                 )
+                 meansUI("means_x")
         ), select = T
       )
     }
@@ -203,20 +192,22 @@ server <- function(input, output, session) {
     if(method$model() == "L"){
       appendTab("yTabs",
                 tabPanel("Indicator",
-                         fluidRow(style = "padding-top:5px",
-                           column(12,
-                             numericInput("mean_i_y", "Mean", 0, width = "50%")
-                           )
-                         )
+                         indicatorUI("i_y")
+                         # fluidRow(style = "padding-top:5px",
+                         #   column(12,
+                         #     numericInput("mean_i_y", "Mean", 0, width = "50%")
+                         #   )
+                         # )
                 )
       )
       appendTab("xTabs",
                 tabPanel("Indicator",
-                         fluidRow(style = "padding-top:5px",
-                           column(12,
-                             numericInput("mean_i_x", "Mean", 0, width = "50%")
-                           )
-                         )
+                         indicatorUI("i_x")
+                         # fluidRow(style = "padding-top:5px",
+                         #   column(12,
+                         #     numericInput("mean_i_x", "Mean", 0, width = "50%")
+                         #   )
+                         # )
                 )
       )
     }
@@ -292,6 +283,12 @@ server <- function(input, output, session) {
   tv_phi_x   <- tvServer("carryover_x", method$t)
   tv_beta_x  <- tvServer("spillover_x", method$t)
   
+  means_y <- meansServer("means_y")
+  means_x <- meansServer("means_x")
+  
+  i_y <- indicatorServer("i_y")
+  i_x <- indicatorServer("i_x")
+  
   # GENERATE DATA
   dat <- reactive({
     
@@ -317,8 +314,8 @@ server <- function(input, output, session) {
       }
     }
     if(method$model() == "HMM"){
-      params_y <- list(mu = c(input$mean_y_1, input$mean_y_2))
-      params_x <- list(mu = c(input$mean_x_1, input$mean_x_2))
+      params_y <- list(mu = c(means_y$mu_1(), means_y$mu_2()))
+      params_x <- list(mu = c(means_x$mu_1(), means_x$mu_2()))
     }
     if(method$model() == "TV"){
       params_y <- list(alpha = tv_alpha_y$p(), phi = tv_phi_y$p(), beta = tv_beta_y$p())
@@ -336,8 +333,8 @@ server <- function(input, output, session) {
     indicators_x <- NULL
     if(method$model() == "L") {
       measurement_errors <- errorsServer("measurementError")
-      indicators_y <- list(m = input$mean_i_y, l = 1, e = measurement_errors[1])
-      indicators_x <- list(m = input$mean_i_x, l = 1, e = measurement_errors[3])
+      indicators_y <- list(m = i_y$mean(), l = 1, e = measurement_errors[1])
+      indicators_x <- list(m = i_x$mean(), l = 1, e = measurement_errors[3])
     }
     if(method$model() == "HMM"){
       errors <- list(firstRegime = errorsServer("measurementError"),

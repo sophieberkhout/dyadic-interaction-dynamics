@@ -190,3 +190,51 @@ tvServer <- function(id, t){
     }
   )
 }
+
+meansUI <- function(id){
+  ns <- NS(id)
+  
+  fluidRow(style = "padding-top:5px",
+           column(12,
+                  numericInput(ns("mean_1"), "First regime", 0, width = "50%"),
+                  numericInput(ns("mean_2"), "Second regime", 0, width = "50%")
+           )
+  )
+}
+
+meansServer <- function(id){
+  moduleServer(
+    id,
+    function(input, output, server){
+      return(
+        list(
+          mu_1 = reactive({ input$mean_1 }),
+          mu_2 = reactive({ input$mean_2 })
+        )
+      )
+    }
+  )
+}
+
+indicatorUI <- function(id){
+  ns <- NS(id)
+  
+  fluidRow(style = "padding-top:5px",
+           column(12,
+                  numericInput(ns("mean"), "Mean", 0, width = "50%")
+           )
+  )
+}
+
+indicatorServer <- function(id){
+  moduleServer(
+    id,
+    function(input, output, server){
+      return(
+        list(
+          mean = reactive({ input$mean })
+        )
+      )
+    }
+  )
+}
