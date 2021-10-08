@@ -142,7 +142,7 @@ server <- function(input, output, session) {
     if(method$model() == "TV"){
       appendTab("yTabs",
         tabPanel("Intercept",
-                 tvUI("intercept_y"),
+                 tvUI("intercept_y", type = "num"),
                 ), select = T
       )
       appendTab("yTabs",
@@ -158,7 +158,7 @@ server <- function(input, output, session) {
       
       appendTab("xTabs",
                 tabPanel("Intercept",
-                         tvUI("intercept_x"),
+                         tvUI("intercept_x", type = "num"),
                 ), select = T
       )
       appendTab("xTabs",

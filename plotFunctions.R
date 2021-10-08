@@ -264,7 +264,7 @@ myTSsimple <- function(t, y, xlab = NULL, ylab = NULL,
   if(is.null(ylab)) ylab <- expression(italic("y"))
   dat <- data.frame(x = t, y = y)
   p <- ggplot(dat, aes(x = x, y = y)) +
-    geom_line() +
+    geom_line(size = 1) +
     labs(x = xlab, y = ylab)
   p <- myTheme(p, x = xlim, y = ylim, shiny = shiny)
   if(!is.null(filename))  ggsave(filename, p, width = width, height = height)

@@ -136,17 +136,28 @@ errorsServer <- function(id){
   )
 }
 
-tvUI <- function(id){
+tvUI <- function(id, type = "slider"){
   ns <- NS(id)
+  
+  if(type == "num"){
+    stablePanel <- conditionalPanel(condition = "input.tv == 'stable'",
+                                    numericInput(ns("stable"), "Value", 0, width = "50%"),
+                                    ns = ns)
+    step <- 1
+    def_amp <- 1
+  } else {
+    stablePanel <- conditionalPanel(condition = "input.tv == 'stable'",
+                                    sliderInput(ns("stable"), "Value", -1, 1, .2, .1, width = "50%"),
+                                    ns = ns)
+    step <- 0.1
+    def_amp <- 0.3
+  }
   
   fluidRow(style = "padding-top:5px",
     column(12,
       radioButtons(ns("tv"), "", list("Stable" = "stable", "Time-varying" = "tv"), 
                    selected = "stable", inline = T),
-      conditionalPanel(condition = "input.tv == 'stable'",
-                       numericInput(ns("stable"), "Value", 0, width = "50%"),
-                       ns = ns
-      ),
+      stablePanel,
       conditionalPanel(condition = "input.tv == 'tv'",
                        fluidRow(
                          column(3,
@@ -165,12 +176,12 @@ tvUI <- function(id){
                          ),
                          conditionalPanel(condition = "input.change == 'sine'",
                                           column(3,
-                                                 numericInput(ns("amp"), "Amplitude", 1),
+                                                 numericInput(ns("amp"), "Amplitude", def_amp, step = step),
                                                  numericInput(ns("phase"), "Phase", 0),
                                           ),
                                           column(3,
                                                  numericInput(ns("freq"), "Frequency", 1),
-                                                 numericInput(ns("dev"), "Deviation", 0)
+                                                 numericInput(ns("dev"), "Deviation", 0, step = step)
                                           ),
                                           ns = ns
                          ),
