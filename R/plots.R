@@ -54,22 +54,22 @@ plotsInputUI <- function(id){
                  )
     ),
     conditionalPanel(condition = "input.showTSy | input.showTSx",
-                     column(8, plotOutput(ns("ts"))), ns = ns
+                     column(8, withSpinner(plotOutput(ns("ts")))), ns = ns
     ),
     conditionalPanel(condition = "input.showCarryoverY | input.showCarryoverX",
-                     column(4, plotOutput(ns("carryover"))), ns = ns
+                     column(4, withSpinner(plotOutput(ns("carryover")))), ns = ns
     ),
     conditionalPanel(condition = "input.showSpilloverY | input.showSpilloverX",
-                     column(4, plotOutput(ns("spillover"))), ns = ns
+                     column(4, withSpinner(plotOutput(ns("spillover")))), ns = ns
     ),
     conditionalPanel(condition = "input.showACFy | input.showACFx",
-                     column(4, plotOutput(ns("acf"))), ns = ns
+                     column(4, withSpinner(plotOutput(ns("acf")))), ns = ns
     ),       
     conditionalPanel(condition = "input.showCCFy | input.showCCFx",
-                     column(4, plotOutput(ns("ccf"))), ns = ns
+                     column(4, withSpinner(plotOutput(ns("ccf")))), ns = ns
     ),
     conditionalPanel(condition = "input.show3Dy | input.show3Dx", ns = ns,
-                     column(11, plotly::plotlyOutput(ns("plotly"), height = 600))
+                     column(11, withSpinner(plotly::plotlyOutput(ns("plotly"))), height = 600)
     ),
     conditionalPanel(condition = "input['intercept_y-plot'] & input['intercept_y-tv'] == 'tv' & input['method-model'] == 'TV'",
                      column(4, plotOutput(ns("alpha_y")))

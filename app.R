@@ -1,8 +1,16 @@
 library(shiny)
+if(!("shinycssloaders" %in% installed.packages())){
+  install.packages("shinycssloaders")
+}
+library(shinycssloaders)
 options(shiny.autoreload = TRUE)
 source("simVARS.R")
 source("plotFunctions.R")
 options(shiny.error = F)
+options(shiny.reactlog=F)
+options(spinner.type = 7)
+options(spinner.size = 0.2)
+options(spinner.color = "grey")
 
 ui <- navbarPage("Dyadic Interactions", id = "navbar",
   tabPanel("Simulation", value = "sim",
@@ -68,7 +76,7 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
   tabPanel("Data", value = "data",
     fluidRow(
       column(9,
-             DT::dataTableOutput("table")
+             withSpinner(DT::dataTableOutput("table"))
       ),
       column(3,
             radioButtons("dataFormat", "Choose data format",
@@ -81,6 +89,7 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
 )
 
 server <- function(input, output, session) {
+  
   # DYNAMIC INPUT
   method <- methodServer("method")
   
@@ -270,6 +279,7 @@ server <- function(input, output, session) {
 
   # GENERATE DATA
   dat <- reactive({
+    
     params_y <- list(alpha = params_y$alpha(), phi = params_y$phi(), beta = params_y$beta())
     params_x <- list(alpha = params_x$alpha(), phi = params_x$phi(), beta = params_x$beta())
     
