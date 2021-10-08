@@ -21,19 +21,24 @@ VAR1 <- function(occasions, params_y, params_x, z){
   return(dat)
 }
 
-LVAR1 <- function(occasions, params_y, params_x, indicators_y, indicators_x, z){
+LVAR1 <- function(occasions, params_y, params_x, indicators_y, indicators_x, e, z){
   
   alpha_y <- params_y[[1]]
   phi_y   <- params_y[[2]]
   beta_y  <- params_y[[3]]
-  # indicators <- list(y = list(means = c(), lambdas = c(), error_variance = c())
+  # indicators <- list(y = list(means = c(), lambdas = c())
+  # e <- c(var_y, covar, var_x)
   # there should be an option to correlate errors
   # indicators for y and x....
+  
+  m <- matrix(errors, 2, 2, dimnames = list(c("y", "x"), c("y", "x"))) # create covariance matrix
+  e <- as.data.frame(MASS::mvrnorm(occasions, c(0, 0), Sigma = m))     # simulate errors for each occasion
+  
   means_y   <- indicators_y[[1]]
   q_y       <- length(means_y)
   lambdas_y <- matrix(indicators_y[[2]]) # one should be 1 for scaling?
-  epsilon_y <- MASS::mvrnorm(occasions, rep(0, q_y), 
-                             diag(indicators_y[[3]], ))
+  # epsilon_y <- MASS::mvrnorm(occasions, rep(0, q_y), 
+  #                            diag(indicators_y[[3]], ))
   
   alpha_x <- params_x[[1]]
   phi_x   <- params_x[[2]]
@@ -42,8 +47,8 @@ LVAR1 <- function(occasions, params_y, params_x, indicators_y, indicators_x, z){
   means_x   <- indicators_x[[1]]
   q_x       <- length(means_x)
   lambdas_x <- matrix(indicators_x[[2]]) # one should be 1 for scaling?
-  epsilon_x <- MASS::mvrnorm(occasions, rep(0, q_x), 
-                             diag(indicators_x[[3]], ))
+  # epsilon_x <- MASS::mvrnorm(occasions, rep(0, q_x), 
+  #                            diag(indicators_x[[3]], ))
   
   
   y <- numeric(occasions)
@@ -55,8 +60,8 @@ LVAR1 <- function(occasions, params_y, params_x, indicators_y, indicators_x, z){
   }
   
   # mu + lambda * F + e
-  ys <- t(means_y + lambdas_y %*% t(matrix(y)) + t(epsilon_y))
-  xs <- t(means_x + lambdas_x %*% t(matrix(x)) + t(epsilon_x))
+  ys <- t(means_y + lambdas_y %*% t(matrix(y)) + t(e$y))
+  xs <- t(means_x + lambdas_x %*% t(matrix(x)) + t(e$x))
 
   if(q_y == 1 & q_x == 1) {
     colnames(ys) <- "y"
@@ -205,8 +210,8 @@ TVAR1 <- function(occasions,
     ifelse(is.null(tau_y) || x[t-1] <= tau_y, s_y <- 1, s_y <- 2)
     ifelse(is.null(tau_x) || y[t-1] <= tau_x, s_x <- 1, s_x <- 2)
     
-    y[t] <- alpha_y[s_y] + phi_y[s_y] * y[t-1] + beta_y[s_y] * x[t-1] + z$y[t]
-    x[t] <- alpha_x[s_x] + phi_x[s_x] * x[t-1] + beta_x[s_x] * y[t-1] + z$x[t]
+    y[t] <- alpha_y[s_y] + phi_y[s_y] * y[t-1] + beta_y[s_y] * x[t-1] + z[[s_y]][t, "y"]
+    x[t] <- alpha_x[s_x] + phi_x[s_x] * x[t-1] + beta_x[s_x] * y[t-1] + z[[s_x]][t, "x"]
     
     influence_x[t-1] <- beta_y[s_y] * x[t-1]
     influence_y[t-1] <- beta_x[s_x] * y[t-1]

@@ -2,6 +2,7 @@ library(shiny)
 options(shiny.autoreload = TRUE)
 source("simVARS.R")
 source("plotFunctions.R")
+options(shiny.error = F)
 
 ui <- navbarPage("Dyadic Interactions", id = "navbar",
   tabPanel("Simulation", value = "sim",
@@ -9,15 +10,39 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
        methodUI("method"),
        column(3,
               h3(em("y"), align = "right"),
-              tabsetPanel(id = "yTabs")
+              tabsetPanel(id = "yTabs"),
+              conditionalPanel(condition =  "input.model == 'T'",
+                               hr(),
+                               fluidRow(
+                                 column(3,
+                                        numericInput("tau_y", "Threshold", 0)
+                                 )
+                               ), ns = NS("method")
+              )
        ),
        column(3,
               h3(em("x"), align = "right"),
-              tabsetPanel(id = "xTabs"
+              tabsetPanel(id = "xTabs"),
+              conditionalPanel(condition =  "input.model == 'T'",
+                               hr(),
+                               fluidRow(
+                                 column(3,
+                                        numericInput("tau_x", "Threshold", 0)
+                                 )
+                               ), ns = NS("method")
               )
        ),
        column(3, style = "padding-top:57px",
               tabsetPanel(id = "errors"
+              ),
+              conditionalPanel(condition = "input.model == 'T'",
+                               hr(),
+                               h5("For all regime combinations"),
+                               fluidRow(
+                                 column(4,
+                                        numericInput("yx_T", "Correlation", .3, -1, 1, .1),
+                                 )
+                               ), ns = NS("method")
               ),
               conditionalPanel(condition = "input.model == 'MS' || input.model == 'HMM'",
                 tabsetPanel(id = "transition",
@@ -81,40 +106,12 @@ server <- function(input, output, session) {
     if(method$model() != "TV" && method$model() != "HMM"){
       appendTab("yTabs",
         tabPanel("Parameters",
-                 inputVARUI("yParameters"),
-                 if(method$model() == "T" || method$model() == "MS"){
-                   fluidRow(
-                     column(6,
-                       checkboxInput("add_regime_y", "Add second regime", value = T)
-                     ),
-                     if(method$model() == "T"){
-                       conditionalPanel(condition = "input.add_regime_y",
-                         column(6,
-                                numericInput("tau_y", "Threshold", 0, width = "50%")
-                         )
-                       )                       
-                     }
-                   )
-                 }
+                 inputVARUI("yParameters")
         ), select = T
       )
       appendTab("xTabs",
         tabPanel("Parameters",
-                 inputVARUI("xParameters"),
-                 if(method$model() == "T" || method$model() == "MS"){
-                   fluidRow(
-                     column(6,
-                            checkboxInput("add_regime_x", "Add second regime", value = T)
-                     ),
-                     if(method$model() == "T"){
-                       conditionalPanel(condition = "input.add_regime_x",
-                                        column(6,
-                                               numericInput("tau_x", "Threshold", 0, width = "50%")
-                                        )
-                       )
-                     }
-                   )
-                 }
+                 inputVARUI("xParameters")
         ), select = T
       )
     }
@@ -193,64 +190,36 @@ server <- function(input, output, session) {
       appendTab("yTabs",
                 tabPanel("Indicator",
                          indicatorUI("i_y")
-                         # fluidRow(style = "padding-top:5px",
-                         #   column(12,
-                         #     numericInput("mean_i_y", "Mean", 0, width = "50%")
-                         #   )
-                         # )
                 )
       )
       appendTab("xTabs",
                 tabPanel("Indicator",
                          indicatorUI("i_x")
-                         # fluidRow(style = "padding-top:5px",
-                         #   column(12,
-                         #     numericInput("mean_i_x", "Mean", 0, width = "50%")
-                         #   )
-                         # )
                 )
       )
     }
     
     if(method$model() == "T" || method$model() == "MS"){
-      observeEvent(input$add_regime_y, {
-        removeTab("yTabs", target = "Second regime")
-        if(input$add_regime_y){
-          appendTab("yTabs",
-            tabPanel("Second regime",
-                     inputVARUI("ySecondRegime")
-            )
-          )          
-        }
-      })
+      removeTab("yTabs", target = "Second regime")
+      appendTab("yTabs",
+        tabPanel("Second regime",
+                 inputVARUI("ySecondRegime")
+        )
+      )          
 
-      observeEvent(input$add_regime_x, {
-        removeTab("xTabs", target = "Second regime")
-        if(input$add_regime_x){
-          appendTab("xTabs",
-            tabPanel("Second regime",
-                     inputVARUI("xSecondRegime")
-            )
-          )
-        }
-      })
-      
-      ######################
-      ######################
-      ### WHAT TO DO? ######
-      ### correlation the same for both regimes?
-      observeEvent({
-        input$add_regime_y
-        input$add_regime_x}, {
-        removeTab("errors", target = "Second regime")
-        if(input$add_regime_y | input$add_regime_x){
-          appendTab("errors",
-                    tabPanel("Second regime",
-                             errorsUI("innovationsSecondRegime")
-                    )
-          )
-        }
-      })
+      removeTab("xTabs", target = "Second regime")
+      appendTab("xTabs",
+        tabPanel("Second regime",
+                 inputVARUI("xSecondRegime")
+        )
+      )
+
+      removeTab("errors", target = "Second regime")
+      appendTab("errors",
+                tabPanel("Second regime",
+                         errorsUI("innovationsSecondRegime")
+                )
+      )
     }
   })
   
@@ -275,13 +244,13 @@ server <- function(input, output, session) {
     return(pi_ot)
   }, align = "l")
   
-  tv_alpha_y <- tvServer("intercept_y", method$t)
-  tv_phi_y   <- tvServer("carryover_y", method$t)
-  tv_beta_y  <- tvServer("spillover_y", method$t)
-
-  tv_alpha_x <- tvServer("intercept_x", method$t)
-  tv_phi_x   <- tvServer("carryover_x", method$t)
-  tv_beta_x  <- tvServer("spillover_x", method$t)
+  tv_alpha_y <- tvServer("intercept_y", method$model, method$t)
+  tv_phi_y   <- tvServer("carryover_y", method$model, method$t)
+  tv_beta_y  <- tvServer("spillover_y", method$model, method$t)
+  
+  tv_alpha_x <- tvServer("intercept_x", method$model, method$t)
+  tv_phi_x   <- tvServer("carryover_x", method$model, method$t)
+  tv_beta_x  <- tvServer("spillover_x", method$model, method$t)
   
   means_y <- meansServer("means_y")
   means_x <- meansServer("means_x")
@@ -289,29 +258,46 @@ server <- function(input, output, session) {
   i_y <- indicatorServer("i_y")
   i_x <- indicatorServer("i_x")
   
+  innovations <- errorsServer("innovations")
+  otherErrors <- eventReactive(method$model(), {
+    innovations_2 <- NULL
+    measurement_errors <- NULL
+    measurement_errors_2 <- NULL
+    
+    if(method$model() == "MS" | method$model() == "T")
+     innovations_2 <- errorsServer("innovationsSecondRegime")
+    if(method$model() == "L" | method$model() == "HMM")
+     measurement_errors <- errorsServer("measurementError")
+    if(method$model() == "HMM")
+     measurement_errors_2 <- errorsServer("measurementErrorSecondRegime")
+    
+    return(
+      list(
+        innovations_2 = innovations_2,
+        measurement_errors = measurement_errors,
+        measurement_errors_2 = measurement_errors_2
+      )
+    )
+  })
+
   # GENERATE DATA
   dat <- reactive({
-    
+
     params_y <- inputVARServer("yParameters")
     params_x <- inputVARServer("xParameters")
-    
+  
     if(method$model() == "T" || method$model() == "MS"){
-      if(input$add_regime_y){
-        params_y2 <- inputVARServer("ySecondRegime")
-        params_y$alpha[2] <- params_y2$alpha
-        params_y$phi[2]   <- params_y2$phi
-        params_y$beta[2]  <- params_y2$beta
-        if(method$model() == "T") params_y$tau <- input$tau_y        
-      }
+      params_y2 <- inputVARServer("ySecondRegime")
+      params_y$alpha[2] <- params_y2$alpha
+      params_y$phi[2]   <- params_y2$phi
+      params_y$beta[2]  <- params_y2$beta
+      if(method$model() == "T") params_y$tau <- input$tau_y        
 
-
-      if(input$add_regime_x){
-        params_x2 <- inputVARServer("xSecondRegime")
-        params_x$alpha[2] <- params_x2$alpha
-        params_x$phi[2]   <- params_x2$phi
-        params_x$beta[2]  <- params_x2$beta
-        if(method$model() == "T") params_x$tau <- input$tau_x
-      }
+      params_x2 <- inputVARServer("xSecondRegime")
+      params_x$alpha[2] <- params_x2$alpha
+      params_x$phi[2]   <- params_x2$phi
+      params_x$beta[2]  <- params_x2$beta
+      if(method$model() == "T") params_x$tau <- input$tau_x
     }
     if(method$model() == "HMM"){
       params_y <- list(mu = c(means_y$mu_1(), means_y$mu_2()))
@@ -322,33 +308,43 @@ server <- function(input, output, session) {
       params_x <- list(alpha = tv_alpha_x$p(), phi = tv_phi_x$p(), beta = tv_beta_x$p())
     }
     
-    ###### TO DO:
-    ###### TVAR second regime innovations
-    ###### Latent both measurement error and innovations
-    if(method$model() == "VAR" || method$model() == "L" || method$model() == "TV" || method$model() == "T"){
-      errors <- errorsServer("innovations")
-    }
-    
+    innovations <- c(innovations$y(), innovations$c_yx(), innovations$x())
+
     indicators_y <- NULL
     indicators_x <- NULL
+    if(method$model() == "L" | method$model() == "HMM"){
+      measurement_errors <- otherErrors()$measurement_errors
+      measurement_errors <- c(measurement_errors$y(), measurement_errors$c_yx(), 
+                            measurement_errors$x())
+    }
+    
     if(method$model() == "L") {
-      measurement_errors <- errorsServer("measurementError")
-      indicators_y <- list(m = i_y$mean(), l = 1, e = measurement_errors[1])
-      indicators_x <- list(m = i_x$mean(), l = 1, e = measurement_errors[3])
+      indicators_y <- list(m = i_y$mean(), l = 1)
+      indicators_x <- list(m = i_x$mean(), l = 1)
     }
     if(method$model() == "HMM"){
-      errors <- list(firstRegime = errorsServer("measurementError"),
-                     secondRegime = errorsServer("measurementErrorSecondRegime"))
+      measurement_errors_2 <- otherErrors()$measurement_errors_2
+      measurement_errors_2 <- c(measurement_errors_2$y(), measurement_errors_2$c_yx(), 
+                                measurement_errors_2$x())
+      errors <- list(firstRegime = measurement_errors,
+                     secondRegime = measurement_errors_2)
+      measurement_errors <- errors
     }
-    if(method$model() == "MS"){
-      errors <- list(firstRegime = errorsServer("innovations"),
-                     secondRegime = errorsServer("innovationsSecondRegime"))
+    if(method$model() == "MS" || method$model() == "T"){
+      innovations_2 <- otherErrors()$innovations_2
+      innovations_2 <- c(innovations_2$y(), innovations_2$c_yx(), innovations_2$x())
+      if(method$model() == "T") innovations[2] <- input$yx_T
+      errors <- list(firstRegime = innovations,
+                     secondRegime = innovations_2)
+      innovations <- errors      
     }
     
     probs <- NULL
     if(method$model() == "MS" || method$model() == "HMM") probs <- c(input$pi_o, input$pi_t)
 
     ifelse(input$dataFormat == "long", longformat <- T, longformat <- F)
+    
+    if(method$model() != "L" & method$model() != "HMM") measurement_errors <- NULL
     
     set.seed(method$seed())
     dat <- simVARS(occasions = method$t(), burnin = method$burnin(),
@@ -358,7 +354,8 @@ server <- function(input, output, session) {
                    probs = probs,
                    indicators_y = indicators_y,
                    indicators_x = indicators_x,
-                   innovations = errors,
+                   errors = measurement_errors,
+                   innovations = innovations,
                    longformat = longformat)
     
     dat

@@ -20,6 +20,7 @@ methodServer <- function(id){
   moduleServer(
     id,
     function(input, output, session){
+      
       observeEvent(input$seed, {
         if(!is.integer(input$seed)){
           newSeed <- round(input$seed)
@@ -68,7 +69,11 @@ inputVARUI <- function(id){
   
   fluidRow(style = "padding-top:5px",
     column(12,
-      numericInput(ns("alpha"), "Intercept", 0, width = "50%"),
+      fluidRow(
+        column(3,
+               numericInput(ns("alpha"), "Intercept", 0)
+        )
+      ),
       sliderInput(ns("phi"), "Carryover", -1, 1, .5, .1),
       sliderInput(ns("beta"), "Spillover", -1, 1, .2, .1)
     )
@@ -97,7 +102,10 @@ errorsUI <- function(id){
   fluidRow(style = "padding-top:5px",
     column(4,
            numericInput(ns("y"), "Variance y", .1, 0, 1, .05),
-           numericInput(ns("yx"), "Correlation", .3, -1, 1, .1)
+           conditionalPanel(condition = "input.model != 'T'",
+                            numericInput(ns("yx"), "Correlation", .3, -1, 1, .1),
+                            ns = NS("method")
+                            )
     ),
     column(4,
            numericInput(ns("x"), "Variance x", .1, 0, 1, .05)
@@ -109,9 +117,23 @@ errorsServer <- function(id){
   moduleServer(
     id,
     function(input, output, session){
-      cov_yx <- input$yx * sqrt(input$y) * sqrt(input$x)
+      cov_yx <- reactive({
+        validate(need(input$yx, "Loading..."),
+                 need(input$y, " "),
+                 need(input$x, " "))
+        
+        c_yx <- input$yx * sqrt(input$y) * sqrt(input$x)
+        return(c_yx)
+      })
+        # cov_yx <- input$yx * sqrt(input$y) * sqrt(input$x)
+        # if(!is.null(T_cor)) cov_yx <- T_cor
       return(
-        c(input$y, cov_yx, input$x)
+        # c(input$y, cov_yx(), input$x)
+        list(
+          y = reactive({ input$y }),
+          x = reactive({ input$x }),
+          c_yx = cov_yx
+        )
       )
     }
   )
@@ -163,11 +185,15 @@ tvUI <- function(id){
 }
 
 
-tvServer <- function(id, t){
+tvServer <- function(id, model, t){
   moduleServer(
     id,
     function(input, output, session){
       tv_par <- reactive({
+        validate(
+          need(input$tv, "Loading...")
+        )
+        
         if(input$tv == "stable"){
           p <- input$stable
         } else if(input$change == "linear"){

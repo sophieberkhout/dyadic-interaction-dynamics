@@ -71,34 +71,26 @@ plotsInputUI <- function(id){
     conditionalPanel(condition = "input.show3Dy | input.show3Dx", ns = ns,
                      column(11, plotly::plotlyOutput(ns("plotly"), height = 600))
     ),
-    conditionalPanel(condition = "input.plot & input.tv == 'tv'",
-                     column(4, plotOutput(ns("alpha_y"))),
-                     ns = NS("intercept_y")
-
+    conditionalPanel(condition = "input['intercept_y-plot'] & input['intercept_y-tv'] == 'tv' & input['method-model'] == 'TV'",
+                     column(4, plotOutput(ns("alpha_y")))
     ),
-    conditionalPanel(condition = "input.plot & input.tv == 'tv'",
-                     column(4, plotOutput(ns("phi_y"))),
-                     ns = NS("carryover_y")
+    conditionalPanel(condition = "input['carryover_y-plot'] & input['carryover_y-tv'] == 'tv' & input['method-model'] == 'TV'",
+                     column(4, plotOutput(ns("phi_y")))
+    ),
+    conditionalPanel(condition = "input['spillover_y-plot'] & input['spillover_y-tv'] == 'tv' & input['method-model'] == 'TV'",
+                     column(4, plotOutput(ns("beta_y")))
                      
     ),
-    conditionalPanel(condition = "input.plot & input.tv == 'tv'",
-                     column(4, plotOutput(ns("beta_y"))),
-                     ns = NS("spillover_y")
+    conditionalPanel(condition = "input['intercept_x-plot'] & input['intercept_x-tv'] == 'tv' & input['method-model'] == 'TV'",
+                     column(4, plotOutput(ns("alpha_x")))
                      
     ),
-    conditionalPanel(condition = "input.plot & input.tv == 'tv'",
-                     column(4, plotOutput(ns("alpha_x"))),
-                     ns = NS("intercept_x")
+    conditionalPanel(condition = "input['carryover_x-plot'] & input['carryover_x-tv'] == 'tv' & input['method-model'] == 'TV'",
+                     column(4, plotOutput(ns("phi_x")))
                      
     ),
-    conditionalPanel(condition = "input.plot & input.tv == 'tv'",
-                     column(4, plotOutput(ns("phi_x"))),
-                     ns = NS("carryover_x")
-                     
-    ),
-    conditionalPanel(condition = "input.plot & input.tv == 'tv'",
-                     column(4, plotOutput(ns("beta_x"))),
-                     ns = NS("spillover_x")
+    conditionalPanel(condition = "input['spillover_x-plot'] & input['spillover_x-tv'] == 'tv' & input['method-model'] == 'TV'",
+                     column(4, plotOutput(ns("beta_x")))
                      
     )
   )
@@ -163,21 +155,6 @@ plotsServer <- function(id, dataFormat, model, t, dat, tv){
         if(input$show3Dy && input$show3Dx) p <- my3D(dat())
         return(p)
       })
-
-      # tv_alpha <- reactive({
-      #   if(intercept_y()$tv == "Stable"){
-      #     a <- intercept_y()$stable
-      #   } else {
-      #     if(intercept_y()$change == "Linear"){
-      #       a <- change_linear(intercept_y()$from, intercept_y()$to, method()$t)
-      #     } else if(input$change == "Sine"){
-      #       a <- change_sine(amplitude = intercept_y()$amp, freq = intercept_y()$freq,
-      #                        phase = intercept_y()$phase, deviation = intercept_y()$dev,
-      #                        t = method()$t)
-      #     }
-      #   }
-      #   return(a)
-      # })
 
       output$alpha_y <- renderPlot({
         p <- myTSsimple(1:t(), tv$alpha_y$p(), ylab = "Intercept y", shiny = T)

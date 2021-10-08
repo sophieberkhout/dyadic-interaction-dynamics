@@ -1,7 +1,7 @@
 simVARS <- function(occasions, burnin, 
                     type, probs, 
                     params_y, params_x, # list(alpha =, phi = , beta =, tau = ),
-                    indicators_y = NULL, indicators_x = NULL,
+                    indicators_y = NULL, indicators_x = NULL, errors = c(.1, .03, .1),
                     innovations = c(.1, .03, .1),
                     longformat = T){
   
@@ -10,17 +10,40 @@ simVARS <- function(occasions, burnin,
   o_bi <- occasions + burnin # add burnin
   
   # COVARYING INNOVATIONS
-  ifelse(!is.list(innovations), covs <- innovations, covs <- innovations[[1]]) # get vector indicating (co)variances
-  covs <- append(covs, covs[2], after = 2)
-  m <- matrix(covs, 2, 2, dimnames = list(c("y", "x"), c("y", "x")))   # create covariance matrix
-  z <- as.data.frame(MASS::mvrnorm(o_bi, c(0, 0), Sigma = m))          # simulate innovations for each occasion
+  if(type != "T"){
+    ifelse(!is.list(innovations), covs <- innovations, covs <- innovations[[1]]) # get vector indicating (co)variances
+    covs <- append(covs, covs[2], after = 2)
+    m <- matrix(covs, 2, 2, dimnames = list(c("y", "x"), c("y", "x")))   # create covariance matrix
+    z <- as.data.frame(MASS::mvrnorm(o_bi, c(0, 0), Sigma = m))          # simulate innovations for each occasion
+  }
   
-  if(type == "MS" | type == "HMM"){ # Markov-switching and HMM models have different variances between regimes
-    ifelse(!is.list(innovations), covs2 <- innovations, covs2 <- innovations[[2]])
+  # Markov-switching and HMM models have different variances between regimes
+  if(type == "MS" | type == "HMM"){
+    if(type == "MS") er <- innovations else er <- errors
+    ifelse(!is.list(er), covs2 <- er, covs2 <- er[[2]])
     covs2 <- append(covs2, covs2[2], after = 2)
     m2 <- matrix(covs2, 2, 2, dimnames = list(c("y", "x"), c("y", "x")))
     z2 <- as.data.frame(MASS::mvrnorm(o_bi, c(0, 0), Sigma = m2))
     z  <- list(z, z2)
+  }
+  
+  if(type == "T"){
+    if(is.list(innovations)){
+      v <- c(innovations[[1]][1], innovations[[1]][3], 
+             innovations[[2]][1], innovations[[2]][3])
+      m <- diag(v)
+      v <- sqrt(v)
+      c <- innovations[[1]][2]
+      m[1, 2:4] <- v[1] * v[-1] * c
+      m[2, 3:4] <- v[2] * v[3:4] * c
+      m[3, 4] <- v[3] * v[4] * c
+      m[lower.tri(m)] <- t(m)[lower.tri(m)]
+      z_both <- MASS::mvrnorm(o_bi, rep(0, 4), m)
+      z <- as.data.frame(z_both[, 1:2])
+      z2 <- as.data.frame(z_both[, 3:4])
+      names(z) <- names(z2) <- c("y", "x")
+      z <- list(z, z2)
+    }
   }
 
   if(type == "VAR"){
@@ -28,7 +51,8 @@ simVARS <- function(occasions, burnin,
   }
   if(type == "L"){
     if(is.null(indicators_y) | is.null(indicators_x)) stop("You have to specify indicators for x and y.")
-    dat <- LVAR1(o_bi, params_y, params_x, indicators_y, indicators_x, z)
+    errors <- append(errors, errors[2], after = 2)
+    dat <- LVAR1(o_bi, params_y, params_x, indicators_y, indicators_x, errors, z)
   }
   if(type == "TV"){
     dat <- TVVAR1(o_bi, burnin, params_y, params_x, z)
