@@ -244,13 +244,13 @@ server <- function(input, output, session) {
     return(pi_ot)
   }, align = "l")
   
-  tv_alpha_y <- tvServer("intercept_y", method$model, method$t)
-  tv_phi_y   <- tvServer("carryover_y", method$model, method$t)
-  tv_beta_y  <- tvServer("spillover_y", method$model, method$t)
+  tv_alpha_y <- tvServer("intercept_y", method$t)
+  tv_phi_y   <- tvServer("carryover_y", method$t)
+  tv_beta_y  <- tvServer("spillover_y", method$t)
   
-  tv_alpha_x <- tvServer("intercept_x", method$model, method$t)
-  tv_phi_x   <- tvServer("carryover_x", method$model, method$t)
-  tv_beta_x  <- tvServer("spillover_x", method$model, method$t)
+  tv_alpha_x <- tvServer("intercept_x", method$t)
+  tv_phi_x   <- tvServer("carryover_x", method$t)
+  tv_beta_x  <- tvServer("spillover_x", method$t)
   
   means_y <- meansServer("means_y")
   means_x <- meansServer("means_x")
@@ -259,44 +259,29 @@ server <- function(input, output, session) {
   i_x <- indicatorServer("i_x")
   
   innovations <- errorsServer("innovations")
-  otherErrors <- eventReactive(method$model(), {
-    innovations_2 <- NULL
-    measurement_errors <- NULL
-    measurement_errors_2 <- NULL
-    
-    if(method$model() == "MS" | method$model() == "T")
-     innovations_2 <- errorsServer("innovationsSecondRegime")
-    if(method$model() == "L" | method$model() == "HMM")
-     measurement_errors <- errorsServer("measurementError")
-    if(method$model() == "HMM")
-     measurement_errors_2 <- errorsServer("measurementErrorSecondRegime")
-    
-    return(
-      list(
-        innovations_2 = innovations_2,
-        measurement_errors = measurement_errors,
-        measurement_errors_2 = measurement_errors_2
-      )
-    )
-  })
+  innovations_2 <- errorsServer("innovationsSecondRegime")
+  measurement_errors <- errorsServer("measurementError")
+  measurement_errors_2 <- errorsServer("measurementErrorSecondRegime")
+
+  params_y <- inputVARServer("yParameters")
+  params_x <- inputVARServer("xParameters")
+  params_y_2 <- inputVARServer("ySecondRegime")
+  params_x_2 <- inputVARServer("xSecondRegime")
 
   # GENERATE DATA
   dat <- reactive({
-
-    params_y <- inputVARServer("yParameters")
-    params_x <- inputVARServer("xParameters")
-  
+    params_y <- list(alpha = params_y$alpha(), phi = params_y$phi(), beta = params_y$beta())
+    params_x <- list(alpha = params_x$alpha(), phi = params_x$phi(), beta = params_x$beta())
+    
     if(method$model() == "T" || method$model() == "MS"){
-      params_y2 <- inputVARServer("ySecondRegime")
-      params_y$alpha[2] <- params_y2$alpha
-      params_y$phi[2]   <- params_y2$phi
-      params_y$beta[2]  <- params_y2$beta
+      params_y$alpha[2] <- params_y_2$alpha()
+      params_y$phi[2]   <- params_y_2$phi()
+      params_y$beta[2]  <- params_y_2$beta()
       if(method$model() == "T") params_y$tau <- input$tau_y        
 
-      params_x2 <- inputVARServer("xSecondRegime")
-      params_x$alpha[2] <- params_x2$alpha
-      params_x$phi[2]   <- params_x2$phi
-      params_x$beta[2]  <- params_x2$beta
+      params_x$alpha[2] <- params_x_2$alpha()
+      params_x$phi[2]   <- params_x_2$phi()
+      params_x$beta[2]  <- params_x_2$beta()
       if(method$model() == "T") params_x$tau <- input$tau_x
     }
     if(method$model() == "HMM"){
@@ -313,9 +298,8 @@ server <- function(input, output, session) {
     indicators_y <- NULL
     indicators_x <- NULL
     if(method$model() == "L" | method$model() == "HMM"){
-      measurement_errors <- otherErrors()$measurement_errors
       measurement_errors <- c(measurement_errors$y(), measurement_errors$c_yx(), 
-                            measurement_errors$x())
+                              measurement_errors$x())
     }
     
     if(method$model() == "L") {
@@ -323,7 +307,6 @@ server <- function(input, output, session) {
       indicators_x <- list(m = i_x$mean(), l = 1)
     }
     if(method$model() == "HMM"){
-      measurement_errors_2 <- otherErrors()$measurement_errors_2
       measurement_errors_2 <- c(measurement_errors_2$y(), measurement_errors_2$c_yx(), 
                                 measurement_errors_2$x())
       errors <- list(firstRegime = measurement_errors,
@@ -331,7 +314,6 @@ server <- function(input, output, session) {
       measurement_errors <- errors
     }
     if(method$model() == "MS" || method$model() == "T"){
-      innovations_2 <- otherErrors()$innovations_2
       innovations_2 <- c(innovations_2$y(), innovations_2$c_yx(), innovations_2$x())
       if(method$model() == "T") innovations[2] <- input$yx_T
       errors <- list(firstRegime = innovations,

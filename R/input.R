@@ -86,9 +86,9 @@ inputVARServer <- function(id){
     function(input, output, session){
       return(
         list(
-          alpha = input$alpha,
-          phi   = input$phi,
-          beta  = input$beta
+          alpha = reactive({ input$alpha }),
+          phi   = reactive({ input$phi }),
+          beta  = reactive({ input$beta })
           
         )
       )
@@ -125,10 +125,7 @@ errorsServer <- function(id){
         c_yx <- input$yx * sqrt(input$y) * sqrt(input$x)
         return(c_yx)
       })
-        # cov_yx <- input$yx * sqrt(input$y) * sqrt(input$x)
-        # if(!is.null(T_cor)) cov_yx <- T_cor
       return(
-        # c(input$y, cov_yx(), input$x)
         list(
           y = reactive({ input$y }),
           x = reactive({ input$x }),
@@ -185,7 +182,7 @@ tvUI <- function(id){
 }
 
 
-tvServer <- function(id, model, t){
+tvServer <- function(id, t){
   moduleServer(
     id,
     function(input, output, session){
