@@ -147,7 +147,7 @@ tvUI <- function(id, type = "slider"){
     def_amp <- 1
   } else {
     stablePanel <- conditionalPanel(condition = "input.tv == 'stable'",
-                                    sliderInput(ns("stable"), "Value", -1, 1, .2, .1, width = "50%"),
+                                    sliderInput(ns("stable"), "Value", -1, 1, .2, .1),
                                     ns = ns)
     step <- 0.1
     def_amp <- 0.3
@@ -166,27 +166,27 @@ tvUI <- function(id, type = "slider"){
                                              selected = "linear")
                          ),
                          conditionalPanel(condition = "input.change == 'linear'",
-                                          column(3,
-                                                 numericInput(ns("from"), "From", 0),
+                                          column(4,
+                                                 numericInput(ns("from"), "From", 0, step = step),
                                           ),
-                                          column(3,
-                                                 numericInput(ns("to"), "To", 0)
+                                          column(4,
+                                                 numericInput(ns("to"), "To", 0, step = step)
                                           ),
                                           ns = ns
                          ),
                          conditionalPanel(condition = "input.change == 'sine'",
-                                          column(3,
+                                          column(4,
                                                  numericInput(ns("amp"), "Amplitude", def_amp, step = step),
                                                  numericInput(ns("phase"), "Phase", 0),
                                           ),
-                                          column(3,
+                                          column(4,
                                                  numericInput(ns("freq"), "Frequency", 1),
                                                  numericInput(ns("dev"), "Deviation", 0, step = step)
                                           ),
                                           ns = ns
                          ),
                        ),
-                       checkboxInput(ns("plot"), "Plot"), ns = ns
+                       checkboxInput(ns("plot"), "Plot parameter over time"), ns = ns
       )
     )
   )
@@ -272,3 +272,4 @@ indicatorServer <- function(id){
     }
   )
 }
+

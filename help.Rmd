@@ -1,0 +1,42 @@
+---
+title: "Help"
+output: 
+  html_document:
+    toc: true
+---
+
+# Dyadic Interactions Simulation
+This Shinyapp generates data from several models that are used to analyze dyadic interactions.
+
+## Method
+
+### Model
+
+#### First-order vector autoregressive model (VAR(1))
+#### Latent VAR(1)
+#### Time-varying VAR(1)
+#### Threshold VAR(1)
+#### Hidden Markov model
+#### Markov switching model
+
+### Measurement occasions
+
+### Burnin
+
+### Seed
+
+## Parameters
+
+## Plots
+
+### Time series
+
+### Carryover state-space
+
+### Spillover state-space
+
+### 3D state-space
+
+### Autocorrelation function
+
+### Cross-correlation function

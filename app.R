@@ -16,7 +16,7 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
   tabPanel("Simulation", value = "sim",
      fluidRow(
        methodUI("method"),
-       column(3,
+       column(3, style = 'border-right:1px solid; border-color:LightGrey;',
               h3(em("y"), align = "right"),
               tabsetPanel(id = "yTabs"),
               conditionalPanel(condition =  "input.model == 'T'",
@@ -28,7 +28,7 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
                                ), ns = NS("method")
               )
        ),
-       column(3,
+       column(3, style = 'border-right:1px solid; border-color:LightGrey;',
               h3(em("x"), align = "right"),
               tabsetPanel(id = "xTabs"),
               conditionalPanel(condition =  "input.model == 'T'",
@@ -71,6 +71,8 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
        )
      ),
      hr(),
+     formulaUI("formula"),
+     hr(),
      plotsInputUI("inputPlots"),
   ),
   tabPanel("Data", value = "data",
@@ -85,6 +87,9 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
             downloadButton("downloadData", "Download data")
       )
     )
+  ),
+  tabPanel("Info", value = "info",
+           includeHTML("help.Rmd")
   )
 )
 
@@ -352,6 +357,8 @@ server <- function(input, output, session) {
     
     dat
   })
+  
+  formulaServer("formula", params_y, params_x)
   
   # PLOTS
   dataFormat <- reactive({ input$dataFormat })

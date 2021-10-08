@@ -46,10 +46,10 @@ plotsInputUI <- function(id){
                  ),
                  fluidRow(column(6, h5("Cross-correlation function")),
                           column(3,
-                                 checkboxInput(ns("showCCFy"), "(y * x)")
+                                 checkboxInput(ns("showCCFy"), "y*x")
                           ),
                           column(3,
-                                 checkboxInput(ns("showCCFx"), "(x * y)")
+                                 checkboxInput(ns("showCCFx"), "x*y")
                           )
                  )
     ),
