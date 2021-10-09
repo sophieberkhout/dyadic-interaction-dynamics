@@ -358,7 +358,12 @@ server <- function(input, output, session) {
     dat
   })
   
-  formulaServer("formula", params_y, params_x)
+  formulaServer("formula", method$model,
+                params_y, params_x, params_y_2, params_x_2,
+                reactive({input$tau_y}), reactive({input$tau_x}),
+                i_y, i_x,
+                means_y, means_x,
+                innovations)
   
   # PLOTS
   dataFormat <- reactive({ input$dataFormat })
