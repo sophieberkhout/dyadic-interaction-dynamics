@@ -7,7 +7,6 @@ options(shiny.autoreload = TRUE)
 source("simVARS.R")
 source("plotFunctions.R")
 options(shiny.error = F)
-options(shiny.reactlog=F)
 options(spinner.type = 7)
 options(spinner.size = 0.2)
 options(spinner.color = "grey")
@@ -361,9 +360,11 @@ server <- function(input, output, session) {
   formulaServer("formula", method$model,
                 params_y, params_x, params_y_2, params_x_2,
                 reactive({input$tau_y}), reactive({input$tau_x}),
+                reactive({input$yx_T}),
                 i_y, i_x,
                 means_y, means_x,
-                innovations)
+                innovations, innovations_2,
+                measurement_errors, measurement_errors_2)
   
   # PLOTS
   dataFormat <- reactive({ input$dataFormat })
