@@ -28,18 +28,14 @@ LVAR1 <- function(occasions, params_y, params_x, indicators_y, indicators_x, e, 
   beta_y  <- params_y[[3]]
   # indicators <- list(y = list(means = c(), lambdas = c())
   # e <- c(var_y, covar, var_x)
-  # there should be an option to correlate errors
-  # indicators for y and x....
-  
+
   m <- matrix(errors, 2, 2, dimnames = list(c("y", "x"), c("y", "x"))) # create covariance matrix
   e <- as.data.frame(MASS::mvrnorm(occasions, c(0, 0), Sigma = m))     # simulate errors for each occasion
   
   means_y   <- indicators_y[[1]]
   q_y       <- length(means_y)
   lambdas_y <- matrix(indicators_y[[2]]) # one should be 1 for scaling?
-  # epsilon_y <- MASS::mvrnorm(occasions, rep(0, q_y), 
-  #                            diag(indicators_y[[3]], ))
-  
+
   alpha_x <- params_x[[1]]
   phi_x   <- params_x[[2]]
   beta_x  <- params_x[[3]]
@@ -47,9 +43,6 @@ LVAR1 <- function(occasions, params_y, params_x, indicators_y, indicators_x, e, 
   means_x   <- indicators_x[[1]]
   q_x       <- length(means_x)
   lambdas_x <- matrix(indicators_x[[2]]) # one should be 1 for scaling?
-  # epsilon_x <- MASS::mvrnorm(occasions, rep(0, q_x), 
-  #                            diag(indicators_x[[3]], ))
-  
   
   y <- numeric(occasions)
   x <- numeric(occasions) 
@@ -95,24 +88,7 @@ change <- function(param, t, burnin = NULL){
 }
 
 TVVAR1 <- function(occasions, burnin, params_y, params_x, z){
-  ####### NEW SPECIFICATION
-  ####### WHAT TO DO WITH BURNIN
-  # alpha_y <- params_y[[1]]
-  # phi_y   <- params_y[[2]]
-  # beta_y  <- params_y[[3]]
-  # 
-  # alpha_x <- params_x[[1]]
-  # phi_x   <- params_x[[2]]
-  # beta_x  <- params_x[[3]]
-  
-  ### if length == 1, repeat
-  ### if length > 1, take average? paste before
-  
-  # like this?
-  # ifelse(length(params_y[[1]]) == 1, 
-  #        alpha_y <- rep(params_y[[1]], occasions), 
-  #        alpha_y <- c(rep(mean(params_y[[1]]), burnin), params_y[[1]])) 
-  
+
   ifelse(length(params_y[[1]]) == 1, 
          alpha_y <- rep(params_y[[1]], occasions), 
          alpha_y <- c(rep(params_y[[1]][1], burnin), params_y[[1]]))
@@ -132,26 +108,6 @@ TVVAR1 <- function(occasions, burnin, params_y, params_x, z){
   ifelse(length(params_x[[3]]) == 1, 
          beta_x  <- rep(params_x[[3]], occasions), 
          beta_x  <- c(rep(params_x[[3]][1], burnin), params_x[[3]]))
-  
-  # ifelse(length(params_y[[1]]) == 1, 
-  #        alpha_y <- rep(params_y[[1]], occasions), 
-  #        alpha_y <- change(param = params_y[[1]], t = (occasions-burnin), burnin = burnin)) 
-  # ifelse(length(params_y[[2]]) == 1, 
-  #        phi_y   <- rep(params_y[[2]], occasions), 
-  #        phi_y   <- change(params_y[[2]], (occasions-burnin), burnin))
-  # ifelse(length(params_y[[3]]) == 1, 
-  #        beta_y  <- rep(params_y[[3]], occasions), 
-  #        beta_y  <- change(params_y[[3]], (occasions-burnin), burnin))
-  # 
-  # ifelse(length(params_x[[1]]) == 1, 
-  #        alpha_x <- rep(params_x[[1]], occasions), 
-  #        alpha_x <- change(params_x[[1]], (occasions-burnin), burnin))
-  # ifelse(length(params_x[[2]]) == 1, 
-  #        phi_x   <- rep(params_x[[2]], occasions), 
-  #        phi_x   <- change(params_x[[2]], (occasions-burnin), burnin)) 
-  # ifelse(length(params_x[[3]]) == 1, 
-  #        beta_x  <- rep(params_x[[3]], occasions), 
-  #        beta_x  <- change(params_x[[3]], (occasions-burnin), burnin))
   
   y <- numeric(occasions)
   x <- numeric(occasions) 

@@ -2,7 +2,30 @@ library(shiny)
 if(!("shinycssloaders" %in% installed.packages())){
   install.packages("shinycssloaders")
 }
-library(shinycssloaders)
+if(!("ggplot2" %in% installed.packages())){
+  install.packages("ggplot2")
+}
+if(!("plotly" %in% installed.packages())){
+  install.packages("plotly")
+}
+if(!("DT" %in% installed.packages())){
+  install.packages("DT")
+}
+if(!("viridis" %in% installed.packages())){
+  install.packages("viridis")
+}
+if(!("oddsratio" %in% installed.packages())){
+  install.packages("oddsratio")
+}
+if(!("MASS" %in% installed.packages())){
+  install.packages("MASS")
+}
+if(!("stringr" %in% installed.packages())){
+  install.packages("stringr")
+}
+library("shinycssloaders")
+library("ggplot2")
+library("plotly")
 options(shiny.autoreload = TRUE)
 source("simVARS.R")
 source("plotFunctions.R")

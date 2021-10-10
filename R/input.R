@@ -70,7 +70,7 @@ inputVARUI <- function(id){
   fluidRow(style = "padding-top:5px",
     column(12,
       fluidRow(
-        column(3,
+        column(4,
                numericInput(ns("alpha"), "Intercept", 0)
         )
       ),
