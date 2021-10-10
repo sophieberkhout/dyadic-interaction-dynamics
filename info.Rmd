@@ -1,0 +1,8 @@
+---
+title: "Info"
+output: 
+  html_fragment
+---
+
+### Dyadic Interactions Simulation
+This Shinyapp generates data from several models that are used to analyze dyadic interactions. It complements the paper "Statistical Techniques for Analyzing Dyadic Interactions" by S.W. Berkhout, N.K. Schuurman, and E.L. Hamaker.

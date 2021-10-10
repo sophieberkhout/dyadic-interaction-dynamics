@@ -36,7 +36,7 @@ simVARS <- function(occasions, burnin,
       c <- innovations[[1]][2]
       m[1, 2:4] <- v[1] * v[-1] * c
       m[2, 3:4] <- v[2] * v[3:4] * c
-      m[3, 4] <- v[3] * v[4] * c
+      m[3, 4]   <- v[3] * v[4] * c
       m[lower.tri(m)] <- t(m)[lower.tri(m)]
       z_both <- MASS::mvrnorm(o_bi, rep(0, 4), m)
       z <- as.data.frame(z_both[, 1:2])

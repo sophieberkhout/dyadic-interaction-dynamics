@@ -4,7 +4,7 @@ plotsInputUI <- function(id){
   fluidRow(
     sidebarPanel(width = 3,
                  h4("Plots"),
-                 fluidRow(column(6, h5("Time series")),
+                 fluidRow(column(6, h5("Time-series")),
                           column(3,
                                  checkboxInput(ns("showTSy"), "y", value = T)
                           ),

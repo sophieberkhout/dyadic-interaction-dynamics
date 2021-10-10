@@ -88,7 +88,14 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
     )
   ),
   tabPanel("Info", value = "info",
-           includeHTML("help.Rmd")
+           fluidRow(
+             column(6,
+                    includeMarkdown("info.Rmd")
+             ),
+             column(6,
+                    includeMarkdown("help.Rmd")
+             )
+           )
   )
 )
 
@@ -356,7 +363,7 @@ server <- function(input, output, session) {
     
     dat
   })
-  
+
   formulaServer("formula", method$model,
                 params_y, params_x, params_y_2, params_x_2,
                 reactive({input$tau_y}), reactive({input$tau_x}),

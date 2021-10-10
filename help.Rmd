@@ -1,42 +1,55 @@
 ---
-title: "Help"
+title: "Info"
 output: 
-  html_document:
-    toc: true
+  html_fragment
 ---
 
-# Dyadic Interactions Simulation
-This Shinyapp generates data from several models that are used to analyze dyadic interactions.
+### Help
 
-## Method
+#### Method
 
-### Model
+* Model:
+Which model to generate data from. Some models use different parameters, so the input menus may change accordingly.
 
-#### First-order vector autoregressive model (VAR(1))
-#### Latent VAR(1)
-#### Time-varying VAR(1)
-#### Threshold VAR(1)
-#### Hidden Markov model
-#### Markov switching model
+* Measurement occasions:
+The number of measurements over time ($t$).
 
-### Measurement occasions
+* Burnin:
+How many of the first generated data points to throw away. This is used to eliminate influence of the initial value used to start the data generation (here the initial value is always $0$). 
 
-### Burnin
+* Seed:
+Sets the seed which is used to create reproducible results.
 
-### Seed
+#### Parameters
 
-## Parameters
+* Intercept:
+The intercept is the expected mean value of a variable when all parameters equal $0$.
 
-## Plots
+* Carryover:
+Carryover, or autoregression, is relation between the score of a variable at time point $t$ and a previous time point of that same variable.
 
-### Time series
+* Spillover:
+Spillover, or cross-lagged regression, constitute the relation between a variable at time $t$ and a previous occasion $t-1$ of a different variable.
 
-### Carryover state-space
+* Innovations:
+The innovations represent the parts of a variable at time $t$ that cannot be predicted from the previous occasions.
 
-### Spillover state-space
+#### Plots
 
-### 3D state-space
+* Time-series:
+Plots the sequence of a variable against time.
 
-### Autocorrelation function
+* Carryover state-space:
+Plots a variable at time $t$ against itself at a previous occasion ($t - 1$).
 
-### Cross-correlation function
+* Spillover state-space:
+Plots a variable at time $t$ against another variable at a previous occasion ($t - 1$).
+
+* 3D state-space:
+A combination of the time-series plot and the carryover state-space. The line connects each occasion to the next occasion to show how the sequence develops over time.
+
+* Autocorrelation function:
+Plots the autocorrelation of a variable for different time lags.
+
+* Cross-correlation function:
+Plots the cross-correlation of two variables for different time lags.
