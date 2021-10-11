@@ -32,7 +32,7 @@ dat.b <- simVARS(occasions = 300, burnin = 20,
 lim <- c(min(c(dat.a$behavior, dat.b$behavior)), max(c(dat.a$behavior, dat.b$behavior)))
 
 myTS(dat.a, ylim = lim)
-myTS(dat.a, ylim = lim, regime = T, regimeType = "point") # not right
+myTS(dat.a, ylim = lim, regime = T, regimeType = "points")
 mySSP(dat.a, type = "carryover", xlim = lim, ylim = lim)
 # mySSP(dat.a, type = "spillover", partner = "y")
 mySSP(dat.a, type = "spillover_threshold", partner = "y", tau = 0, ylim = lim)
