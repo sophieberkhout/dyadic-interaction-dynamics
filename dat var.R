@@ -1,24 +1,19 @@
-# library(ggplot2)
-# source("myTheme.R")
-# library(tidyverse)
 source("simVARS.R")
 source("plotFunctions.R")
 
 set.seed(1)
 dat.2 <- simVARS(occasions = 300, burnin = 20,
                  type = "VAR", 
-                 params_y = c(0, 0.5, 0.2),
-                 params_x = c(0, 0.5, 0.2),
-                 # seed = 1
+                 params_y = c(0, 0.4, 0.2),
+                 params_x = c(0, 0.4, 0.2),
                  )
 
 
 set.seed(1)
 dat.8 <- simVARS(occasions = 300, burnin = 20,
                  type = "VAR", 
-                 params_y = c(0, 0.5, 0.8),
-                 params_x = c(0, 0.5, 0.2),
-                 # seed = 1
+                 params_y = c(0, 0.4, 0.6),
+                 params_x = c(0, 0.4, 0.2),
                  )
 
 
