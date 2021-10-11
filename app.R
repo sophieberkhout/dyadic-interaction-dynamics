@@ -40,7 +40,29 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
        methodUI("method"),
        column(3, style = 'border-right:1px solid; border-color:LightGrey;',
               h3(em("y"), align = "right"),
-              tabsetPanel(id = "yTabs"),
+              tabsetPanel(id = "yTabs",
+                          tabPanel("Parameters",
+                                   inputVARUI("yParameters")
+                          ),
+                          tabPanel("Intercept",
+                                   tvUI("intercept_y", type = "num"),
+                          ),
+                          tabPanel("Carryover",
+                                   tvUI("carryover_y"),
+                          ),
+                          tabPanel("Spillover",
+                                   tvUI("spillover_y"),
+                          ),
+                          tabPanel("Means",
+                                   meansUI("means_y")
+                          ),
+                          tabPanel("Indicator",
+                                   indicatorUI("i_y")
+                          ),
+                          tabPanel("Second regime",
+                                   inputVARUI("ySecondRegime")
+                          )
+              ),
               conditionalPanel(condition =  "input.model == 'T'",
                                hr(),
                                fluidRow(
@@ -52,7 +74,29 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
        ),
        column(3, style = 'border-right:1px solid; border-color:LightGrey;',
               h3(em("x"), align = "right"),
-              tabsetPanel(id = "xTabs"),
+              tabsetPanel(id = "xTabs",
+                tabPanel("Parameters",
+                         inputVARUI("xParameters")
+                ),
+                tabPanel("Intercept",
+                         tvUI("intercept_x", type = "num"),
+                ),
+                tabPanel("Carryover",
+                         tvUI("carryover_x"),
+                ),
+                tabPanel("Spillover",
+                         tvUI("spillover_x"),
+                ),
+                tabPanel("Means",
+                         meansUI("means_x")
+                ),
+                tabPanel("Indicator",
+                         indicatorUI("i_x")
+                ),
+                tabPanel("Second regime",
+                         inputVARUI("xSecondRegime")
+                )
+              ),
               conditionalPanel(condition =  "input.model == 'T'",
                                hr(),
                                fluidRow(
@@ -63,7 +107,19 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
               )
        ),
        column(3, style = "padding-top:57px",
-              tabsetPanel(id = "errors"
+              tabsetPanel(id = "errors",
+                          tabPanel("Innovations",
+                                   errorsUI("innovations")
+                          ),
+                          tabPanel("Measurement error",
+                                   errorsUI("measurementError")
+                          ),
+                          tabPanel("Second regime",
+                                   errorsUI("measurementErrorSecondRegime")
+                          ),
+                          tabPanel("Second regime ",
+                                   errorsUI("innovationsSecondRegime")
+                          )
               ),
               conditionalPanel(condition = "input.model == 'T'",
                                hr(),
@@ -128,143 +184,94 @@ server <- function(input, output, session) {
   method <- methodServer("method")
   
   observeEvent(method$model(), {
-    removeTab("yTabs", target = "Second regime")
-    removeTab("xTabs", target = "Second regime")
-    removeTab("yTabs", target = "Intercept")
-    removeTab("yTabs", target = "Carryover")
-    removeTab("yTabs", target = "Spillover")
-    removeTab("xTabs", target = "Intercept")
-    removeTab("xTabs", target = "Carryover")
-    removeTab("xTabs", target = "Spillover")
-    removeTab("yTabs", target = "Parameters")
-    removeTab("xTabs", target = "Parameters")
-    removeTab("yTabs", target = "Means")
-    removeTab("xTabs", target = "Means")
-    removeTab("yTabs", target = "Indicator")
-    removeTab("xTabs", target = "Indicator")
-    removeTab("errors", target = "Innovations")
-    removeTab("errors", target = "Measurement error")
-    removeTab("errors", target = "Second regime")
+    hideTab("yTabs", target = "Second regime")
+    hideTab("xTabs", target = "Second regime")
+    hideTab("yTabs", target = "Intercept")
+    hideTab("yTabs", target = "Carryover")
+    hideTab("yTabs", target = "Spillover")
+    hideTab("xTabs", target = "Intercept")
+    hideTab("xTabs", target = "Carryover")
+    hideTab("xTabs", target = "Spillover")
+    hideTab("yTabs", target = "Parameters")
+    hideTab("xTabs", target = "Parameters")
+    hideTab("yTabs", target = "Means")
+    hideTab("xTabs", target = "Means")
+    hideTab("yTabs", target = "Indicator")
+    hideTab("xTabs", target = "Indicator")
+    hideTab("errors", target = "Innovations")
+    hideTab("errors", target = "Measurement error")
+    hideTab("errors", target = "Second regime")
+    hideTab("errors", target = "Second regime ")
+    
     
     if(method$model() != "TV" && method$model() != "HMM"){
-      appendTab("yTabs",
-        tabPanel("Parameters",
-                 inputVARUI("yParameters")
-        ), select = T
+      showTab("yTabs", "Parameters",
+              select = T
       )
-      appendTab("xTabs",
-        tabPanel("Parameters",
-                 inputVARUI("xParameters")
-        ), select = T
+      showTab("xTabs", "Parameters",
+              select = T
       )
     }
     
     if(method$model() != "HMM"){
-      appendTab("errors",
-        tabPanel("Innovations",
-                 errorsUI("innovations")
-        ), select = T
+      showTab("errors", "Innovations",
+              select = T
       )
     }
     
     if(method$model() == "L" | method$model() == "HMM"){
-      appendTab("errors",
-                tabPanel("Measurement error",
-                         errorsUI("measurementError")
-                ), select = ifelse(method$model() == "L", F, T)
+      showTab("errors", "Measurement error",
+                select = ifelse(method$model() == "L", F, T)
       )
       if(method$model() == "HMM"){
-        appendTab("errors",
-                  tabPanel("Second regime",
-                           errorsUI("measurementErrorSecondRegime")
-                  )
+        showTab("errors", "Second regime",
         )
       }
     }
     
     if(method$model() == "TV"){
-      appendTab("yTabs",
-        tabPanel("Intercept",
-                 tvUI("intercept_y", type = "num"),
-                ), select = T
+      showTab("yTabs", "Intercept",
+                select = T
       )
-      appendTab("yTabs",
-                tabPanel("Carryover",
-                         tvUI("carryover_y"),
-                )
+      showTab("yTabs", "Carryover"
       )
-      appendTab("yTabs",
-                tabPanel("Spillover",
-                         tvUI("spillover_y"),
-                )
+      showTab("yTabs", "Spillover"
       )
       
-      appendTab("xTabs",
-                tabPanel("Intercept",
-                         tvUI("intercept_x", type = "num"),
-                ), select = T
+      showTab("xTabs", "Intercept",
+                select = T
       )
-      appendTab("xTabs",
-                tabPanel("Carryover",
-                         tvUI("carryover_x"),
-                )
+      showTab("xTabs", "Carryover"
       )
-      appendTab("xTabs",
-                tabPanel("Spillover",
-                         tvUI("spillover_x"),
-                )
+      showTab("xTabs", "Spillover"
       )
     }
     
     if(method$model() == "HMM"){
-      appendTab("yTabs",
-        tabPanel("Means",
-                 meansUI("means_y")
-        ), select = T
+      showTab("yTabs", "Means",
+                 select = T
       )
-      appendTab("xTabs",
-        tabPanel("Means",
-                 meansUI("means_x")
-        ), select = T
+      showTab("xTabs", "Means",
+                select = T
       )
     }
     
     if(method$model() == "L"){
-      appendTab("yTabs",
-                tabPanel("Indicator",
-                         indicatorUI("i_y")
-                )
+      showTab("yTabs", "Indicator"
       )
-      appendTab("xTabs",
-                tabPanel("Indicator",
-                         indicatorUI("i_x")
-                )
+      showTab("xTabs", "Indicator"
       )
     }
     
     if(method$model() == "T" || method$model() == "MS"){
-      removeTab("yTabs", target = "Second regime")
-      appendTab("yTabs",
-        tabPanel("Second regime",
-                 inputVARUI("ySecondRegime")
-        )
+      showTab("yTabs", "Second regime"
       )          
-
-      removeTab("xTabs", target = "Second regime")
-      appendTab("xTabs",
-        tabPanel("Second regime",
-                 inputVARUI("xSecondRegime")
-        )
+      showTab("xTabs", "Second regime"
       )
-
-      removeTab("errors", target = "Second regime")
-      appendTab("errors",
-                tabPanel("Second regime",
-                         errorsUI("innovationsSecondRegime")
-                )
+      showTab("errors", "Second regime "
       )
     }
-  })
+  }, priority = 1)
   
   observeEvent(input$navbar, {
     if(input$navbar == "sim"){

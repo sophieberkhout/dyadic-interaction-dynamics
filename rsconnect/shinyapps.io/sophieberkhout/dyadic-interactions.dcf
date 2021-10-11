@@ -5,10 +5,10 @@ account: sophieberkhout
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 4840147
-bundleId: 5124824
+bundleId: 5125932
 url: https://sophieberkhout.shinyapps.io/dyadic-interactions/
-when: 1633908012.43782
-lastSyncTime: 1633908012.43782
+when: 1633937176.11581
+lastSyncTime: 1633937176.11581
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: dat hmm.R|dat lvar.R|dat msvar.R|dat tv-var.R|dat tvar.R|dat var.R|data.txt|madhyasta TAR code edited.R|plot linear.R|QID_exampleData.RData|zoomed plots tar tv-var.R
+ignoredFiles: dat hmm.R|dat lvar.R|dat msvar.R|dat tv-var.R|dat tvar.R|dat var.R|madhyasta TAR code edited.R|plot linear.R|zoomed plots tar tv-var.R
