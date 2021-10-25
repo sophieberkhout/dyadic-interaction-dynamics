@@ -1,28 +1,12 @@
 library(shiny)
-if(!("shinycssloaders" %in% installed.packages())){
-  install.packages("shinycssloaders")
-}
-if(!("ggplot2" %in% installed.packages())){
-  install.packages("ggplot2")
-}
-if(!("plotly" %in% installed.packages())){
-  install.packages("plotly")
-}
-if(!("DT" %in% installed.packages())){
-  install.packages("DT")
-}
-if(!("viridis" %in% installed.packages())){
-  install.packages("viridis")
-}
-if(!("oddsratio" %in% installed.packages())){
-  install.packages("oddsratio")
-}
-if(!("MASS" %in% installed.packages())){
-  install.packages("MASS")
-}
-if(!("stringr" %in% installed.packages())){
-  install.packages("stringr")
-}
+if(!("shinycssloaders" %in% installed.packages())) install.packages("shinycssloaders")
+if(!("ggplot2" %in% installed.packages())) install.packages("ggplot2")
+if(!("plotly" %in% installed.packages())) install.packages("plotly")
+if(!("DT" %in% installed.packages())) install.packages("DT")
+if(!("viridis" %in% installed.packages())) install.packages("viridis")
+if(!("oddsratio" %in% installed.packages())) install.packages("oddsratio")
+if(!("MASS" %in% installed.packages())) install.packages("MASS")
+if(!("stringr" %in% installed.packages())) install.packages("stringr")
 library("shinycssloaders")
 library("ggplot2")
 library("plotly")
@@ -36,12 +20,15 @@ options(spinner.color = "grey")
 
 ui <- navbarPage("Dyadic Interactions", id = "navbar",
   tabPanel("Simulation", value = "sim",
-     fluidRow(
+     fluidRow(style = "height:50%;",
+              column(6,
        methodUI("method"),
-       column(3, style = 'border-right:1px solid; border-color:LightGrey;',
-              h3(em("y"), align = "right"),
+       # column(7,
+       column(7, style = 'border-right:1px solid; border-color:LightGrey;',
+              formulaModelUI("formula_model_y"),
+              # h3(em("y"), align = "right"),
               tabsetPanel(id = "yTabs",
-                          tabPanel("Parameters",
+                          tabPanel("Regression coefficients",
                                    inputVARUI("yParameters")
                           ),
                           tabPanel("Intercept",
@@ -71,11 +58,14 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
                                  )
                                ), ns = NS("method")
               )
+       )
        ),
-       column(3, style = 'border-right:1px solid; border-color:LightGrey;',
-              h3(em("x"), align = "right"),
+       column(6,
+       column(7, style = 'border-right:1px solid; border-color:LightGrey;',
+              formulaModelUI("formula_model_x"),
+              # h3(em("x"), align = "right"),
               tabsetPanel(id = "xTabs",
-                tabPanel("Parameters",
+                tabPanel("Regression coefficients",
                          inputVARUI("xParameters")
                 ),
                 tabPanel("Intercept",
@@ -106,12 +96,13 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
                                ), ns = NS("method")
               )
        ),
-       column(3, style = "padding-top:57px",
+       column(5,
+              formulaModelUI("formula_model_z"),
               tabsetPanel(id = "errors",
-                          tabPanel("Innovations",
+                          tabPanel("Innovation parameters",
                                    errorsUI("innovations")
                           ),
-                          tabPanel("Measurement error",
+                          tabPanel("Measurement error parameters",
                                    errorsUI("measurementError")
                           ),
                           tabPanel("Second regime",
@@ -125,7 +116,7 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
                                hr(),
                                h5("For all regime combinations"),
                                fluidRow(
-                                 column(4,
+                                 column(6,
                                         numericInput("yx_T", "Correlation", .3, -1, 1, .1),
                                  )
                                ), ns = NS("method")
@@ -147,6 +138,13 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
                 ), ns = NS("method")
               )
        )
+       )
+     ),
+     conditionalPanel(condition =  "input.model == 'TV'",
+                      hr(), 
+                      h4("Parameters plotted over time"),
+                      plotstvUI("tvPlots"),
+                      ns = NS("method")
      ),
      hr(),
      formulaUI("formula"),
@@ -183,6 +181,10 @@ server <- function(input, output, session) {
   # DYNAMIC INPUT
   method <- methodServer("method")
   
+  formulaModelServer("formula_model_y", method$model, "y")
+  formulaModelServer("formula_model_x", method$model, "x")
+  formulaModelServer("formula_model_z", method$model, "z")
+  
   observeEvent(method$model(), {
     hideTab("yTabs", target = "Second regime")
     hideTab("xTabs", target = "Second regime")
@@ -192,35 +194,35 @@ server <- function(input, output, session) {
     hideTab("xTabs", target = "Intercept")
     hideTab("xTabs", target = "Carryover")
     hideTab("xTabs", target = "Spillover")
-    hideTab("yTabs", target = "Parameters")
-    hideTab("xTabs", target = "Parameters")
+    hideTab("yTabs", target = "Regression coefficients")
+    hideTab("xTabs", target = "Regression coefficients")
     hideTab("yTabs", target = "Means")
     hideTab("xTabs", target = "Means")
     hideTab("yTabs", target = "Indicator")
     hideTab("xTabs", target = "Indicator")
-    hideTab("errors", target = "Innovations")
-    hideTab("errors", target = "Measurement error")
+    hideTab("errors", target = "Innovation parameters")
+    hideTab("errors", target = "Measurement error parameters")
     hideTab("errors", target = "Second regime")
     hideTab("errors", target = "Second regime ")
     
     
     if(method$model() != "TV" && method$model() != "HMM"){
-      showTab("yTabs", "Parameters",
+      showTab("yTabs", "Regression coefficients",
               select = T
       )
-      showTab("xTabs", "Parameters",
+      showTab("xTabs", "Regression coefficients",
               select = T
       )
     }
     
     if(method$model() != "HMM"){
-      showTab("errors", "Innovations",
+      showTab("errors", "Innovation parameters",
               select = T
       )
     }
     
     if(method$model() == "L" | method$model() == "HMM"){
-      showTab("errors", "Measurement error",
+      showTab("errors", "Measurement error parameters",
                 select = ifelse(method$model() == "L", F, T)
       )
       if(method$model() == "HMM"){
@@ -380,7 +382,7 @@ server <- function(input, output, session) {
     if(method$model() != "L" & method$model() != "HMM") measurement_errors <- NULL
     
     set.seed(method$seed())
-    dat <- simVARS(occasions = method$t(), burnin = method$burnin(),
+    dat <- simVARS(occasions = method$t(), burnin = 100,
                    type = method$model(),
                    params_y = params_y,
                    params_x = params_x,
@@ -401,11 +403,16 @@ server <- function(input, output, session) {
                 i_y, i_x,
                 means_y, means_x,
                 innovations, innovations_2,
-                measurement_errors, measurement_errors_2)
+                measurement_errors, measurement_errors_2,
+                tv = list(alpha_y = tv_alpha_y, phi_y = tv_phi_y, beta_y = tv_beta_y,
+                          alpha_x = tv_alpha_x, phi_x = tv_phi_x, beta_x = tv_beta_x))
   
   # PLOTS
   dataFormat <- reactive({ input$dataFormat })
   plotsServer("inputPlots", dataFormat, method$model, method$t, dat,
+              tv = list(alpha_y = tv_alpha_y, phi_y = tv_phi_y, beta_y = tv_beta_y,
+                        alpha_x = tv_alpha_x, phi_x = tv_phi_x, beta_x = tv_beta_x))
+  plotstvServer("tvPlots", method$t,
               tv = list(alpha_y = tv_alpha_y, phi_y = tv_phi_y, beta_y = tv_beta_y,
                         alpha_x = tv_alpha_x, phi_x = tv_phi_x, beta_x = tv_beta_x))
   
@@ -428,4 +435,14 @@ server <- function(input, output, session) {
   )
 }
 
-shinyApp(ui = ui, server = server)
+shinyApp(ui = tagList(
+                tags$style("
+                  body {
+                 -moz-transform: scale(0.8, 0.8); /* Moz-browsers */
+                 zoom: 0.8; /* Other non-webkit browsers */
+                 zoom: 80%; /* Webkit browsers */
+                 }
+                 "), 
+                ui
+              ), 
+         server = server)

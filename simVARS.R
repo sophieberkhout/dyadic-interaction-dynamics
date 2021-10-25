@@ -94,13 +94,14 @@ simVARS <- function(occasions, burnin,
 }
 
 ## Time-varying
-change_linear <- function(from, to, t){
-  x <- seq(from, to, length.out = t)
+change_linear <- function(int, slope, t){
+  n <- 1:t
+  x <- int + slope * n
   return(x)
 }
 
 change_sine <- function(amplitude, freq, phase, deviation, t){
   n <- 1:t
-  x <- amplitude  * sin(2 * pi * (freq/t) * n + phase) + deviation
+  x <- amplitude  * sin(2 * pi * (freq/t) * (n + phase)) + deviation
   return(x)
 }

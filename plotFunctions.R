@@ -267,6 +267,8 @@ myTSsimple <- function(t, y, xlab = NULL, ylab = NULL,
     geom_line(size = 1) +
     labs(x = xlab, y = ylab)
   p <- myTheme(p, x = xlim, y = ylim, shiny = shiny)
+  p <- p + theme(text = element_text(size = 16),
+                 axis.text = element_text(size = 10))
   if(!is.null(filename))  ggsave(filename, p, width = width, height = height)
   return(p)
 }
@@ -311,17 +313,23 @@ my3D <- function(dat, partner = NULL){
   p
 }
 
-myTVpars <- function(tvFit, partner = NULL){
+myTVpars <- function(tvFit, partner = NULL, shiny = F){
   # option to suppress plot
-  plt <- oddsratio::no_plot(tvFit)
   # plt <- plot(tvFit)
   
-  tvpars <- data.frame(x = c(plt[[1]]$x, plt[[2]]$x, plt[[3]]$x), 
-                       y = c(plt[[1]]$fit, plt[[2]]$fit, plt[[3]]$fit), 
-                       se = c(plt[[1]]$se, plt[[2]]$se, plt[[3]]$se),
-                       p = rep(1:3, each = length(plt[[1]]$x)))
+  if(!shiny) {
+    plt <- oddsratio::no_plot(tvFit)
+    tvpars <- data.frame(x = c(plt[[1]]$x, plt[[2]]$x, plt[[3]]$x), 
+                         y = c(plt[[1]]$fit, plt[[2]]$fit, plt[[3]]$fit), 
+                         se = c(plt[[1]]$se, plt[[2]]$se, plt[[3]]$se),
+                         p = rep(1:3, each = length(plt[[1]]$x)))
+  } else {
+    tvpars <- data.frame(x = c(tvFit$alpha, tvFit$phi, tvFit$beta),
+                         y = rep(1:length(tvFit$alpha), 3),
+                         p = rep(1:3, each = length(tvFit$alpha)))
+  }
   
-  labels <- c(bquote(alpha[.(partner)]), bquote(phi[.(partner)]), bquote(beta[.(partner)]))
+  labels <- c(bquote(alpha[.(partner), t]), bquote(phi[.(partner), t]), bquote(beta[.(partner), t]))
   
   p <- ggplot(tvpars, aes(x = x, y = y, fill = as.factor(p), color = as.factor(p))) +
     geom_line() +
@@ -334,7 +342,14 @@ myTVpars <- function(tvFit, partner = NULL){
     scale_fill_manual(values = c("grey40", "grey80", "black"), labels = labels) +
     labs(x = expression(italic("t")), y = "Parameter Value")
   
+  if(shiny) {
+    p <- ggplot(tvpars, aes(x = x, y = y, color = as.factor(p))) +
+      geom_line() +
+      scale_color_manual(values = c("grey40", "grey80", "black"), labels = labels) +
+      labs(x = expression(italic("t")), y = "Parameter Value")
+  }
   
-  p <- myTheme(p, x = tvpars$x, y = c(tvpars$y + tvpars$se, tvpars$y - tvpars$se))
+  if(!shiny) p <- myTheme(p, x = tvpars$x, y = c(tvpars$y + tvpars$se, tvpars$y - tvpars$se))
+  if(shiny)  p <- myTheme(p, x = tvpars$x, y = tvpars$y)
   return(p)
 }

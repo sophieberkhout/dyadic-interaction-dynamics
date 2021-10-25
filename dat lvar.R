@@ -3,26 +3,26 @@ source("plotFunctions.R")
 
 set.seed(1)
 dat.low <- simVARS(300, 20, 
-               type = "L",
-               params_y = list(alpha = 0, phi = 0.3, beta = 0.2),
-               params_x = list(alpha = 0, phi = 0.3, beta = 0.2),
-               indicators_y = list(means = 0, lambdas = 1),
-               indicators_x = list(means = 0, lambdas = 1),
-               innovations = c(.1, .03, .1),
-               errors = c(.1, .03, .1),
-               longformat = T
+                   type = "L",
+                   params_y = list(alpha = 0, phi = 0.3, beta = 0.2),
+                   params_x = list(alpha = 0, phi = 0.3, beta = 0.2),
+                   indicators_y = list(means = 0, lambdas = 1),
+                   indicators_x = list(means = 0, lambdas = 1),
+                   innovations = c(.1, .03, .1),
+                   errors = c(.1, .03, .1),
+                   longformat = T
 )
 
 set.seed(1)
 dat.high <- simVARS(300, 20,
-               type = "L",
-               params_y = list(alpha = 0, phi = 0.3, beta = 0.2),
-               params_x = list(alpha = 0, phi = 0.3, beta = 0.2),
-               indicators_y = list(means = 0, lambdas = 1),
-               indicators_x = list(means = 0, lambdas = 1),
-               innovations = c(.1, .03, .1),
-               errors = c(1, .3, 1),
-               longformat = T
+                    type = "L",
+                    params_y = list(alpha = 0, phi = 0.3, beta = 0.2),
+                    params_x = list(alpha = 0, phi = 0.3, beta = 0.2),
+                    indicators_y = list(means = 0, lambdas = 1),
+                    indicators_x = list(means = 0, lambdas = 1),
+                    innovations = c(.1, .03, .1),
+                    errors = c(1, .3, 1),
+                    longformat = T
 )
 
 lim <- c(min(c(dat.low$behavior, dat.high$behavior)), max(c(dat.low$behavior, dat.high$behavior)))

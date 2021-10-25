@@ -1,7 +1,7 @@
 methodUI <- function(id){
   ns <- NS(id)
   
-  sidebarPanel(width = 3,
+  sidebarPanel(width = 5,
                h4("Method"),
                selectInput(ns("model"), "Data generating model",
                            list("First-order Vector Autoregressive VAR(1)" = "VAR",
@@ -11,7 +11,7 @@ methodUI <- function(id){
                                 "Hidden Markov Model" = "HMM",
                                 "Markov-Switching VAR(1)" = "MS"), selected = "VAR", width = "95%"),
                numericInput(ns("t"), "Measurement occasions", 300, min = 2, step = 50, width = "60%"), # 1 does not work
-               numericInput(ns("burnin"), "Burnin", 20, min = 0, step = 10, width = "60%"),
+               # numericInput(ns("burnin"), "Burnin", 20, min = 0, step = 10, width = "60%"),
                numericInput(ns("seed"), "Seed", 1, min = 1, max = .Machine$integer.max, width = "60%")
   )
 }
@@ -28,12 +28,12 @@ methodServer <- function(id){
         }
       })
       
-      observeEvent(input$burnin, {
-        if(!is.integer(input$burnin)){
-          newBurnin <- round(input$burnin)
-          updateNumericInput(session, "burnin", value = newBurnin)
-        }
-      })
+      # observeEvent(input$burnin, {
+      #   if(!is.integer(input$burnin)){
+      #     newBurnin <- round(input$burnin)
+      #     updateNumericInput(session, "burnin", value = newBurnin)
+      #   }
+      # })
       
       observeEvent(input$t, {
         if(!is.integer(input$t)){
@@ -46,7 +46,7 @@ methodServer <- function(id){
         list(
           model  = reactive({ input$model }),
           t      = reactive({ input$t }),
-          burnin = reactive({ input$burnin }),
+          # burnin = reactive({ input$burnin }),
           seed   = reactive({ input$seed })
         )
       )
@@ -71,11 +71,11 @@ inputVARUI <- function(id){
     column(12,
       fluidRow(
         column(4,
-               numericInput(ns("alpha"), "Intercept", 0)
+               numericInput(ns("alpha"), HTML("Intercept &#120572;"), 0)
         )
       ),
-      sliderInput(ns("phi"), "Carryover", -1, 1, .5, .1),
-      sliderInput(ns("beta"), "Spillover", -1, 1, .2, .1)
+      sliderInput(ns("phi"), HTML("Carryover &#120573;"), -1, 1, .5, .1),
+      sliderInput(ns("beta"), HTML("Spillover &#120601;"), -1, 1, .2, .1)
     )
   )
 }
@@ -100,14 +100,14 @@ errorsUI <- function(id){
   ns <- NS(id)
   
   fluidRow(style = "padding-top:5px",
-    column(4,
+    column(6,
            numericInput(ns("y"), "Variance y", .1, 0, 1, .05),
            conditionalPanel(condition = "input.model != 'T'",
                             numericInput(ns("yx"), "Correlation", .3, -1, 1, .1),
                             ns = NS("method")
                             )
     ),
-    column(4,
+    column(6,
            numericInput(ns("x"), "Variance x", .1, 0, 1, .05)
     )
   )
@@ -167,10 +167,10 @@ tvUI <- function(id, type = "slider"){
                          ),
                          conditionalPanel(condition = "input.change == 'linear'",
                                           column(4,
-                                                 numericInput(ns("from"), "From", 0, step = step),
+                                                 numericInput(ns("int"), "Intercept", 0, step = 0.1),
                                           ),
                                           column(4,
-                                                 numericInput(ns("to"), "To", 0, step = step)
+                                                 numericInput(ns("slope"), "Slope", 0, step = 0.001)
                                           ),
                                           ns = ns
                          ),
@@ -205,7 +205,7 @@ tvServer <- function(id, t){
         if(input$tv == "stable"){
           p <- input$stable
         } else if(input$change == "linear"){
-            p <- change_linear(input$from, input$to, t())
+            p <- change_linear(input$int, input$slope, t())
         } else if(input$change == "sine"){
             p <- change_sine(amplitude = input$amp, freq = input$freq,
                              phase = input$phase, deviation = input$dev,
@@ -216,9 +216,18 @@ tvServer <- function(id, t){
       
       return(
         list(
-          p    = tv_par,
-          tv   = reactive({ input$tv }),
-          plot = reactive({ input$plot })
+          p      = tv_par,
+          tv     = reactive({ input$tv }),
+          plot   = reactive({ input$plot }),
+          stable = reactive({ input$stable }),
+          change = reactive({ input$change }),
+          int    = reactive({ input$int }),
+          slope  = reactive({ input$slope }),
+          amp    = reactive({ input$amp }),
+          freq   = reactive({ input$freq }),
+          phase  = reactive({ input$phase }),
+          dev    = reactive({ input$dev }),
+          t      = t
         )
       )
     }

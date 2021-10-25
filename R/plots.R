@@ -2,7 +2,8 @@ plotsInputUI <- function(id){
   ns <- NS(id)
 
   fluidRow(
-    sidebarPanel(width = 3,
+    column(3,
+    sidebarPanel(width = 10,
                  h4("Plots"),
                  fluidRow(column(6, h5("Time-series")),
                           column(3,
@@ -52,47 +53,49 @@ plotsInputUI <- function(id){
                                  checkboxInput(ns("showCCFx"), "x*y")
                           )
                  )
-    ),
+    )),
     conditionalPanel(condition = "input.showTSy | input.showTSx",
-                     column(8, withSpinner(plotOutput(ns("ts")))), ns = ns
+                     column(6, h4("Time-series"),
+                            withSpinner(plotOutput(ns("ts"), height = "350px"))), ns = ns
     ),
     conditionalPanel(condition = "input.showCarryoverY | input.showCarryoverX",
-                     column(4, withSpinner(plotOutput(ns("carryover")))), ns = ns
+                     column(3,  h4("Carryover"),
+                            withSpinner(plotOutput(ns("carryover"), height = "350px"))), ns = ns
     ),
     conditionalPanel(condition = "input.showSpilloverY | input.showSpilloverX",
-                     column(4, withSpinner(plotOutput(ns("spillover")))), ns = ns
+                     column(3, withSpinner(plotOutput(ns("spillover"), height = "350px"))), ns = ns
     ),
     conditionalPanel(condition = "input.showACFy | input.showACFx",
-                     column(4, withSpinner(plotOutput(ns("acf")))), ns = ns
+                     column(3, withSpinner(plotOutput(ns("acf"), height = "350px"))), ns = ns
     ),       
     conditionalPanel(condition = "input.showCCFy | input.showCCFx",
-                     column(4, withSpinner(plotOutput(ns("ccf")))), ns = ns
+                     column(3, withSpinner(plotOutput(ns("ccf"), height = "350px"))), ns = ns
     ),
     conditionalPanel(condition = "input.show3Dy | input.show3Dx", ns = ns,
-                     column(11, withSpinner(plotly::plotlyOutput(ns("plotly"))), height = 600)
-    ),
-    conditionalPanel(condition = "input['intercept_y-plot'] & input['intercept_y-tv'] == 'tv' & input['method-model'] == 'TV'",
-                     column(4, plotOutput(ns("alpha_y")))
-    ),
-    conditionalPanel(condition = "input['carryover_y-plot'] & input['carryover_y-tv'] == 'tv' & input['method-model'] == 'TV'",
-                     column(4, plotOutput(ns("phi_y")))
-    ),
-    conditionalPanel(condition = "input['spillover_y-plot'] & input['spillover_y-tv'] == 'tv' & input['method-model'] == 'TV'",
-                     column(4, plotOutput(ns("beta_y")))
-                     
-    ),
-    conditionalPanel(condition = "input['intercept_x-plot'] & input['intercept_x-tv'] == 'tv' & input['method-model'] == 'TV'",
-                     column(4, plotOutput(ns("alpha_x")))
-                     
-    ),
-    conditionalPanel(condition = "input['carryover_x-plot'] & input['carryover_x-tv'] == 'tv' & input['method-model'] == 'TV'",
-                     column(4, plotOutput(ns("phi_x")))
-                     
-    ),
-    conditionalPanel(condition = "input['spillover_x-plot'] & input['spillover_x-tv'] == 'tv' & input['method-model'] == 'TV'",
-                     column(4, plotOutput(ns("beta_x")))
-                     
+                     column(10, withSpinner(plotly::plotlyOutput(ns("plotly"))), height = 600)
     )
+    # conditionalPanel(condition = "input['intercept_y-plot'] & input['intercept_y-tv'] == 'tv' & input['method-model'] == 'TV'",
+    #                  column(3, plotOutput(ns("alpha_y")))
+    # ),
+    # conditionalPanel(condition = "input['carryover_y-plot'] & input['carryover_y-tv'] == 'tv' & input['method-model'] == 'TV'",
+    #                  column(3, plotOutput(ns("phi_y")))
+    # ),
+    # conditionalPanel(condition = "input['spillover_y-plot'] & input['spillover_y-tv'] == 'tv' & input['method-model'] == 'TV'",
+    #                  column(3, plotOutput(ns("beta_y")))
+    #                  
+    # ),
+    # conditionalPanel(condition = "input['intercept_x-plot'] & input['intercept_x-tv'] == 'tv' & input['method-model'] == 'TV'",
+    #                  column(3, plotOutput(ns("alpha_x")))
+    #                  
+    # ),
+    # conditionalPanel(condition = "input['carryover_x-plot'] & input['carryover_x-tv'] == 'tv' & input['method-model'] == 'TV'",
+    #                  column(3, plotOutput(ns("phi_x")))
+    #                  
+    # ),
+    # conditionalPanel(condition = "input['spillover_x-plot'] & input['spillover_x-tv'] == 'tv' & input['method-model'] == 'TV'",
+    #                  column(3, plotOutput(ns("beta_x")))
+    #                  
+    # )
   )
 }
 
@@ -156,29 +159,93 @@ plotsServer <- function(id, dataFormat, model, t, dat, tv){
         return(p)
       })
 
+      # output$alpha_y <- renderPlot({
+      #   p <- myTSsimple(1:t(), tv$alpha_y$p(), ylab = "Intercept y", shiny = T)
+      #   return(p)
+      # })
+      # output$phi_y <- renderPlot({
+      #   p <- myTSsimple(1:t(), tv$phi_y$p(), ylab = "Carryover y", shiny = T)
+      #   return(p)
+      # })
+      # output$beta_y <- renderPlot({
+      #   p <- myTSsimple(1:t(), tv$beta_y$p(), ylab = "Spillover y", shiny = T)
+      #   return(p)
+      # })
+      # 
+      # output$alpha_x <- renderPlot({
+      #   p <- myTSsimple(1:t(), tv$alpha_x$p(), ylab = "Intercept x", shiny = T)
+      #   return(p)
+      # })
+      # output$phi_x <- renderPlot({
+      #   p <- myTSsimple(1:t(), tv$phi_x$p(), ylab = "Carryover x", shiny = T)
+      #   return(p)
+      # })
+      # output$beta_x <- renderPlot({
+      #   p <- myTSsimple(1:t(), tv$beta_x$p(), ylab = "Spillover x", shiny = T)
+      #   return(p)
+      # })
+    }
+  )
+}
+
+
+plotstvUI <- function(id){
+  ns <- NS(id)
+  # fluidRow(
+  #   column(6,
+  #   column(3, offset = 3, plotOutput(ns("alpha_y"), height = "250px")),
+  #   column(3, plotOutput(ns("phi_y"), height = "250px")),
+  #   column(3, plotOutput(ns("beta_y"), height = "250px"))
+  #   ),
+  #   column(6,
+  #   column(2, plotOutput(ns("alpha_x"), height = "250px")),
+  #   column(2, plotOutput(ns("phi_x"), height = "250px")),
+  #   column(2, plotOutput(ns("beta_x"), height = "250px"))
+  #   )
+  # )
+  fluidRow(
+   column(2, plotOutput(ns("alpha_y"), height = "200px")),
+   column(2, plotOutput(ns("phi_y"), height = "200px")),
+   column(2, style = 'border-right:1px solid; border-color:LightGrey;',
+          plotOutput(ns("beta_y"), height = "200px")),
+   column(2, plotOutput(ns("alpha_x"), height = "200px")),
+   column(2, plotOutput(ns("phi_x"), height = "200px")),
+   column(2, plotOutput(ns("beta_x"), height = "200px"))
+  )
+}
+
+plotstvServer <- function(id, t, tv){
+  moduleServer(
+    id,
+    function(input, output, session){
       output$alpha_y <- renderPlot({
-        p <- myTSsimple(1:t(), tv$alpha_y$p(), ylab = "Intercept y", shiny = T)
+        p <- myTSsimple(1:t(), tv$alpha_y$p(), ylab = bquote(Intercept ~ alpha[y*","*t]), shiny = T)
+        # p <- myTVpars(list(alpha = tv$alpha_y$p(),
+        #                    phi = tv$phi_y$p(),
+        #                    beta = tv$beta_y$p()),
+        #               partner = "y",
+        #               shiny = T)
         return(p)
       })
       output$phi_y <- renderPlot({
-        p <- myTSsimple(1:t(), tv$phi_y$p(), ylab = "Carryover y", shiny = T)
+        p <- myTSsimple(1:t(), tv$phi_y$p(), ylab = bquote(Carryover ~ phi[y*","*t]), shiny = T)
         return(p)
       })
       output$beta_y <- renderPlot({
-        p <- myTSsimple(1:t(), tv$beta_y$p(), ylab = "Spillover y", shiny = T)
+        p <- myTSsimple(1:t(), tv$beta_y$p(), ylab = bquote(Spillover ~ beta[y*","*t]), shiny = T)
         return(p)
       })
       
       output$alpha_x <- renderPlot({
-        p <- myTSsimple(1:t(), tv$alpha_x$p(), ylab = "Intercept x", shiny = T)
+        p <- myTSsimple(1:t(), tv$alpha_x$p(), ylab = bquote(Intercept ~ alpha[x*","*t]), shiny = T)
         return(p)
       })
       output$phi_x <- renderPlot({
-        p <- myTSsimple(1:t(), tv$phi_x$p(), ylab = "Carryover x", shiny = T)
+        p <- myTSsimple(1:t(), tv$phi_x$p(), ylab = bquote(Carryover ~ phi[x*","*t]), shiny = T)
         return(p)
       })
       output$beta_x <- renderPlot({
-        p <- myTSsimple(1:t(), tv$beta_x$p(), ylab = "Spillover x", shiny = T)
+        p <- myTSsimple(1:t(), tv$beta_x$p(), ylab = bquote(Spillover ~ beta[x*","*t]), shiny = T)
         return(p)
       })
     }
