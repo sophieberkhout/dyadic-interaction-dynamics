@@ -5,4 +5,7 @@ output:
 ---
 
 ### Dyadic Interactions Simulation
-This Shinyapp generates data from several models that are used to analyze dyadic interactions. It complements the paper "Statistical Techniques for Analyzing Dyadic Interactions" by S.W. Berkhout, N.K. Schuurman, and E.L. Hamaker.
+This Shiny app generates data from several models that are used to analyze dyadic interactions. It supplements the paper "Statistical Techniques for Analyzing Dyadic Interactions" by S.W. Berkhout, N.K. Schuurman, and E.L. Hamaker.
+
+#### Contact information
+If you have any questions or comments, please contact S.W. Berkhout ([s.w.berkhout@uu.nl](mailto:s.w.berkhout@uu.nl)).

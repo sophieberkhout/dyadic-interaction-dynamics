@@ -1,0 +1,19 @@
+---
+title: "Info"
+output: 
+  html_fragment
+---
+
+### Data
+
+The *Data* tab shows the data generated in the *Simulation* tab, where these data are also visualized in the plots. By changing any of the options in the 'Simulation' tab, a new data set will be generated and therefore the data in this tab will change. You can recover any generated data set by using the same seed and options (and generate a new data set with the same options by setting a different seed).
+
+#### Data format
+
+* **"Wide"**: The columns *y* and *x* indicate each entity in the dyad and rows indicate the measurement occasion (also clarified by column *t*). This formats *y* and *x* as if they were two time-invariant variables so it is not really wide-format as in that case there would be two rows for *y* and *x* and separate columns for each measurement occasion per entity which would be rather unclear.
+
+* **Long**: The column *t* indicates the measurement occasion, the column *entity* indicates the entity of the dyad and the column *value* indicates the value of the generated measurement. This format is especially useful to plot data with `ggplot`.
+
+#### Download data
+
+Downloads a CSV file named 'dyadicinteractions.csv' containing the data shown in the tab.

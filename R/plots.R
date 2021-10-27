@@ -63,16 +63,20 @@ plotsInputUI <- function(id){
                             withSpinner(plotOutput(ns("carryover"), height = "350px"))), ns = ns
     ),
     conditionalPanel(condition = "input.showSpilloverY | input.showSpilloverX",
-                     column(3, withSpinner(plotOutput(ns("spillover"), height = "350px"))), ns = ns
+                     column(3, h4("Spillover"),
+                            withSpinner(plotOutput(ns("spillover"), height = "350px"))), ns = ns
     ),
     conditionalPanel(condition = "input.showACFy | input.showACFx",
-                     column(3, withSpinner(plotOutput(ns("acf"), height = "350px"))), ns = ns
+                     column(3, h4("Autocorrelation function"),
+                            withSpinner(plotOutput(ns("acf"), height = "350px"))), ns = ns
     ),       
     conditionalPanel(condition = "input.showCCFy | input.showCCFx",
-                     column(3, withSpinner(plotOutput(ns("ccf"), height = "350px"))), ns = ns
+                     column(3, h4("Cross-correlation function"),
+                            withSpinner(plotOutput(ns("ccf"), height = "350px"))), ns = ns
     ),
     conditionalPanel(condition = "input.show3Dy | input.show3Dx", ns = ns,
-                     column(10, withSpinner(plotly::plotlyOutput(ns("plotly"))), height = 600)
+                     column(10, h4("3D state space"),
+                            withSpinner(plotly::plotlyOutput(ns("plotly"))), height = 600)
     )
     # conditionalPanel(condition = "input['intercept_y-plot'] & input['intercept_y-tv'] == 'tv' & input['method-model'] == 'TV'",
     #                  column(3, plotOutput(ns("alpha_y")))
@@ -219,7 +223,7 @@ plotstvServer <- function(id, t, tv){
     id,
     function(input, output, session){
       output$alpha_y <- renderPlot({
-        p <- myTSsimple(1:t(), tv$alpha_y$p(), ylab = bquote(Intercept ~ alpha[y*","*t]), shiny = T)
+        p <- myTSsimple(1:t(), tv$alpha_y$p(), ylab = bquote(Intercept ~ italic(alpha["y, t"])), shiny = T)
         # p <- myTVpars(list(alpha = tv$alpha_y$p(),
         #                    phi = tv$phi_y$p(),
         #                    beta = tv$beta_y$p()),
@@ -228,24 +232,24 @@ plotstvServer <- function(id, t, tv){
         return(p)
       })
       output$phi_y <- renderPlot({
-        p <- myTSsimple(1:t(), tv$phi_y$p(), ylab = bquote(Carryover ~ phi[y*","*t]), shiny = T)
+        p <- myTSsimple(1:t(), tv$phi_y$p(), ylab = bquote(Carryover ~ italic(phi["y, t"])), shiny = T)
         return(p)
       })
       output$beta_y <- renderPlot({
-        p <- myTSsimple(1:t(), tv$beta_y$p(), ylab = bquote(Spillover ~ beta[y*","*t]), shiny = T)
+        p <- myTSsimple(1:t(), tv$beta_y$p(), ylab = bquote(Spillover ~ italic(beta["y, t"])), shiny = T)
         return(p)
       })
       
       output$alpha_x <- renderPlot({
-        p <- myTSsimple(1:t(), tv$alpha_x$p(), ylab = bquote(Intercept ~ alpha[x*","*t]), shiny = T)
+        p <- myTSsimple(1:t(), tv$alpha_x$p(), ylab = bquote(Intercept ~ italic(alpha["x, t"])), shiny = T)
         return(p)
       })
       output$phi_x <- renderPlot({
-        p <- myTSsimple(1:t(), tv$phi_x$p(), ylab = bquote(Carryover ~ phi[x*","*t]), shiny = T)
+        p <- myTSsimple(1:t(), tv$phi_x$p(), ylab = bquote(Carryover ~ italic(phi["x, t"])), shiny = T)
         return(p)
       })
       output$beta_x <- renderPlot({
-        p <- myTSsimple(1:t(), tv$beta_x$p(), ylab = bquote(Spillover ~ beta[x*","*t]), shiny = T)
+        p <- myTSsimple(1:t(), tv$beta_x$p(), ylab = bquote(Spillover ~ italic(beta["x, t"])), shiny = T)
         return(p)
       })
     }

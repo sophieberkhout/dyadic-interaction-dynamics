@@ -50,7 +50,7 @@ formulaModelServer <- function(id, model, columnName){
         
         if(model() == "T") {
           formula_y <-
-            "$$ \\small{
+            "$$
              \\begin{aligned}
                 y_t = 
                 &\\begin{cases}
@@ -58,10 +58,10 @@ formulaModelServer <- function(id, model, columnName){
                 \\alpha_{y, 2} + \\phi_{y, 2} y_{t-1} + \\beta_{y, 2} x_{t-1} + \\zeta_{y, t} \\enspace \\text{if} \\: x_{t-1} > \\tau_y
                 \\end{cases}
              \\end{aligned}
-            } $$"
+             $$"
           
           formula_x <-
-            "$$ \\small{
+            "$$
               \\begin{aligned}
                 x_t =
                 &\\begin{cases}
@@ -69,7 +69,7 @@ formulaModelServer <- function(id, model, columnName){
                 \\alpha_{x, 2} + \\phi_{x, 2} x_{t-1} + \\beta_{x, 2} y_{t-1} + \\zeta_{x, t} \\enspace \\text{if} \\: y_{t-1} > \\tau_x
                 \\end{cases}
              \\end{aligned}
-            } $$"
+             $$"
           
           formula_z <- "$$ Z \\sim \\mathcal{N}(0, \\Sigma) $$"
           
@@ -349,25 +349,42 @@ formulaServer <- function(id, model,
           # )
           
           formula_z <- sprintf(
-            "\\begin{array}{c}
-              \\Sigma =
+            "$$ \\Sigma =
+              \\begin{align}
+              &\\begin{matrix}
+              y1 \\\\
+              x1
+              \\end{matrix}
               \\begin{bmatrix} 
               %1$.2f & %5$.2f  \\\\
               %5$.2f & %2$.2f 
               \\end{bmatrix}
+              \\begin{matrix}
+              y1 \\\\
+              x2
+              \\end{matrix}
               \\begin{bmatrix} 
               %1$.2f & %6$.2f  \\\\
               %6$.2f & %4$.2f 
               \\end{bmatrix} \\\\
+              &\\begin{matrix}
+              y2 \\\\
+              x1
+              \\end{matrix}
               \\begin{bmatrix} 
               %3$.2f & %7$.2f  \\\\
               %7$.2f & %2$.2f 
               \\end{bmatrix}
+              \\begin{matrix}
+              y2 \\\\
+              x2
+              \\end{matrix}
               \\begin{bmatrix} 
               %3$.2f & %8$.2f  \\\\
               %8$.2f & %4$.2f 
               \\end{bmatrix}
-             \\end{array}",
+             \\end{align}
+             $$",
             innovations$y(), innovations$x(), innovations_2$y(), innovations_2$x(),
             covs()$y1x1, covs()$y1x2, covs()$x1y2, covs()$y2x2
           )
@@ -409,7 +426,15 @@ formulaServer <- function(id, model,
             "\\begin{aligned}
               \\Sigma =
               \\begin{cases}
+              \\begin{matrix}
+              y1 \\\\
+              x1
+              \\end{matrix}
               \\begin{bmatrix} %1$.2f & %2$.2f \\\\ %2$.2f & %3$.2f \\end{bmatrix} \\\\
+              \\begin{matrix}
+              y2 \\\\
+              x2
+              \\end{matrix}
               \\begin{bmatrix} %4$.2f & %5$.2f \\\\ %5$.2f & %6$.2f \\end{bmatrix}
               \\end{cases}
              \\end{aligned}",
@@ -457,7 +482,15 @@ formulaServer <- function(id, model,
             "\\begin{aligned}
               \\Sigma =
               \\begin{cases}
+              \\begin{matrix}
+              y1 \\\\
+              x1
+              \\end{matrix}
               \\begin{bmatrix} %1$.2f & %2$.2f \\\\ %2$.2f & %3$.2f \\end{bmatrix} \\\\
+              \\begin{matrix}
+              y2 \\\\
+              x2
+              \\end{matrix}
               \\begin{bmatrix} %4$.2f & %5$.2f \\\\ %5$.2f & %6$.2f \\end{bmatrix}
               \\end{cases}
              \\end{aligned}",

@@ -158,7 +158,7 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
       ),
       column(3,
             radioButtons("dataFormat", "Choose data format",
-                         choices = list("Wide" = "wide", "Long" = "long")
+                         choices = list('"Wide"' = "wide", "Long" = "long")
             ),
             downloadButton("downloadData", "Download data")
       )
@@ -166,11 +166,14 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
   ),
   tabPanel("Info", value = "info",
            fluidRow(
-             column(6,
-                    includeMarkdown("info.Rmd")
+             column(4,
+                    sidebarPanel(includeMarkdown("info.Rmd"), width = 12)
              ),
-             column(6,
+             column(4,
                     includeMarkdown("help.Rmd")
+             ),
+             column(4,
+                    includeMarkdown("help_data.Rmd")
              )
            )
   )

@@ -4,52 +4,55 @@ output:
   html_fragment
 ---
 
-### Help
+### Simulations
 
 #### Method
 
-* Model:
+* **Model**:
 Which model to generate data from. Some models use different parameters, so the input menus may change accordingly.
 
-* Measurement occasions:
-The number of measurements over time ($t$).
+* **Measurement occasions**:
+The number of measurements over time ($t$). Note that at all times a burnin of 100 measurement occasions is used. This meanst that the first 100 generated data points are thrown away. This is used to eliminate influence of the initial value used to start the data generation (here the initial value is always $0$). 
 
-* Burnin:
-How many of the first generated data points to throw away. This is used to eliminate influence of the initial value used to start the data generation (here the initial value is always $0$). 
-
-* Seed:
+* **Seed**:
 Sets the seed which is used to create reproducible results.
 
-#### Parameters
+#### Regression coefficients
 
-* Intercept:
+* **Intercept $\alpha$**:
 The intercept is the expected mean value of a variable when all parameters equal $0$.
 
-* Carryover:
+* **Carryover $\phi$**:
 Carryover, or autoregression, is relation between the score of a variable at time point $t$ and a previous time point of that same variable.
 
-* Spillover:
+* **Spillover $\beta$**:
 Spillover, or cross-lagged regression, constitute the relation between a variable at time $t$ and a previous occasion $t-1$ of a different variable.
 
-* Innovations:
-The innovations represent the parts of a variable at time $t$ that cannot be predicted from the previous occasions.
+#### Innovation parameters
+The innovations represent the parts of a variable at time $t$ that cannot be predicted from the previous occasions. These are randomly generated with a multivariate normal distribution with mean $0$ and covariance matrix $\Sigma$.
+
+* **Variance y**: The variance for the innovations of $y$.
+
+* **Variance x**: The variance for the innovations of $x$.
+
+* **Correlation**: The correlation between the innovations of $y$ and $x$. Note that a covariance matrix is used to generate the innovations. Therefore the correlation is internally recomputed into covariance, using $Cov(y, x) = Cor(y, x) \sqrt{Var(y)Var(x)}$.
 
 #### Plots
 
-* Time-series:
+* **Time-series**:
 Plots the sequence of a variable against time.
 
-* Carryover state-space:
+* **Carryover state-space**:
 Plots a variable at time $t$ against itself at a previous occasion ($t - 1$).
 
-* Spillover state-space:
+* **Spillover state-space**:
 Plots a variable at time $t$ against another variable at a previous occasion ($t - 1$).
 
-* 3D state-space:
+* **3D state-space**:
 A combination of the time-series plot and the carryover state-space. The line connects each occasion to the next occasion to show how the sequence develops over time.
 
-* Autocorrelation function:
+* **Autocorrelation function**:
 Plots the autocorrelation of a variable for different time lags.
 
-* Cross-correlation function:
+* **Cross-correlation function**:
 Plots the cross-correlation of two variables for different time lags.
