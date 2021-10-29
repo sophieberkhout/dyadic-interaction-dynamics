@@ -31,13 +31,13 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
                           tabPanel("Regression coefficients",
                                    inputVARUI("yParameters")
                           ),
-                          tabPanel("Intercept",
+                          tabPanel(HTML("Intercept &#120572;"),
                                    tvUI("intercept_y", type = "num"),
                           ),
-                          tabPanel("Carryover",
+                          tabPanel(HTML("Carryover &#120601;"),
                                    tvUI("carryover_y"),
                           ),
-                          tabPanel("Spillover",
+                          tabPanel(HTML("Spillover &#120573;"),
                                    tvUI("spillover_y"),
                           ),
                           tabPanel("Means",
@@ -54,7 +54,7 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
                                hr(),
                                fluidRow(
                                  column(3,
-                                        numericInput("tau_y", "Threshold", 0)
+                                        numericInput("tau_y", HTML("Threshold &#120591;"), 0)
                                  )
                                ), ns = NS("method")
               )
@@ -68,13 +68,13 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
                 tabPanel("Regression coefficients",
                          inputVARUI("xParameters")
                 ),
-                tabPanel("Intercept",
+                tabPanel(HTML("Intercept &#120572;"),
                          tvUI("intercept_x", type = "num"),
                 ),
-                tabPanel("Carryover",
+                tabPanel(HTML("Carryover &#120601;"),
                          tvUI("carryover_x"),
                 ),
-                tabPanel("Spillover",
+                tabPanel(HTML("Spillover &#120573;"),
                          tvUI("spillover_x"),
                 ),
                 tabPanel("Means",
@@ -91,7 +91,7 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
                                hr(),
                                fluidRow(
                                  column(3,
-                                        numericInput("tau_x", "Threshold", 0)
+                                        numericInput("tau_x", HTML("Threshold &#120591;"), 0)
                                  )
                                ), ns = NS("method")
               )
@@ -167,13 +167,13 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
   tabPanel("Info", value = "info",
            fluidRow(
              column(4,
-                    sidebarPanel(includeMarkdown("info.Rmd"), width = 12)
-             ),
-             column(4,
                     includeMarkdown("help.Rmd")
              ),
              column(4,
                     includeMarkdown("help_data.Rmd")
+             ),
+             column(4,
+                    sidebarPanel(includeMarkdown("info.Rmd"), width = 12)
              )
            )
   )
@@ -191,12 +191,12 @@ server <- function(input, output, session) {
   observeEvent(method$model(), {
     hideTab("yTabs", target = "Second regime")
     hideTab("xTabs", target = "Second regime")
-    hideTab("yTabs", target = "Intercept")
-    hideTab("yTabs", target = "Carryover")
-    hideTab("yTabs", target = "Spillover")
-    hideTab("xTabs", target = "Intercept")
-    hideTab("xTabs", target = "Carryover")
-    hideTab("xTabs", target = "Spillover")
+    hideTab("yTabs", target = HTML("Intercept &#120572;"))
+    hideTab("yTabs", target = HTML("Carryover &#120601;"))
+    hideTab("yTabs", target = HTML("Spillover &#120573;"))
+    hideTab("xTabs", target = HTML("Intercept &#120572;"))
+    hideTab("xTabs", target = HTML("Carryover &#120601;"))
+    hideTab("xTabs", target = HTML("Spillover &#120573;"))
     hideTab("yTabs", target = "Regression coefficients")
     hideTab("xTabs", target = "Regression coefficients")
     hideTab("yTabs", target = "Means")
@@ -235,20 +235,20 @@ server <- function(input, output, session) {
     }
     
     if(method$model() == "TV"){
-      showTab("yTabs", "Intercept",
+      showTab("yTabs", HTML("Intercept &#120572;"),
                 select = T
       )
-      showTab("yTabs", "Carryover"
+      showTab("yTabs", HTML("Carryover &#120601;")
       )
-      showTab("yTabs", "Spillover"
+      showTab("yTabs", HTML("Spillover &#120573;")
       )
       
-      showTab("xTabs", "Intercept",
+      showTab("xTabs", HTML("Intercept &#120572;"),
                 select = T
       )
-      showTab("xTabs", "Carryover"
+      showTab("xTabs", HTML("Carryover &#120601;")
       )
-      showTab("xTabs", "Spillover"
+      showTab("xTabs", HTML("Spillover &#120573;")
       )
     }
     

@@ -4,7 +4,8 @@ output:
   html_fragment
 ---
 
-### Simulations
+### Simulation
+The *Simulation* tab generates dyadic data according to the options on top. Below follow descriptions of each of the options. Be aware that some options change when a different model is selected because the models may use different parameters.
 
 #### Method
 
@@ -23,10 +24,12 @@ Sets the seed which is used to create reproducible results.
 The intercept is the expected mean value of a variable when all parameters equal $0$.
 
 * **Carryover $\phi$**:
-Carryover, or autoregression, is relation between the score of a variable at time point $t$ and a previous time point of that same variable.
+Carryover, or autoregression, is relation between the score of a variable at time point $t$ and a previous time point of that same variable, and can range from $-1$ to $1$.
 
 * **Spillover $\beta$**:
-Spillover, or cross-lagged regression, constitute the relation between a variable at time $t$ and a previous occasion $t-1$ of a different variable.
+Spillover, or cross-lagged regression, constitute the relation between a variable at time $t$ and a previous occasion $t-1$ of a different variable, and can range from $-1$ to $1$.
+
+* **Threshold $\tau$**: Only for the Threshold VAR(1) model. The threshold is the cutoff value that determines the regime of the system. If the previous value of the other entity of the dyad falls below or is equal to the threshold value, then this entity moves to the first regime. When the previous value of the other entity is higher then the threshold, than this entity moves to the second regime.
 
 #### Innovation parameters
 The innovations represent the parts of a variable at time $t$ that cannot be predicted from the previous occasions. These are randomly generated with a multivariate normal distribution with mean $0$ and covariance matrix $\Sigma$.
@@ -36,6 +39,28 @@ The innovations represent the parts of a variable at time $t$ that cannot be pre
 * **Variance x**: The variance for the innovations of $x$.
 
 * **Correlation**: The correlation between the innovations of $y$ and $x$. Note that a covariance matrix is used to generate the innovations. Therefore the correlation is internally recomputed into covariance, using $Cov(y, x) = Cor(y, x) \sqrt{Var(y)Var(x)}$.
+
+#### Indicator
+Only for the latent VAR(1) model.
+
+* **Mean**: The mean of the indicator in the factor model. If one wants to specify a specific mean for the time-series of an entity then they should use this option and set the intercept in the regression coefficients to $0$.
+
+#### Second regime
+Only for the Threshold VAR(1), Hidden Markov, and Markov-switching VAR(1) models. A second set of parameters that are used to generate data when the system is in the second regime. If you do not want a parameter to be regime-switching, make sure that it has the same value as the first regime.
+
+#### Means
+Only for the Hidden Markov model.
+
+* **First regime**: Mean for the time-series of an entity when the first regime is active.
+
+* **Second regime**: Mean for the time-series of an entity when the second regime is active.
+
+#### Transition probabilities
+Only for the Hidden Markov and the Markov-switching VAR(1) model. The transition probabilities constitute the regime-switching transition matrix. 
+
+* **Stay in 1**: The probability of staying in the first regime, when the system was also in the first regime at the previous occasion. This probability automatically implies the probability **Switch to 2** as this is the probability of switching to the second regime when the system was in the first regime at the previous occasion (and there are only two regimes).
+
+* **Stay in 2**: The probability of staying in the second regime, when the system was also in the second regime at the previous occasion. This probability automatically implies the probability **Switch to 1** as this is the probability of switching to the first regime when the system was in the second regime at the previous occasion (and there are only two regimes).
 
 #### Plots
 

@@ -74,8 +74,8 @@ inputVARUI <- function(id){
                numericInput(ns("alpha"), HTML("Intercept &#120572;"), 0)
         )
       ),
-      sliderInput(ns("phi"), HTML("Carryover &#120573;"), -1, 1, .5, .1),
-      sliderInput(ns("beta"), HTML("Spillover &#120601;"), -1, 1, .2, .1)
+      sliderInput(ns("phi"), HTML("Carryover &#120601;"), -1, 1, .5, .1),
+      sliderInput(ns("beta"), HTML("Spillover &#120573;"), -1, 1, .2, .1)
     )
   )
 }
@@ -185,8 +185,7 @@ tvUI <- function(id, type = "slider"){
                                           ),
                                           ns = ns
                          ),
-                       ),
-                       checkboxInput(ns("plot"), "Plot parameter over time"), ns = ns
+                       ), ns = ns
       )
     )
   )

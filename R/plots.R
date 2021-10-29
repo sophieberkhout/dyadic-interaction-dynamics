@@ -223,7 +223,7 @@ plotstvServer <- function(id, t, tv){
     id,
     function(input, output, session){
       output$alpha_y <- renderPlot({
-        p <- myTSsimple(1:t(), tv$alpha_y$p(), ylab = bquote(Intercept ~ italic(alpha["y, t"])), shiny = T)
+        p <- myTSsimple(1:t(), tv$alpha_y$p(), ylab = bquote(Intercept ~ italic(alpha["y,t"])), shiny = T)
         # p <- myTVpars(list(alpha = tv$alpha_y$p(),
         #                    phi = tv$phi_y$p(),
         #                    beta = tv$beta_y$p()),
@@ -232,24 +232,24 @@ plotstvServer <- function(id, t, tv){
         return(p)
       })
       output$phi_y <- renderPlot({
-        p <- myTSsimple(1:t(), tv$phi_y$p(), ylab = bquote(Carryover ~ italic(phi["y, t"])), shiny = T)
+        p <- myTSsimple(1:t(), tv$phi_y$p(), ylab = bquote(Carryover ~ italic(phi["y,t"])), shiny = T)
         return(p)
       })
       output$beta_y <- renderPlot({
-        p <- myTSsimple(1:t(), tv$beta_y$p(), ylab = bquote(Spillover ~ italic(beta["y, t"])), shiny = T)
+        p <- myTSsimple(1:t(), tv$beta_y$p(), ylab = bquote(Spillover ~ italic(beta["y,t"])), shiny = T)
         return(p)
       })
       
       output$alpha_x <- renderPlot({
-        p <- myTSsimple(1:t(), tv$alpha_x$p(), ylab = bquote(Intercept ~ italic(alpha["x, t"])), shiny = T)
+        p <- myTSsimple(1:t(), tv$alpha_x$p(), ylab = bquote(Intercept ~ italic(alpha["x,t"])), shiny = T)
         return(p)
       })
       output$phi_x <- renderPlot({
-        p <- myTSsimple(1:t(), tv$phi_x$p(), ylab = bquote(Carryover ~ italic(phi["x, t"])), shiny = T)
+        p <- myTSsimple(1:t(), tv$phi_x$p(), ylab = bquote(Carryover ~ italic(phi["x,t"])), shiny = T)
         return(p)
       })
       output$beta_x <- renderPlot({
-        p <- myTSsimple(1:t(), tv$beta_x$p(), ylab = bquote(Spillover ~ italic(beta["x, t"])), shiny = T)
+        p <- myTSsimple(1:t(), tv$beta_x$p(), ylab = bquote(Spillover ~ italic(beta["x,t"])), shiny = T)
         return(p)
       })
     }
