@@ -175,7 +175,7 @@ TVAR1 <- function(occasions,
     regime_y[t] <- s_y
     regime_x[t] <- s_x
   }
-  dat <- data.frame(behavior_y = y, behavior_x = x, influence_y, influence_x, regime_y, regime_x)
+  dat <- data.frame(value_y = y, value_x = x, influence_y, influence_x, regime_y, regime_x)
   if(!longformat) names(dat)[1:2] <- c("y", "x") 
   return(dat)
 }

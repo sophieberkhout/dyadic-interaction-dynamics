@@ -7,17 +7,28 @@ myTS <- function(dat, partner = NULL, regime = F, regimeType = NULL,
                  xlim = NULL, ylim = NULL, cols = NULL, shiny = F, legend.position = NULL){
   
   if(is.null(xlim)) xlim <- dat$t
-  if(is.null(ylim)) ylim <- dat$behavior
+  if(is.null(ylim)) ylim <- dat$value
+  
+  if(regime){
+    # x_breaks <- pretty(xlim)
+    y_breaks <- pretty(ylim)
+    bottom <- min(as.numeric(y_breaks))
+    # bottom <- min(as.numeric(c(x_breaks, y_breaks)))
+    dat$secLab <- ifelse(dat$partner == "y", "2nd regime y", "2nd regime x")
+    dat$segY <- ifelse(dat$partner == "y", bottom, bottom + 0.1)
+  }
   
   if(is.null(cols)) pCols <- c("grey", "black") else pCols <- cols
   shinyCols <- viridis::viridis(2, begin = .4, end = .8, option = "A")
   
   if(is.null(partner)){
     if(shiny) pCols <- shinyCols
-    p <- ggplot(dat, aes(x = t, y = behavior, color = partner)) + 
-    geom_line(size = 1) +
-    labs(x = expression(italic("t")), y = "Measurement") + # measure
-    scale_color_manual(values = pCols)
+    # p <- ggplot(dat, aes(x = t, y = value, color = partner)) + 
+    #   geom_line(size = 1) +
+    p <- ggplot(dat) + 
+      geom_line(aes(x = t, y = value, color = partner), size = 1) +
+      labs(x = expression(italic("t")), y = "Value") + # measure
+      scale_color_manual(values = pCols)
   } else {
     dat <- dat[dat$partner == partner, ]
     
@@ -26,47 +37,66 @@ myTS <- function(dat, partner = NULL, regime = F, regimeType = NULL,
       if(partner == "x") pCols <- shinyCols[2]
     } else { pCols <- "black" }    
     
-    p <- ggplot(dat, aes(x = t, y = behavior)) + 
+    p <- ggplot(dat, aes(x = t, y = value)) + 
       labs(x = bquote(italic("t")), y = bquote(italic(.(partner)))) +
       geom_line(col = pCols, size = 1)
   }
   
   if(regime){
     if(is.null(partner)){
-      partners <- unique(dat$partner)
+      # partners <- unique(dat$partner)
       
-      regy <- dat[dat$partner == partners[1], c("t", "regime")]
-      regx <- dat[dat$partner == partners[2], c("t", "regime")]
+      # regy <- dat[dat$partner == partners[1], c("t", "regime")]
+      # regx <- dat[dat$partner == partners[2], c("t", "regime")]
       
-      fill <- rep("Both in 1", nrow(regy)) # make NA regimes white
-      fill[regy$regime == 2 & regx$regime == 1] <- "y in 2, x in 1"
-      fill[regx$regime == 2 & regy$regime == 1] <- "x in 2, y in 1"
-      fill[regy$regime == 2 & regx$regime == 2] <- "Both in 2"
-      fill[regy$regime == 1 & regx$regime == 1] <- "Both in 1"
+      # regy <- dat[dat$partner == partners[1], "regime"]
+      # regx <- dat[dat$partner == partners[2], "regime"]
+      # 
+      
+      # fill <- rep("Both in 1", nrow(regy)) # make NA regimes white
+      # fill[regy$regime == 2 & regx$regime == 1] <- "y in 2, x in 1"
+      # fill[regx$regime == 2 & regy$regime == 1] <- "x in 2, y in 1"
+      # fill[regy$regime == 2 & regx$regime == 2] <- "Both in 2"
+      # fill[regy$regime == 1 & regx$regime == 1] <- "Both in 1"
       
       colShades <- c("white", "black", shinyCols[2], shinyCols[1])
       
-      dfShades <- data.frame(tleft = dat$t - 0.5, tright = dat$t + 0.5, g = fill)
-      dat <- cbind(dat, dfShades)
-      shades <- geom_rect(aes(xmin = tleft, xmax = tright, fill = g), 
-                          ymin = -Inf, ymax = Inf, data = dat, color = NA, alpha = 0.05)
+      # dfShades <- data.frame(tleft = dat$t - 0.5, tright = dat$t + 0.5, g = fill)
+      # dat <- cbind(dat, dfShades)
+      # shades <- geom_rect(aes(xmin = tleft, xmax = tright, fill = g), 
+      #                     ymin = -Inf, ymax = Inf, data = dat, color = NA, alpha = 0.05)
       
       if(!is.null(regimeType)){
         if(regimeType == "shades"){
           p$layers <- c(shades, p$layers)
           p <- p + scale_fill_manual(values = colShades)        
         } else {
-          sameRegime <- all(regy$regime == regx$regime)
-          x_breaks <- pretty(xlim)
-          y_breaks <- pretty(ylim)
-          bottom <- min(as.numeric(c(x_breaks, y_breaks)))
+          # sameRegime <- all(regy$regime == regx$regime)
+          # sameRegime <- F
+          # seg <- data.frame(x = c(regy, regx), y = rep(c(bottom, bottom + 0.1), each = length(regy)),
+          #                   partner = dat$partner)
+          secReg <- which(dat$regime == 2)
+          dat$seg <- NA
+          dat$seg[secReg] <- dat$t[secReg]
+          sameRegime <- all(dat$regime[dat$partner == "y"] == dat$regime[dat$partner == "x"])
           if(!sameRegime){
+            pCols <- rep(pCols, 2)
             p <- p + 
-              annotate("point", x = regy$t[regy$regime == 2], y = bottom + 0.1, colour = pCols[2]) +
-              annotate("point", x = regx$t[regx$regime == 2], y = bottom, colour = pCols[1])
+              geom_point(aes(x = seg, y = segY, color = secLab), data = dat) +
+              scale_color_manual(values = pCols) +
+              guides(color = guide_legend(override.aes = list(shape = c(19, 19, NA, NA),
+                                                              linetype = c(0, 0, 1, 1)),
+                                          ncol = 2))
+              # annotate("point", x = regy$t[regy$regime == 2], y = bottom + 0.1, colour = pCols[2]) +
+              # annotate("point", x = regx$t[regx$regime == 2], y = bottom, colour = pCols[1])
           } else {
+            pCols <- c("black", pCols)
             p <- p + 
-              annotate("point", x = regy$t[regy$regime == 2], y = bottom, colour = "black")            
+              geom_point(aes(x = seg, y = bottom, color = "2nd regime"), data = dat) +
+              scale_color_manual(values = pCols) +
+              guides(color = guide_legend(override.aes = list(shape = c(19, NA, NA),
+                                                              linetype = c(0, 1, 1))))
+              # annotate("point", x = regy$t[regy$regime == 2], y = bottom, colour = "black")            
           }
         }
       }
@@ -78,7 +108,7 @@ myTS <- function(dat, partner = NULL, regime = F, regimeType = NULL,
     }
   }
   
-  p <- myTheme(p, x = xlim, y = ylim, shiny = shiny, legend.position = legend.position)
+  p <- myTheme(p, x = xlim, y = ylim, shiny = T, legend.position = legend.position, cols = pCols)
   
   if(!is.null(filename))  ggsave(filename, p, width = width, height = height)
   return(p)
@@ -88,7 +118,7 @@ mySSP <- function(dat, type, tau, partner = NULL,
                   filename = NULL, width = 5, height = 3,
                   xlim = NULL, ylim = NULL, shiny = F){
   t <- max(dat$t)
-  dat$lag1 <- c(NA, dat$behavior[-nrow(dat)])
+  dat$lag1 <- c(NA, dat$value[-nrow(dat)])
   dat$lag1[t+1] <- NA
   
   dat$spillover <- c(dat$lag1[(t+1):(t*2)], dat$lag1[1:t])
@@ -97,14 +127,14 @@ mySSP <- function(dat, type, tau, partner = NULL,
   
   if(is.null(partner)){
     if(type == "carryover"){
-      p <-  ggplot(dat, aes(x = lag1, y = behavior, color = partner)) +
+      p <-  ggplot(dat, aes(x = lag1, y = value, color = partner)) +
         geom_point(size = 2) + 
         scale_color_manual(values = c("grey", "black")) +
         labs(x = expression(italic("t-1")), y = expression(italic("t"))) +
         geom_smooth(method = "lm", se = F, fullrange = T)
     }
     if(type == "spillover"){
-      p <- ggplot(dat, aes(x = spillover, y = behavior, color = partner)) + 
+      p <- ggplot(dat, aes(x = spillover, y = value, color = partner)) + 
         geom_point(size = 2) +
         scale_color_manual(values = c("grey", "black"), 
                            labels = c(expression(paste("x"[t], " vs ", "y"[t-1])), expression(paste("y"[t], " vs ", "x"[t-1])))) +
@@ -123,22 +153,22 @@ mySSP <- function(dat, type, tau, partner = NULL,
     
     
     if(is.null(xlim)) xlim <- dat$spillover
-    if(is.null(ylim)) ylim <- dat$behavior
+    if(is.null(ylim)) ylim <- dat$value
     
     if(type == "carryover"){
-      p <-  ggplot(dat, aes(x = lag1, y = behavior)) +
+      p <-  ggplot(dat, aes(x = lag1, y = value)) +
         geom_point(size = 2, col = pCols) + 
         labs(x = bquote(italic(.(partner)["t-1"])), y = bquote(italic(.(partner)["t"]))) +
         geom_smooth(method = "lm", se = F, fullrange = T, color = pCols)
     }
     if(type == "spillover"){
-      p <- ggplot(dat, aes(x = spillover, y = behavior)) + 
+      p <- ggplot(dat, aes(x = spillover, y = value)) + 
         geom_point(size = 2, col = pCols) +
         labs(x = bquote(italic(.(other)["t-1"])), y = bquote(italic(.(partner)["t"]))) +
         geom_smooth(method = "lm", se = F, fullrange = T, color = pCols) 
     }
     if(type == "spillover_threshold"){
-      p <- ggplot(dat, aes(x = spillover, y = behavior, colour = regime)) + geom_point(size = 2) +
+      p <- ggplot(dat, aes(x = spillover, y = value, colour = regime)) + geom_point(size = 2) +
         scale_color_manual(values = c("gray50", "gray75")) +
         labs(x = bquote(italic(.(other)["t-1"])), y = bquote(italic(.(partner)["t"]))) +
         geom_smooth(data = dat[dat$regime == 1, ], method = "lm", se = F, 
@@ -150,8 +180,8 @@ mySSP <- function(dat, type, tau, partner = NULL,
     }
   }
   
-  if(is.null(xlim)) xlim <- dat$behavior
-  if(is.null(ylim)) ylim <- dat$behavior
+  if(is.null(xlim)) xlim <- dat$value
+  if(is.null(ylim)) ylim <- dat$value
   
   p <- myTheme(p, x = xlim, y = ylim, legend.position = legend.position, shiny)
   if(!is.null(filename))  ggsave(filename, p, width = width, height = height)
@@ -161,8 +191,8 @@ mySSP <- function(dat, type, tau, partner = NULL,
 myCCF <- function(dat, 
                   filename = NULL, width = 5, height = 3,
                   xlim = NULL, ylim = NULL, shiny = F){
-  cc <- ccf(subset(dat, partner == "y", select = "behavior"), 
-            subset(dat, partner == "x", select = "behavior"))
+  cc <- ccf(subset(dat, partner == "y", select = "value"), 
+            subset(dat, partner == "x", select = "value"))
   cc <- data.frame(lag = cc$lag, ccf = cc$acf)
   # cc <- cc[which(cc$lag == -10):which(cc$lag == 10), ]
   p <- ggplot(cc, aes(x = lag, y = ccf)) + 
@@ -183,8 +213,8 @@ myCF <- function(dat, type, partner = NULL,
   if(ptrue) ifelse(partner == "y", other <- "x", other <- "y")
   
   if(type == "ACF"){
-    ccy <- acf(subset(dat, partner == "y", select = "behavior"), plot = F)
-    ccx <- acf(subset(dat, partner == "x", select = "behavior"), plot = F)
+    ccy <- acf(subset(dat, partner == "y", select = "value"), plot = F)
+    ccx <- acf(subset(dat, partner == "x", select = "value"), plot = F)
     yLabs <- "ACF"
     if(ptrue){
       if(partner == "y"){
@@ -198,10 +228,10 @@ myCF <- function(dat, type, partner = NULL,
   }
   
   if(type == "CCF"){
-    ccy <- ccf(subset(dat, partner == "y", select = "behavior"), 
-               subset(dat, partner == "x", select = "behavior"), plot = F)
-    ccx <- ccf(subset(dat, partner == "x", select = "behavior"), 
-               subset(dat, partner == "y", select = "behavior"), plot = F)
+    ccy <- ccf(subset(dat, partner == "y", select = "value"), 
+               subset(dat, partner == "x", select = "value"), plot = F)
+    ccx <- ccf(subset(dat, partner == "x", select = "value"), 
+               subset(dat, partner == "y", select = "value"), plot = F)
     yLabs <- "CCF"
     if(ptrue){
       if(partner == "y"){
@@ -245,10 +275,10 @@ myInf <- function(dat, partner, tau,
   dat <- dat[dat$partner == partner, ]
   other <- ifelse(partner == "y", "x", "y")
   
-  if(is.null(xlim)) xlim <- dat$behavior
+  if(is.null(xlim)) xlim <- dat$value
   if(is.null(ylim)) ylim <- dat$influence
   
-  p <- ggplot(dat, aes(x = behavior, y = influence)) + geom_point(size = 2) +
+  p <- ggplot(dat, aes(x = value, y = influence)) + geom_point(size = 2) +
     geom_vline(xintercept = tau) + geom_hline(yintercept = 0) + 
     labs(x = bquote(italic(.(partner)[t-1])), y = bquote(italic(paste(beta[.(other)], .(partner)[t-1]))))
   p <- myTheme(p, x = xlim, y = ylim)
@@ -275,7 +305,7 @@ myTSsimple <- function(t, y, xlab = NULL, ylab = NULL,
 
 my3D <- function(dat, partner = NULL){
   t <- max(dat$t)
-  dat$lag1 <- c(NA, dat$behavior[-nrow(dat)])
+  dat$lag1 <- c(NA, dat$value[-nrow(dat)])
   dat$lag1[t+1] <- NA
   
   pCols <- viridis::viridis(2, begin = .4, end = .8, option = "A")
@@ -287,14 +317,14 @@ my3D <- function(dat, partner = NULL){
             size = 14)
   
   if(is.null(partner)){
-    p <- plot_ly(dat, x = ~t, y = ~lag1, z = ~behavior, color = dat$partner, colors = pCols,
+    p <- plot_ly(dat, x = ~t, y = ~lag1, z = ~value, color = dat$partner, colors = pCols,
                  type = "scatter3d", mode = "lines+markers",
                  line = list(width = 4),
                  marker = list(size = 4))
     partner <- "y/x"
   } else {
     dat <- dat[dat$partner == partner, ]
-    p <- plot_ly(dat, x = ~t, y = ~lag1, z = ~behavior,
+    p <- plot_ly(dat, x = ~t, y = ~lag1, z = ~value,
                  type = "scatter3d", mode = "lines+markers",
                  line = list(width = 4, color = pCols),
                  marker = list(size = 4, color = pCols))

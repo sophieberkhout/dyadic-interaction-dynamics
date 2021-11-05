@@ -10,21 +10,25 @@ The *Data* tab shows the data generated in the *Simulation* tab, where these dat
 
 #### Data format
 
-* **"Wide"**: The columns *y* and *x* indicate each entity in the dyad and rows indicate the measurement occasion (also clarified by column *t*). This formats *y* and *x* as if they were two time-invariant variables so it is not really wide-format as in that case there would be two rows for *y* and *x* and separate columns for each measurement occasion per entity which would be rather unclear.
+* **"Wide"**: The columns *y* and *x* indicate each partner in the dyad and rows indicate the measurement occasion (also clarified by column *t*). This formats *y* and *x* as if they were two time-invariant variables so it is not really wide-format as in that case there would be two rows for *y* and *x* and separate columns for each measurement occasion per partner which would be rather unclear.
 
-* **Long**: The column *t* indicates the measurement occasion, the column *entity* indicates the entity of the dyad and the column *value* indicates the value of the generated measurement. This format is especially useful to plot data with `ggplot`.
+* **Long**: The column *t* indicates the measurement occasion, the column *partner* indicates the partner of the dyad and the column *value* indicates the value of the generated measurement. This format is especially useful to plot data with `ggplot`.
 
 **Model specific columns**
 
-Time-varying(1)
+Time-varying VAR(1)
 
-* All time-varying regression coefficients are added as they might be useful to have. They are named after the mathematical symbol (Greek letter) followed by an underscore and then the entity to which the regression coefficient applies (e.g., $\alpha_{y,t}$ becomes `alpha_y`)
+* All time-varying regression coefficients are added as they might be useful to have. They are named after the mathematical symbol (Greek letter) followed by an underscore and then the partner to which the regression coefficient applies (e.g., $\alpha_{y,t}$ becomes `alpha_y`)
 
 Threshold VAR(1)
 
-* Influence: The influence one entity will have on the other. This is computed by multiplying the value of an entity by the regime-specific spillover regression coefficient ($\beta_{s_t}$). For example, `influence_y` is the influence that $y$ has had on $x$, i.e. $\beta_{x, s_t} y_{t-1}$ (CURRENTLY ACTUALLY $\beta_{x, s_{t+1}} y_{t}$, SHOULD CHANGE?)
+* Influence: The influence of a partner at a certain measurement occasion on the other partner for the next measurement occasion. This is computed by multiplying the value of a partner by the regime-specific spillover regression coefficient of the next measurement occasion ($\beta_{s_{t+1}}$). For example, `influence_y` is the influence that $y$ will have on $x$, i.e. $\beta_{x, s_{t+1}} y_{t}$.
 
-* Regime:
+* Regime: The regime of a partner at the current measurement occasion (can differ from the regime of the other partner in the dyad).
+
+Hidden Markov model and Regime-switching VAR(1)
+
+* Regime: The regime where both entities are in at the current measurement occasion. 
 
 #### Download data
 

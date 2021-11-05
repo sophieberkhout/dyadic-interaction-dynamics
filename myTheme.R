@@ -1,4 +1,4 @@
-myTheme <- function(p, x = NULL, y = NULL, legend.position = NULL, shiny = F){
+myTheme <- function(p, x = NULL, y = NULL, legend.position = NULL, shiny = F, cols = c("#8C2981FF", "#FE9F6DFF")){
   if(is.null(legend.position)) legend.position <- c(.15, .9)
   p <- p + 
     theme(panel.grid = element_blank(),
@@ -33,7 +33,7 @@ myTheme <- function(p, x = NULL, y = NULL, legend.position = NULL, shiny = F){
   
   if(shiny){
     legendLabels <- p$scales$scales[[1]]$labels
-    p <- p + scale_color_manual(values = viridis::viridis(2, begin = .4, end = .8, option = "A"),
+    p <- p + scale_color_manual(values = cols,
                                 labels = legendLabels)
 
     p <- p + theme(text = element_text(size = 20, family = "serif"),

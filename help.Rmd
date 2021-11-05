@@ -12,7 +12,15 @@ The *Simulation* tab generates dyadic data according to the options on top. Belo
 * **Model**:
 Which model to generate data from. Some models use different parameters, so the input menus may change accordingly.
 
-* **Measurement occasions**:
+  - *First-order vector autoregressive VAR(1).* The VAR(1) model is a linear model where multiple variables are regressed on themselves and the other variables at previous measurement occasions.
+  - *Latent VAR(1).* A latent VAR(1) model includes a measurement model to link observed variables (or indicators) to latent variables, where the latter are then modeled with a VAR(1) process. In this Shiny app, the latent VAR(1) model only includes one indicator per partner.
+  - *Time-varying VAR(1).* The time-varying VAR(1) model is similar to the linear VAR(1) model, except that now the parameters may vary over time. In this Shiny app, one can choose per regression coefficient per partner whether they stable or time-varying, where they can vary either linearly or according to a sine curve specified by the user.
+  - *Threshold VAR(1).* In a threshold VAR(1) model (TVAR(1) model), there are two or more regimes with varying carryover processes and regime-switching takes place based on the current value of a variable.
+  - *Hidden Markov model.* Hidden Markov modeling, also known as latent Markov modeling (LMM), involves a latent regime-switching process. Unlike the autoregressive models, HMM involves regime-switching with probabilities that determine which regime the system falls in given the regime of the previous observation.
+  - *Markov-switching VAR(1).* The Markov-switching VAR(1) model combines the HMM with the VAR(1) model, allowing for changes in parameters of the VAR(1) process according to Markov switches between states. <br>
+  ㅤ
+
+* **Measurement occasions**: 
 The number of measurements over time ($t$). Note that at all times a burnin of 100 measurement occasions is used. This meanst that the first 100 generated data points are thrown away. This is used to eliminate influence of the initial value used to start the data generation (here the initial value is always $0$). 
 
 * **Seed**:
@@ -29,7 +37,7 @@ Carryover, or autoregression, is relation between the score of a variable at tim
 * **Spillover $\beta$**:
 Spillover, or cross-lagged regression, constitute the relation between a variable at time $t$ and a previous occasion $t-1$ of a different variable, and can range from $-1$ to $1$.
 
-* **Threshold $\tau$**: Only for the Threshold VAR(1) model. The threshold is the cutoff value that determines the regime of the system. If the previous value of the other entity of the dyad falls below or is equal to the threshold value, then this entity moves to the first regime. When the previous value of the other entity is higher then the threshold, than this entity moves to the second regime.
+* **Threshold $\tau$**: Only for the Threshold VAR(1) model. The threshold is the cutoff value that determines the regime of the system. If the previous value of the other partner of the dyad falls below or is equal to the threshold value, then this partner moves to the first regime. When the previous value of the other partner is higher then the threshold, than this partner moves to the second regime.
 
 #### Innovation parameters
 The innovations represent the parts of a variable at time $t$ that cannot be predicted from the previous occasions. These are randomly generated with a multivariate normal distribution with mean $0$ and covariance matrix $\Sigma$.
@@ -43,7 +51,7 @@ The innovations represent the parts of a variable at time $t$ that cannot be pre
 #### Indicator
 Only for the latent VAR(1) model.
 
-* **Mean**: The mean of the indicator in the factor model. If one wants to specify a specific mean for the time-series of an entity then they should use this option and set the intercept in the regression coefficients to $0$.
+* **Mean**: The mean of the indicator in the factor model. If one wants to specify a specific mean for the time-series of a partner then they should use this option and set the intercept in the regression coefficients to $0$.
 
 #### Second regime
 Only for the Threshold VAR(1), Hidden Markov, and Markov-switching VAR(1) models. A second set of parameters that are used to generate data when the system is in the second regime. If you do not want a parameter to be regime-switching, make sure that it has the same value as the first regime.
@@ -51,9 +59,9 @@ Only for the Threshold VAR(1), Hidden Markov, and Markov-switching VAR(1) models
 #### Means
 Only for the Hidden Markov model.
 
-* **First regime**: Mean for the time-series of an entity when the first regime is active.
+* **First regime**: Mean for the time-series of a partner when the first regime is active.
 
-* **Second regime**: Mean for the time-series of an entity when the second regime is active.
+* **Second regime**: Mean for the time-series of a partner when the second regime is active.
 
 #### Transition probabilities
 Only for the Hidden Markov and the Markov-switching VAR(1) model. The transition probabilities constitute the regime-switching transition matrix. 
@@ -62,22 +70,23 @@ Only for the Hidden Markov and the Markov-switching VAR(1) model. The transition
 
 * **Stay in 2**: The probability of staying in the second regime, when the system was also in the second regime at the previous occasion. This probability automatically implies the probability **Switch to 1** as this is the probability of switching to the first regime when the system was in the second regime at the previous occasion (and there are only two regimes).
 
+***
 #### Plots
 
 * **Time-series**:
-Plots the sequence of a variable against time.
+Plots the sequence of a partner's values against time.
 
 * **Carryover state-space**:
-Plots a variable at time $t$ against itself at a previous occasion ($t - 1$).
+Plots a partner's value at time $t$ against itself at a previous occasion ($t - 1$).
 
 * **Spillover state-space**:
-Plots a variable at time $t$ against another variable at a previous occasion ($t - 1$).
+Plots a partner's value at time $t$ against the other partner's value at a previous occasion ($t - 1$).
 
 * **3D state-space**:
 A combination of the time-series plot and the carryover state-space. The line connects each occasion to the next occasion to show how the sequence develops over time.
 
 * **Autocorrelation function**:
-Plots the autocorrelation of a variable for different time lags.
+Plots the autocorrelation of a partner's values for different time lags.
 
 * **Cross-correlation function**:
-Plots the cross-correlation of two variables for different time lags.
+Plots the cross-correlation of both partner's values for different time lags.

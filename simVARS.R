@@ -79,7 +79,7 @@ simVARS <- function(occasions, burnin,
       }
       
       dat <- reshape(dat, varying = partners, 
-                     v.names = "behavior", timevar = "partner", 
+                     v.names = "value", timevar = "partner", 
                      idvar = "t", times = partners,
                      direction = "long", sep = "_")
     } else {

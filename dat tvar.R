@@ -29,7 +29,7 @@ dat.b <- simVARS(occasions = 300, burnin = 20,
                                     two = c(.1, .03, .1))
 )
 
-lim <- c(min(c(dat.a$behavior, dat.b$behavior)), max(c(dat.a$behavior, dat.b$behavior)))
+lim <- c(min(c(dat.a$value, dat.b$value)), max(c(dat.a$value, dat.b$value)))
 
 myTS(dat.a, ylim = lim)
 myTS(dat.a, ylim = lim, regime = T, regimeType = "points")

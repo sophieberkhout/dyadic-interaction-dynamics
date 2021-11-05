@@ -4,12 +4,12 @@ methodUI <- function(id){
   sidebarPanel(width = 5,
                h4("Method"),
                selectInput(ns("model"), "Data generating model",
-                           list("First-order Vector Autoregressive VAR(1)" = "VAR",
+                           list("First-order vector autoregressive VAR(1)" = "VAR",
                                 "Latent VAR(1)" = "L",
-                                "Time-Varying VAR(1)" = "TV",
+                                "Time-varying VAR(1)" = "TV",
                                 "Threshold VAR(1)" = "T",
-                                "Hidden Markov Model" = "HMM",
-                                "Markov-Switching VAR(1)" = "MS"), selected = "VAR", width = "95%"),
+                                "Hidden Markov model" = "HMM",
+                                "Markov-switching VAR(1)" = "MS"), selected = "VAR", width = "95%"),
                numericInput(ns("t"), "Measurement occasions", 300, min = 2, step = 50, width = "60%"), # 1 does not work
                # numericInput(ns("burnin"), "Burnin", 20, min = 0, step = 10, width = "60%"),
                numericInput(ns("seed"), "Seed", 1, min = 1, max = .Machine$integer.max, width = "60%")
