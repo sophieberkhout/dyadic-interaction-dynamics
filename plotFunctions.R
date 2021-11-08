@@ -44,37 +44,27 @@ myTS <- function(dat, partner = NULL, regime = F, regimeType = NULL,
   
   if(regime){
     if(is.null(partner)){
-      # partners <- unique(dat$partner)
-      
-      # regy <- dat[dat$partner == partners[1], c("t", "regime")]
-      # regx <- dat[dat$partner == partners[2], c("t", "regime")]
-      
-      # regy <- dat[dat$partner == partners[1], "regime"]
-      # regx <- dat[dat$partner == partners[2], "regime"]
-      # 
-      
-      # fill <- rep("Both in 1", nrow(regy)) # make NA regimes white
-      # fill[regy$regime == 2 & regx$regime == 1] <- "y in 2, x in 1"
-      # fill[regx$regime == 2 & regy$regime == 1] <- "x in 2, y in 1"
-      # fill[regy$regime == 2 & regx$regime == 2] <- "Both in 2"
-      # fill[regy$regime == 1 & regx$regime == 1] <- "Both in 1"
-      
-      colShades <- c("white", "black", shinyCols[2], shinyCols[1])
-      
-      # dfShades <- data.frame(tleft = dat$t - 0.5, tright = dat$t + 0.5, g = fill)
-      # dat <- cbind(dat, dfShades)
-      # shades <- geom_rect(aes(xmin = tleft, xmax = tright, fill = g), 
-      #                     ymin = -Inf, ymax = Inf, data = dat, color = NA, alpha = 0.05)
-      
       if(!is.null(regimeType)){
         if(regimeType == "shades"){
+          partners <- unique(dat$partner)
+          regy <- dat[dat$partner == partners[1], c("t", "regime")]
+          regx <- dat[dat$partner == partners[2], c("t", "regime")]
+          fill <- rep("Both in 1", nrow(regy)) # make NA regimes white
+          fill[regy$regime == 2 & regx$regime == 1] <- "y in 2, x in 1"
+          fill[regx$regime == 2 & regy$regime == 1] <- "x in 2, y in 1"
+          fill[regy$regime == 2 & regx$regime == 2] <- "Both in 2"
+          fill[regy$regime == 1 & regx$regime == 1] <- "Both in 1"
+
+          colShades <- c("white", "black", shinyCols[2], shinyCols[1])
+
+          dfShades <- data.frame(tleft = dat$t - 0.5, tright = dat$t + 0.5, g = fill)
+          dat <- cbind(dat, dfShades)
+          shades <- geom_rect(aes(xmin = tleft, xmax = tright, fill = g),
+                              ymin = -Inf, ymax = Inf, data = dat, color = NA, alpha = 0.05)
+
           p$layers <- c(shades, p$layers)
-          p <- p + scale_fill_manual(values = colShades)        
+          p <- p + scale_fill_manual(values = colShades)
         } else {
-          # sameRegime <- all(regy$regime == regx$regime)
-          # sameRegime <- F
-          # seg <- data.frame(x = c(regy, regx), y = rep(c(bottom, bottom + 0.1), each = length(regy)),
-          #                   partner = dat$partner)
           secReg <- which(dat$regime == 2)
           dat$seg <- NA
           dat$seg[secReg] <- dat$t[secReg]
@@ -87,8 +77,6 @@ myTS <- function(dat, partner = NULL, regime = F, regimeType = NULL,
               guides(color = guide_legend(override.aes = list(shape = c(19, 19, NA, NA),
                                                               linetype = c(0, 0, 1, 1)),
                                           ncol = 2))
-              # annotate("point", x = regy$t[regy$regime == 2], y = bottom + 0.1, colour = pCols[2]) +
-              # annotate("point", x = regx$t[regx$regime == 2], y = bottom, colour = pCols[1])
           } else {
             pCols <- c("black", pCols)
             p <- p + 
@@ -96,7 +84,6 @@ myTS <- function(dat, partner = NULL, regime = F, regimeType = NULL,
               scale_color_manual(values = pCols) +
               guides(color = guide_legend(override.aes = list(shape = c(19, NA, NA),
                                                               linetype = c(0, 1, 1))))
-              # annotate("point", x = regy$t[regy$regime == 2], y = bottom, colour = "black")            
           }
         }
       }
@@ -104,7 +91,9 @@ myTS <- function(dat, partner = NULL, regime = F, regimeType = NULL,
       dat2 <- dat[dat$regime == 2, ]
       shades <- annotate("rect", xmin = dat2$t - 0.5, xmax = dat2$t + 0.49,
                          ymin = -Inf, ymax = Inf, fill = "grey95")
-      p$layers <- c(shades, p$layers)    
+      p$layers <- c(shades, p$layers)
+      p <- p + geom_line(aes(alpha = "2nd regime")) +
+        guides(alpha = guide_legend(override.aes = list(size = 5, fill = "grey95")))
     }
   }
   
@@ -116,14 +105,15 @@ myTS <- function(dat, partner = NULL, regime = F, regimeType = NULL,
 
 mySSP <- function(dat, type, tau, partner = NULL,
                   filename = NULL, width = 5, height = 3,
-                  xlim = NULL, ylim = NULL, shiny = F){
+                  xlim = NULL, ylim = NULL, shiny = F,
+                  legend.position = NULL){
   t <- max(dat$t)
   dat$lag1 <- c(NA, dat$value[-nrow(dat)])
   dat$lag1[t+1] <- NA
   
   dat$spillover <- c(dat$lag1[(t+1):(t*2)], dat$lag1[1:t])
   
-  legend.position <- NULL
+  # legend.position <- NULL
   
   if(is.null(partner)){
     if(type == "carryover"){
@@ -139,7 +129,7 @@ mySSP <- function(dat, type, tau, partner = NULL,
         scale_color_manual(values = c("grey", "black"), 
                            labels = c(expression(paste("x"[t], " vs ", "y"[t-1])), expression(paste("y"[t], " vs ", "x"[t-1])))) +
         labs(x = expression(italic(t-1)), y = expression(italic(t)), color = "legend") +
-        geom_smooth(method = "lm", se = F, fullrange = T) 
+        geom_smooth(method = "lm", se = F, fullrange = T)
     }
   } else {
     dat <- dat[dat$partner == partner, ]

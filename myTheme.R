@@ -1,5 +1,5 @@
 myTheme <- function(p, x = NULL, y = NULL, legend.position = NULL, shiny = F, cols = c("#8C2981FF", "#FE9F6DFF")){
-  if(is.null(legend.position)) legend.position <- c(.15, .9)
+  if(!shiny & is.null(legend.position)) legend.position <- c(.15, .9)
   p <- p + 
     theme(panel.grid = element_blank(),
           axis.line = element_line(colour = "black", size = .75),
@@ -32,13 +32,14 @@ myTheme <- function(p, x = NULL, y = NULL, legend.position = NULL, shiny = F, co
   }
   
   if(shiny){
+    if(is.null(legend.position)) legend.position <- c(.1, .9)
     legendLabels <- p$scales$scales[[1]]$labels
     p <- p + scale_color_manual(values = cols,
                                 labels = legendLabels)
 
     p <- p + theme(text = element_text(size = 20, family = "serif"),
                    axis.text = element_text(size = 18),
-                   legend.position = c(.1, .9))
+                   legend.position = legend.position)
   }
   
   return(p)

@@ -78,28 +78,6 @@ plotsInputUI <- function(id){
                      column(10, h4("3D state space"),
                             withSpinner(plotly::plotlyOutput(ns("plotly"))), height = 600)
     )
-    # conditionalPanel(condition = "input['intercept_y-plot'] & input['intercept_y-tv'] == 'tv' & input['method-model'] == 'TV'",
-    #                  column(3, plotOutput(ns("alpha_y")))
-    # ),
-    # conditionalPanel(condition = "input['carryover_y-plot'] & input['carryover_y-tv'] == 'tv' & input['method-model'] == 'TV'",
-    #                  column(3, plotOutput(ns("phi_y")))
-    # ),
-    # conditionalPanel(condition = "input['spillover_y-plot'] & input['spillover_y-tv'] == 'tv' & input['method-model'] == 'TV'",
-    #                  column(3, plotOutput(ns("beta_y")))
-    #                  
-    # ),
-    # conditionalPanel(condition = "input['intercept_x-plot'] & input['intercept_x-tv'] == 'tv' & input['method-model'] == 'TV'",
-    #                  column(3, plotOutput(ns("alpha_x")))
-    #                  
-    # ),
-    # conditionalPanel(condition = "input['carryover_x-plot'] & input['carryover_x-tv'] == 'tv' & input['method-model'] == 'TV'",
-    #                  column(3, plotOutput(ns("phi_x")))
-    #                  
-    # ),
-    # conditionalPanel(condition = "input['spillover_x-plot'] & input['spillover_x-tv'] == 'tv' & input['method-model'] == 'TV'",
-    #                  column(3, plotOutput(ns("beta_x")))
-    #                  
-    # )
   )
 }
 
@@ -109,17 +87,21 @@ plotsServer <- function(id, dataFormat, model, t, dat, tv){
     function(input, output, session){
       output$ts <- renderPlot({
         req(dataFormat() == "long")
+        legend.position <- c(.05, .9)
+        if(input$showTSy && input$showTSx) partner <- NULL
+          else if(input$showTSy) partner <- "y"
+          else if(input$showTSx) partner <- "x"
         if(model() == "T" || model() == "MS" || model() == "HMM"){
           regime <- T
           regimeType <- "points"
+          if(is.null(partner) & model() == "T") legend.position <- c(.15, .9)
+            else legend.position <- c(.1, .9)
         } else {
           regime <- F
           regimeType <- NULL
         }
-        if(input$showTSy) p <- myTS(dat(), partner = "y", regime = regime, shiny = T)
-        if(input$showTSx) p <- myTS(dat(), partner = "x", regime = regime, shiny = T)
-        if(input$showTSy && input$showTSx) 
-          p <- myTS(dat(), regime = regime, regimeType = regimeType, shiny = T)
+        p <- myTS(dat(), partner = partner, regime = regime, regimeType = regimeType, 
+                  shiny = T, legend.position = legend.position)
         return(p)
       })
       
@@ -135,7 +117,8 @@ plotsServer <- function(id, dataFormat, model, t, dat, tv){
         req(dataFormat() == "long")
         if(input$showSpilloverY) p <- mySSP(dat(), partner = "y", type = "spillover", shiny = T)
         if(input$showSpilloverX) p <- mySSP(dat(), partner = "x", type = "spillover", shiny = T)
-        if(input$showSpilloverY && input$showSpilloverX) p <- mySSP(dat(), type = "spillover", shiny = T)
+        if(input$showSpilloverY && input$showSpilloverX) p <- mySSP(dat(), type = "spillover", shiny = T,
+                                                                    legend.position = c(.2, .9))
         return(p)
       })
 
@@ -162,32 +145,6 @@ plotsServer <- function(id, dataFormat, model, t, dat, tv){
         if(input$show3Dy && input$show3Dx) p <- my3D(dat())
         return(p)
       })
-
-      # output$alpha_y <- renderPlot({
-      #   p <- myTSsimple(1:t(), tv$alpha_y$p(), ylab = "Intercept y", shiny = T)
-      #   return(p)
-      # })
-      # output$phi_y <- renderPlot({
-      #   p <- myTSsimple(1:t(), tv$phi_y$p(), ylab = "Carryover y", shiny = T)
-      #   return(p)
-      # })
-      # output$beta_y <- renderPlot({
-      #   p <- myTSsimple(1:t(), tv$beta_y$p(), ylab = "Spillover y", shiny = T)
-      #   return(p)
-      # })
-      # 
-      # output$alpha_x <- renderPlot({
-      #   p <- myTSsimple(1:t(), tv$alpha_x$p(), ylab = "Intercept x", shiny = T)
-      #   return(p)
-      # })
-      # output$phi_x <- renderPlot({
-      #   p <- myTSsimple(1:t(), tv$phi_x$p(), ylab = "Carryover x", shiny = T)
-      #   return(p)
-      # })
-      # output$beta_x <- renderPlot({
-      #   p <- myTSsimple(1:t(), tv$beta_x$p(), ylab = "Spillover x", shiny = T)
-      #   return(p)
-      # })
     }
   )
 }
@@ -195,18 +152,6 @@ plotsServer <- function(id, dataFormat, model, t, dat, tv){
 
 plotstvUI <- function(id){
   ns <- NS(id)
-  # fluidRow(
-  #   column(6,
-  #   column(3, offset = 3, plotOutput(ns("alpha_y"), height = "250px")),
-  #   column(3, plotOutput(ns("phi_y"), height = "250px")),
-  #   column(3, plotOutput(ns("beta_y"), height = "250px"))
-  #   ),
-  #   column(6,
-  #   column(2, plotOutput(ns("alpha_x"), height = "250px")),
-  #   column(2, plotOutput(ns("phi_x"), height = "250px")),
-  #   column(2, plotOutput(ns("beta_x"), height = "250px"))
-  #   )
-  # )
   fluidRow(
    column(2, plotOutput(ns("alpha_y"), height = "200px")),
    column(2, plotOutput(ns("phi_y"), height = "200px")),
