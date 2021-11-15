@@ -127,6 +127,8 @@ TVAR1 <- function(occasions,
                   params_y, params_x,
                   z, longformat){
 
+  if(ncol(z) == 2) z <- list(z, z)
+  
   ifelse(length(params_y[[1]]) == 1,
          alpha_y <- rep(params_y[[1]], 2),
          alpha_y <- params_y[[1]])

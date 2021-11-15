@@ -2,7 +2,7 @@ library("ggplot2")
 library("plotly")
 source("myTheme.R")
 
-myTS <- function(dat, partner = NULL, regime = F, regimeType = NULL,
+myTS <- function(dat, partner = NULL, regime = F, regimeType = NULL, predicted = F,
                  filename = NULL, width = 5, height = 3,
                  xlim = NULL, ylim = NULL, cols = NULL, shiny = F, legend.position = NULL){
   
@@ -96,18 +96,47 @@ myTS <- function(dat, partner = NULL, regime = F, regimeType = NULL,
         guides(alpha = guide_legend(override.aes = list(size = 5, fill = "grey95")))
     }
   }
-  
-  p <- myTheme(p, x = xlim, y = ylim, shiny = T, legend.position = legend.position, cols = pCols)
+  if(predicted){
+    if(!regime) pCols <- rep(pCols, 2)
+    
+    ncol <- 2
+    
+    datPred <- data.frame(x = dat$t, y = dat$predicted, 
+                          color = rep(c("predicted x","predicted y"), each = nrow(dat)/2))
+    # alpha <- rep(c("predicted x", "predicted y"), nrow(dat)/2)
+    shape <- c(17, 17, NA, NA)
+    linetype <- c(0, 0, 1, 1)
+    if(regime) {
+      if(sameRegime) pCols <- c(pCols, pCols[2:3])
+      shape <- c(19, shape)
+      linetype <- c(0, linetype)
+      if(!sameRegime) {
+        ncol <- 3
+        pCols <- c(pCols[1:2], pCols)
+        shape <- c(19, shape)
+        linetype <- c(0, linetype)
+      }
+    }
+    p <- p + geom_point(aes(x = x, y = y, color = color), data = datPred, pch = 17) +
+      scale_color_manual(values = pCols) +
+      guides(color = guide_legend(override.aes = list(shape = shape,
+                                                      linetype = linetype),
+                                  ncol = ncol))
+  }
+  p <- myTheme(p, x = xlim, y = ylim, shiny, legend.position = legend.position, cols = pCols)
   
   if(!is.null(filename))  ggsave(filename, p, width = width, height = height)
   return(p)
 }
 
+
+
 mySSP <- function(dat, type, tau, partner = NULL,
                   filename = NULL, width = 5, height = 3,
                   xlim = NULL, ylim = NULL, shiny = F,
                   legend.position = NULL){
-  t <- max(dat$t)
+  
+  t <- nrow(dat)/2
   dat$lag1 <- c(NA, dat$value[-nrow(dat)])
   dat$lag1[t+1] <- NA
   
@@ -158,13 +187,15 @@ mySSP <- function(dat, type, tau, partner = NULL,
         geom_smooth(method = "lm", se = F, fullrange = T, color = pCols) 
     }
     if(type == "spillover_threshold"){
-      p <- ggplot(dat, aes(x = spillover, y = value, colour = regime)) + geom_point(size = 2) +
-        scale_color_manual(values = c("gray50", "gray75")) +
+      p <- ggplot(dat, aes(x = spillover, y = value)) + geom_point(size = 2) +
+        # scale_color_manual(values = c("black", "gray75")) +
         labs(x = bquote(italic(.(other)["t-1"])), y = bquote(italic(.(partner)["t"]))) +
         geom_smooth(data = dat[dat$regime == 1, ], method = "lm", se = F, 
-                    xseq = seq(min(dat$spillover, na.rm = T), tau, 0.01)) +
+                    xseq = seq(min(dat$spillover, na.rm = T), tau, 0.01), 
+                    color = "black") +
         geom_smooth(data = dat[dat$regime == 2, ], method = "lm", se = F, 
-                    xseq = seq(tau, max(dat$spillover, na.rm = T), 0.01)) +
+                    xseq = seq(tau, max(dat$spillover, na.rm = T), 0.01),
+                    color = "black") +
         geom_vline(xintercept = tau)
       legend.position <- "none"
     }
@@ -339,8 +370,9 @@ myTVpars <- function(tvFit, partner = NULL, shiny = F){
   
   if(!shiny) {
     plt <- oddsratio::no_plot(tvFit)
+    shift <- tvFit$coefficients[1]
     tvpars <- data.frame(x = c(plt[[1]]$x, plt[[2]]$x, plt[[3]]$x), 
-                         y = c(plt[[1]]$fit, plt[[2]]$fit, plt[[3]]$fit), 
+                         y = c(plt[[1]]$fit + shift, plt[[2]]$fit, plt[[3]]$fit), 
                          se = c(plt[[1]]$se, plt[[2]]$se, plt[[3]]$se),
                          p = rep(1:3, each = length(plt[[1]]$x)))
   } else {

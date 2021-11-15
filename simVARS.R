@@ -10,12 +10,12 @@ simVARS <- function(occasions, burnin,
   o_bi <- occasions + burnin # add burnin
   
   # COVARYING INNOVATIONS
-  if(type != "T"){
+  # if(type != "T"){
     ifelse(!is.list(innovations), covs <- innovations, covs <- innovations[[1]]) # get vector indicating (co)variances
     covs <- append(covs, covs[2], after = 2)
     m <- matrix(covs, 2, 2, dimnames = list(c("y", "x"), c("y", "x")))   # create covariance matrix
     z <- as.data.frame(MASS::mvrnorm(o_bi, c(0, 0), Sigma = m))          # simulate innovations for each occasion
-  }
+  # }
   
   # Markov-switching and HMM models have different variances between regimes
   if(type == "MS" | type == "HMM"){
