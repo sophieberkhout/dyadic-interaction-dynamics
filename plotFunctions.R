@@ -19,7 +19,7 @@ myTS <- function(dat, partner = NULL, regime = F, regimeType = NULL, predicted =
   }
   
   if(is.null(cols)) pCols <- c("grey", "black") else pCols <- cols
-  shinyCols <- viridis::viridis(2, begin = .4, end = .8, option = "A")
+  shinyCols <- viridis::viridis(2, begin = .8, end = .4, option = "A")
   
   if(is.null(partner)){
     if(shiny) pCols <- shinyCols
@@ -33,8 +33,8 @@ myTS <- function(dat, partner = NULL, regime = F, regimeType = NULL, predicted =
     dat <- dat[dat$partner == partner, ]
     
     if(shiny){
-      if(partner == "y") pCols <- shinyCols[1]
-      if(partner == "x") pCols <- shinyCols[2]
+      if(partner == "y") pCols <- shinyCols[2]
+      if(partner == "x") pCols <- shinyCols[1]
     } else { pCols <- "black" }    
     
     p <- ggplot(dat, aes(x = t, y = value)) + 
@@ -55,7 +55,7 @@ myTS <- function(dat, partner = NULL, regime = F, regimeType = NULL, predicted =
           fill[regy$regime == 2 & regx$regime == 2] <- "Both in 2"
           fill[regy$regime == 1 & regx$regime == 1] <- "Both in 1"
 
-          colShades <- c("white", "black", shinyCols[2], shinyCols[1])
+          colShades <- c("white", "black", shinyCols[1], shinyCols[2])
 
           dfShades <- data.frame(tleft = dat$t - 0.5, tright = dat$t + 0.5, g = fill)
           dat <- cbind(dat, dfShades)
@@ -143,32 +143,61 @@ mySSP <- function(dat, type, tau, partner = NULL,
   dat$spillover <- c(dat$lag1[(t+1):(t*2)], dat$lag1[1:t])
   
   # legend.position <- NULL
+  corxx <- round(cor(subset(dat, partner == "x", "value"), 
+                     subset(dat, partner == "x", "lag1"),  
+                     use = "complete.obs"), 3)
+  coryy <- round(cor(subset(dat, partner == "y", "value"), 
+                     subset(dat, partner == "y", "lag1"),  
+                     use = "complete.obs"), 3)
+  
+  corxy <- round(cor(subset(dat, partner == "x", "value"), 
+                     subset(dat, partner == "x", "spillover"),  
+                     use = "complete.obs"), 3)
+  coryx <- round(cor(subset(dat, partner == "y", "value"), 
+                     subset(dat, partner == "y", "spillover"),  
+                     use = "complete.obs"), 3)
   
   if(is.null(partner)){
     if(type == "carryover"){
+      labs <- c(bquote(paste(italic("x"), 
+                             "," ~italic("r")~"="~.(corxx))),
+                bquote(paste(italic("y"), 
+                             "," ~italic("r")~"="~.(coryy))))
+
       p <-  ggplot(dat, aes(x = lag1, y = value, color = partner)) +
         geom_point(size = 2) + 
-        scale_color_manual(values = c("grey", "black")) +
-        labs(x = expression(italic("t-1")), y = expression(italic("t"))) +
+        scale_color_manual(values = c("grey", "black"), labels = labs) +
+        labs(x = bquote(italic("t")*"-1"), y = expression(italic("t"))) +
         geom_smooth(method = "lm", se = F, fullrange = T)
     }
     if(type == "spillover"){
+      labs <- c(bquote(paste(italic("x"[t]) ~"vs" ~italic("y"[t])[-1], 
+                             "," ~italic("r")~"="~.(corxy))),
+                bquote(paste(italic("y"[t]) ~"vs" ~italic("x"[t])[-1], 
+                             "," ~italic("r")~"="~.(coryx))))
       p <- ggplot(dat, aes(x = spillover, y = value, color = partner)) + 
         geom_point(size = 2) +
         scale_color_manual(values = c("grey", "black"), 
-                           labels = c(expression(paste("x"[t], " vs ", "y"[t-1])), expression(paste("y"[t], " vs ", "x"[t-1])))) +
-        labs(x = expression(italic(t-1)), y = expression(italic(t)), color = "legend") +
+                           labels = labs) +
+        labs(x = bquote(italic(t)*"-1"), y = expression(italic(t)), color = "legend") +
         geom_smooth(method = "lm", se = F, fullrange = T)
     }
   } else {
     dat <- dat[dat$partner == partner, ]
     other <- ifelse(partner == "y", "x", "y")
-    
+    corDat <- data.frame(x = -Inf, y = Inf, hjust = -0.25, vjust = 2,
+                         corAuto = ifelse(partner == "y", coryy, corxx),
+                         corCross = ifelse(partner == "y", coryx, corxy))
+
     if(shiny){
-      pCols <- viridis::viridis(2, begin = .4, end = .8, option = "A")
-      if(partner == "y") pCols <- pCols[1]
-      if(partner == "x") pCols <- pCols[2]
-    } else { pCols <- "black" }
+      pCols <- viridis::viridis(2, begin = .8, end = .4, option = "A")
+      if(partner == "y") pCols <- pCols[2]
+      if(partner == "x") pCols <- pCols[1]
+      rSize <- 18 * 0.352777778
+    } else { 
+      pCols <- "black"
+      rSize <- 12 * 0.352777778
+    }
     
     
     if(is.null(xlim)) xlim <- dat$spillover
@@ -177,26 +206,48 @@ mySSP <- function(dat, type, tau, partner = NULL,
     if(type == "carryover"){
       p <-  ggplot(dat, aes(x = lag1, y = value)) +
         geom_point(size = 2, col = pCols) + 
-        labs(x = bquote(italic(.(partner)["t-1"])), y = bquote(italic(.(partner)["t"]))) +
-        geom_smooth(method = "lm", se = F, fullrange = T, color = pCols)
+        labs(x = bquote(italic(.(partner)["t"])[-1]), y = bquote(italic(.(partner)["t"]))) +
+        geom_smooth(method = "lm", se = F, fullrange = T, color = pCols) +
+        geom_text(data = corDat, size = rSize, parse = T,
+                  aes(x = x, y = y, hjust = hjust, vjust = vjust,
+                      label = list(bquote(paste(italic("r")~"="~.(corAuto))))))
     }
     if(type == "spillover"){
+      corPartner <- ifelse(partner == "y", coryx, corxy)
+      
       p <- ggplot(dat, aes(x = spillover, y = value)) + 
         geom_point(size = 2, col = pCols) +
-        labs(x = bquote(italic(.(other)["t-1"])), y = bquote(italic(.(partner)["t"]))) +
-        geom_smooth(method = "lm", se = F, fullrange = T, color = pCols) 
+        labs(x = bquote(italic(.(other)["t"])[-1]), y = bquote(italic(.(partner)["t"]))) +
+        geom_smooth(method = "lm", se = F, fullrange = T, color = pCols) +
+        geom_text(data = corDat, size = rSize, parse = T, 
+                  aes(x = x, y = y, hjust = hjust, vjust = vjust,
+                      label = list(bquote(paste(italic("r")~"="~.(corCross))))))
     }
     if(type == "spillover_threshold"){
+      corxy1 <- round(cor(subset(dat, regime == 1, "value"), 
+                          subset(dat, regime == 1, "spillover"),  
+                          use = "complete.obs"), 3)
+      corxy2 <- round(cor(subset(dat, regime == 2, "value"), 
+                          subset(dat, regime == 2, "spillover"),  
+                          use = "complete.obs"), 3)
+
+      corDat <- data.frame(x = c(tau, tau), y = c(Inf, Inf), hjust = c(1.25, -0.25), vjust = c(1.5, 1.5),
+                           corCross = c(corxy1, corxy2))
+      
       p <- ggplot(dat, aes(x = spillover, y = value)) + geom_point(size = 2) +
         # scale_color_manual(values = c("black", "gray75")) +
-        labs(x = bquote(italic(.(other)["t-1"])), y = bquote(italic(.(partner)["t"]))) +
+        labs(x = bquote(italic(.(other)["t"])[-1]), y = bquote(italic(.(partner)["t"]))) +
         geom_smooth(data = dat[dat$regime == 1, ], method = "lm", se = F, 
                     xseq = seq(min(dat$spillover, na.rm = T), tau, 0.01), 
                     color = "black") +
         geom_smooth(data = dat[dat$regime == 2, ], method = "lm", se = F, 
                     xseq = seq(tau, max(dat$spillover, na.rm = T), 0.01),
                     color = "black") +
-        geom_vline(xintercept = tau)
+        geom_vline(xintercept = tau) +
+        geom_text(data = corDat, size = rSize, parse = T, 
+                  aes(x = x, y = y, hjust = hjust, vjust = vjust,
+                      label = list(bquote(paste(italic("r")~"="~.(corCross[1]))),
+                                   bquote(paste(italic("r")~"="~.(corCross[2]))))))
       legend.position <- "none"
     }
   }
@@ -277,8 +328,15 @@ myCF <- function(dat, type, partner = NULL,
       geom_linerange(dat = cc, aes(ymin = 0, ymax = cf), size = 1.2, alpha = .8, position = position_dodge2(.2))
   } else {
     cc <- data.frame(lag = cc$lag, cf = cc$acf)
+    pCols <- "black"
+    if(shiny) {
+      pCols <- viridis::viridis(2, begin = .8, end = .4, option = "A")
+      if(partner == "y") pCols <- pCols[2]
+      if(partner == "x") pCols <- pCols[1]
+    }    
+    
     p <- ggplot(cc, aes(x = lag, y = cf)) + 
-      geom_linerange(dat = cc, aes(ymin = 0, ymax = cf))
+      geom_linerange(dat = cc, aes(ymin = 0, ymax = cf), size = 1.2, color = pCols)
   }
   
   p <- p + labs(x = "Lag", y = yLabs)
@@ -301,7 +359,7 @@ myInf <- function(dat, partner, tau,
   
   p <- ggplot(dat, aes(x = value, y = influence)) + geom_point(size = 2) +
     geom_vline(xintercept = tau) + geom_hline(yintercept = 0) + 
-    labs(x = bquote(italic(.(partner)[t-1])), y = bquote(italic(paste(beta[.(other)], .(partner)[t-1]))))
+    labs(x = bquote(italic(.(partner)[t])[-1]), y = bquote(paste(italic(beta[.(other)]), italic(.(partner)[t])[-1])))
   p <- myTheme(p, x = xlim, y = ylim)
   if(!is.null(filename))  ggsave(filename, p, width = width, height = height)
   return(p)
@@ -329,9 +387,9 @@ my3D <- function(dat, partner = NULL){
   dat$lag1 <- c(NA, dat$value[-nrow(dat)])
   dat$lag1[t+1] <- NA
   
-  pCols <- viridis::viridis(2, begin = .4, end = .8, option = "A")
+  pCols <- viridis::viridis(2, begin = .8, end = .4, option = "A")
   if(!is.null(partner)){
-    ifelse(partner == "y", pCols <- pCols[1], pCols <- pCols[2])
+    ifelse(partner == "y", pCols <- pCols[2], pCols <- pCols[1])
   }
   
   f <- list(family = "serif",
@@ -352,7 +410,7 @@ my3D <- function(dat, partner = NULL){
   }
   
   p <- layout(p, font = f, 
-              scene = list(yaxis = list(title = paste0("<i>", partner, "<sub>t-1</sub></i>"),
+              scene = list(yaxis = list(title = paste0("<i>", partner, "<sub>t</i>-1</sub>"),
                                         showgrid = F, showbackground = F, automargin = T),
                            xaxis = list(title = "<i>t</i>",
                                         showgrid = F, showbackground = F, automargin = T, autorange = "reversed"),

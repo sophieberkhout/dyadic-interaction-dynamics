@@ -23,14 +23,14 @@ formulaModelServer <- function(id, model, columnName){
         if(model() == "L") {
           formula_y <-
             "\\begin{aligned}
-                \\eta_{t} &= \\alpha_y + \\phi_y \\eta_{t-1} + \\beta_y \\chi_{t-1} + \\zeta_{y, t} \\\\
+                \\eta_{t} &= \\alpha_y + \\phi_y \\eta_{t-1} + \\beta_y \\xi_{t-1} + \\zeta_{y, t} \\\\
                 y_t &= \\mu_y + \\eta_{t} + \\varepsilon_{y, t}
              \\end{aligned}"
           
           formula_x <-
             "\\begin{aligned}
-                \\chi_{t} &= \\alpha_x + \\phi_x \\chi_{t-1} + \\beta_x \\eta_{t-1} + \\zeta_{x, t} \\\\
-                x_t &= \\mu_x + \\chi_{t} + \\varepsilon_{x, t}
+                \\xi_{t} &= \\alpha_x + \\phi_x \\xi_{t-1} + \\beta_x \\eta_{t-1} + \\zeta_{x, t} \\\\
+                x_t &= \\mu_x + \\xi_{t} + \\varepsilon_{x, t}
              \\end{aligned}"
           
           formula_z <-
@@ -254,7 +254,7 @@ formulaServer <- function(id, model,
         if(model() == "L") {
           formula_y <- sprintf(
             "\\begin{aligned}
-                \\eta_{t} &= %.1f + %.1f \\eta_{t-1} + %.1f \\chi_{t-1} + \\zeta_{y, t} \\\\
+                \\eta_{t} &= %.1f + %.1f \\eta_{t-1} + %.1f \\xi_{t-1} + \\zeta_{y, t} \\\\
                 y_t &= %.1f + \\eta_{t} + \\varepsilon_t
              \\end{aligned}", 
             params_y$alpha(), params_y$phi(), params_y$beta(), i_y$mean()
@@ -262,8 +262,8 @@ formulaServer <- function(id, model,
           
           formula_x <- sprintf(
             "\\begin{aligned}
-                \\chi_{t} &= %.1f + %.1f \\chi_{t-1} + %.1f \\eta_{t-1} + \\zeta_{x, t} \\\\
-                x_t &= %.1f + \\chi_{t} + \\varepsilon_t
+                \\xi_{t} &= %.1f + %.1f \\xi_{t-1} + %.1f \\eta_{t-1} + \\zeta_{x, t} \\\\
+                x_t &= %.1f + \\xi_{t} + \\varepsilon_t
              \\end{aligned}", 
             params_x$alpha(), params_x$phi(), params_x$beta(), i_x$mean()
           )

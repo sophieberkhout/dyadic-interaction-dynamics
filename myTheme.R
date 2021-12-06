@@ -1,4 +1,4 @@
-myTheme <- function(p, x = NULL, y = NULL, legend.position = NULL, shiny = F, cols = c("#8C2981FF", "#FE9F6DFF")){
+myTheme <- function(p, x = NULL, y = NULL, legend.position = NULL, shiny = F, cols = c("#FE9F6DFF", "#8C2981FF")){
   if(!shiny & is.null(legend.position)) legend.position <- c(.15, .9)
   p <- p + 
     theme(panel.grid = element_blank(),
@@ -11,6 +11,7 @@ myTheme <- function(p, x = NULL, y = NULL, legend.position = NULL, shiny = F, co
           legend.position = legend.position,
           legend.key = element_rect(fill = "transparent", size = 2),
           legend.background = element_rect(fill = "transparent"),
+          legend.text = element_text(size = 12),
           # legend.text = element_text(size = 12),
           legend.title = element_blank()
   )
@@ -39,6 +40,7 @@ myTheme <- function(p, x = NULL, y = NULL, legend.position = NULL, shiny = F, co
 
     p <- p + theme(text = element_text(size = 20, family = "serif"),
                    axis.text = element_text(size = 18),
+                   legend.text = element_text(size = 18),
                    legend.position = legend.position)
   }
   

@@ -13,7 +13,7 @@ plotsInputUI <- function(id){
                                  checkboxInput(ns("showTSx"), "x", value = T)
                           )
                  ),
-                 fluidRow(column(6, h5("Carryover")),
+                 fluidRow(column(6, h5("Scatter plot auto")),
                           column(3,
                                  checkboxInput(ns("showCarryoverY"), "y")
                           ),
@@ -21,7 +21,7 @@ plotsInputUI <- function(id){
                                  checkboxInput(ns("showCarryoverX"), "x")
                           )
                  ),
-                 fluidRow(column(6, h5("Spillover")),
+                 fluidRow(column(6, h5("Scatter plot cross-lagged")),
                           column(3,
                                  checkboxInput(ns("showSpilloverY"), "y")
                           ),
@@ -59,11 +59,11 @@ plotsInputUI <- function(id){
                             withSpinner(plotOutput(ns("ts"), height = "350px"))), ns = ns
     ),
     conditionalPanel(condition = "input.showCarryoverY | input.showCarryoverX",
-                     column(3,  h4("Carryover"),
+                     column(3,  h4("Scatter plot auto"),
                             withSpinner(plotOutput(ns("carryover"), height = "350px"))), ns = ns
     ),
     conditionalPanel(condition = "input.showSpilloverY | input.showSpilloverX",
-                     column(3, h4("Spillover"),
+                     column(3, h4("Scatter plot cross-lagged"),
                             withSpinner(plotOutput(ns("spillover"), height = "350px"))), ns = ns
     ),
     conditionalPanel(condition = "input.showACFy | input.showACFx",
@@ -109,7 +109,7 @@ plotsServer <- function(id, dataFormat, model, t, dat, tv){
         req(dataFormat() == "long")
         if(input$showCarryoverY) p <- mySSP(dat(), partner = "y", type = "carryover", shiny = T)
         if(input$showCarryoverX) p <- mySSP(dat(), partner = "x", type = "carryover", shiny = T)
-        if(input$showCarryoverY && input$showCarryoverX) p <- mySSP(dat(), type = "carryover", shiny = T)
+        if(input$showCarryoverY && input$showCarryoverX) p <- mySSP(dat(), type = "carryover", shiny = T, legend.position = c(.25, .9))
         return(p)
       })
 
@@ -118,7 +118,7 @@ plotsServer <- function(id, dataFormat, model, t, dat, tv){
         if(input$showSpilloverY) p <- mySSP(dat(), partner = "y", type = "spillover", shiny = T)
         if(input$showSpilloverX) p <- mySSP(dat(), partner = "x", type = "spillover", shiny = T)
         if(input$showSpilloverY && input$showSpilloverX) p <- mySSP(dat(), type = "spillover", shiny = T,
-                                                                    legend.position = c(.2, .9))
+                                                                    legend.position = c(.35, .9))
         return(p)
       })
 
