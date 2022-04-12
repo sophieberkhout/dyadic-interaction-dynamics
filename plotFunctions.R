@@ -133,7 +133,7 @@ myTS <- function(dat, partner = NULL, regime = F, regimeType = NULL, predicted =
 
 mySSP <- function(dat, type, tau, partner = NULL,
                   filename = NULL, width = 5, height = 3,
-                  xlim = NULL, ylim = NULL, shiny = F,
+                  xlim = NULL, ylim = NULL, shiny = F, cor = F,
                   legend.position = NULL){
   
   t <- nrow(dat)/2
@@ -159,10 +159,14 @@ mySSP <- function(dat, type, tau, partner = NULL,
   
   if(is.null(partner)){
     if(type == "carryover"){
-      labs <- c(bquote(paste(italic("x"), 
-                             "," ~italic("r")~"="~.(corxx))),
-                bquote(paste(italic("y"), 
-                             "," ~italic("r")~"="~.(coryy))))
+      if(cor) {
+        labs <- c(bquote(paste(italic("x"), 
+                               "," ~italic("r")~"="~.(corxx))),
+                  bquote(paste(italic("y"), 
+                               "," ~italic("r")~"="~.(coryy))))
+      } else {
+        labs <- c("x", "y")
+      }
 
       p <-  ggplot(dat, aes(x = lag1, y = value, color = partner)) +
         geom_point(size = 2) + 
@@ -171,10 +175,15 @@ mySSP <- function(dat, type, tau, partner = NULL,
         geom_smooth(method = "lm", se = F, fullrange = T)
     }
     if(type == "spillover"){
+      if(cor) {
       labs <- c(bquote(paste(italic("x"[t]) ~"vs" ~italic("y"[t])[-1], 
                              "," ~italic("r")~"="~.(corxy))),
                 bquote(paste(italic("y"[t]) ~"vs" ~italic("x"[t])[-1], 
                              "," ~italic("r")~"="~.(coryx))))
+      } else {
+        labs <- c(expression(paste("x"[t], " vs ", "y"[t-1])), 
+                  expression(paste("y"[t], " vs ", "x"[t-1])))
+      }
       p <- ggplot(dat, aes(x = spillover, y = value, color = partner)) + 
         geom_point(size = 2) +
         scale_color_manual(values = c("grey", "black"), 
@@ -207,10 +216,12 @@ mySSP <- function(dat, type, tau, partner = NULL,
       p <-  ggplot(dat, aes(x = lag1, y = value)) +
         geom_point(size = 2, col = pCols) + 
         labs(x = bquote(italic(.(partner)["t"])[-1]), y = bquote(italic(.(partner)["t"]))) +
-        geom_smooth(method = "lm", se = F, fullrange = T, color = pCols) +
-        geom_text(data = corDat, size = rSize, parse = T,
-                  aes(x = x, y = y, hjust = hjust, vjust = vjust,
-                      label = list(bquote(paste(italic("r")~"="~.(corAuto))))))
+        geom_smooth(method = "lm", se = F, fullrange = T, color = pCols)
+      if(cor){
+        p <- p + geom_text(data = corDat, size = rSize, parse = T,
+                           aes(x = x, y = y, hjust = hjust, vjust = vjust,
+                               label = list(bquote(paste(italic("r")~"="~.(corAuto))))))
+      }
     }
     if(type == "spillover"){
       corPartner <- ifelse(partner == "y", coryx, corxy)
@@ -218,10 +229,12 @@ mySSP <- function(dat, type, tau, partner = NULL,
       p <- ggplot(dat, aes(x = spillover, y = value)) + 
         geom_point(size = 2, col = pCols) +
         labs(x = bquote(italic(.(other)["t"])[-1]), y = bquote(italic(.(partner)["t"]))) +
-        geom_smooth(method = "lm", se = F, fullrange = T, color = pCols) +
-        geom_text(data = corDat, size = rSize, parse = T, 
-                  aes(x = x, y = y, hjust = hjust, vjust = vjust,
-                      label = list(bquote(paste(italic("r")~"="~.(corCross))))))
+        geom_smooth(method = "lm", se = F, fullrange = T, color = pCols)
+      if(cor){
+        p <- p + geom_text(data = corDat, size = rSize, parse = T, 
+                           aes(x = x, y = y, hjust = hjust, vjust = vjust,
+                               label = list(bquote(paste(italic("r")~"="~.(corCross))))))
+      }
     }
     if(type == "spillover_threshold"){
       corxy1 <- round(cor(subset(dat, regime == 1, "value"), 
@@ -243,11 +256,13 @@ mySSP <- function(dat, type, tau, partner = NULL,
         geom_smooth(data = dat[dat$regime == 2, ], method = "lm", se = F, 
                     xseq = seq(tau, max(dat$spillover, na.rm = T), 0.01),
                     color = "black") +
-        geom_vline(xintercept = tau) +
-        geom_text(data = corDat, size = rSize, parse = T, 
-                  aes(x = x, y = y, hjust = hjust, vjust = vjust,
-                      label = list(bquote(paste(italic("r")~"="~.(corCross[1]))),
-                                   bquote(paste(italic("r")~"="~.(corCross[2]))))))
+        geom_vline(xintercept = tau)
+      if(cor){
+        p <- p + geom_text(data = corDat, size = rSize, parse = T, 
+                           aes(x = x, y = y, hjust = hjust, vjust = vjust,
+                               label = list(bquote(paste(italic("r")~"="~.(corCross[1]))),
+                                            bquote(paste(italic("r")~"="~.(corCross[2]))))))
+      }
       legend.position <- "none"
     }
   }
@@ -461,5 +476,49 @@ myTVpars <- function(tvFit, partner = NULL, shiny = F){
   
   if(!shiny) p <- myTheme(p, x = tvpars$x, y = c(tvpars$y + tvpars$se, tvpars$y - tvpars$se))
   if(shiny)  p <- myTheme(p, x = tvpars$x, y = tvpars$y)
+  return(p)
+}
+
+myTVfit <- function(fit1, fit2, par) {
+  plt1 <- oddsratio::no_plot(fit1)
+  plt2 <- oddsratio::no_plot(fit2)
+  
+  shift1 <- shift2 <- 0
+  if(par == "alpha") {
+    shift1 <- fit1$coefficients[1]
+    shift2 <- fit2$coefficients[1]
+    labels <- c(bquote(alpha[y, t]), bquote(alpha[x, t]))
+    i <- 1
+  }
+  if(par == "phi") {
+    labels <- c(bquote(phi[y, t]), bquote(phi[x, t]))
+    i <- 2
+  }
+  if(par == "beta") {
+    labels <- c(bquote(beta[y, t]), bquote(beta[x, t]))
+    i <- 3
+  }
+  
+  
+  dat <- data.frame(x = c(plt2[[i]]$x, plt1[[i]]$x),
+                    y = c(plt2[[i]]$fit + shift2, plt1[[i]]$fit + shift1),
+                    se = c(plt2[[i]]$se, plt1[[i]]$se),
+                    p = rep(1:2, each = length(plt1[[1]]$x)))
+  
+  p <- ggplot(dat, aes(x = x, y = y, fill = as.factor(p), color = as.factor(p))) +
+    geom_segment(aes(x = min(dat$x), xend = max(dat$x), 
+                     y = 0, yend = 0), linetype = "dashed", color = "grey75") +
+    geom_line() +
+    geom_ribbon(aes(ymin = y - se,
+                    ymax = y + se,
+                    fill = as.factor(p),
+                    color = as.factor(p)),
+                alpha = .5) +
+    scale_color_manual(values = c("black", "grey"), labels = labels) +
+    scale_fill_manual(values = c("black", "grey"), labels = labels) +
+    labs(x = expression(italic("t")), y = "Parameter Value")
+  
+  p <- myTheme(p, x = dat$x, y = c(dat$y + dat$se, dat$y - dat$se))
+  
   return(p)
 }

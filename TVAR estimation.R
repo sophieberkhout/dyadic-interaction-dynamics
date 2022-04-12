@@ -1,6 +1,7 @@
-# enter dat (df with 2 columns, second column is threshold var)
-# To get the TVAR model as it is in our paper, see default
-# To get the same models Madhyastha used enter
+# TVAR estimation code adapted from Madhyastha et al (2011)
+# enter df with column "y" as dependent and column "x" as threshold variable
+# to estimate the TVAR model from our paper, use default
+# to estimate the models from Madhyastha et al (2011) use
 # for bilinear model: alpha = 1, phi = 1, beta = 2
 # for ojive model:    alpha = 2, phi = 1, beta = 0
 # for combi model:    alpha = 2, phi = 1, beta = 2
@@ -8,15 +9,13 @@ estTAR <- function(data, alpha = 2, phi = 2, beta = 2, minObs = 10) {
 
   dat <- data
   
-  # nTotal <- nrow(dat)
-  
-  dat$yL    <- c(NA, dat[-nrow(dat), 1])   # lag y variable
-  dat$xL    <- c(NA, dat[-nrow(dat), 2])   # lag x variable (thresholding variable)
+  dat$yL    <- c(NA, dat[-nrow(dat), "y"])   # lag y variable
+  dat$xL    <- c(NA, dat[-nrow(dat), "x"])   # lag x variable (thresholding variable)
   dat       <- na.omit(dat)        # remove first observations with NAs
-  n         <- nrow(dat)
+  n         <- nrow(dat)           # total number of observations
   dat$dummy <- rep(1, n)           # dummy variable for the intercept
   
-  dat <- dat[order(dat$xL), ] # order the data based on x_{t-1}
+  dat <- dat[order(dat$xL), ]   # order the data based on x_{t-1}
   
   minObs <- round(n / minObs)   # minimum % of observations in regime 1
   maxObs <- n - minObs          # maximum % of observations in regime 1
@@ -30,18 +29,34 @@ estTAR <- function(data, alpha = 2, phi = 2, beta = 2, minObs = 10) {
 
   # n   <- nrow(dat) # total number of observations without NAs
   
-  # create formula for the model (dependent on which parameter is regime-switching)
-  # y_t = alpha + phi * y_{t-1} + beta * x{t-1}
-  #     = dummy + yL + xL
-  dep <- colnames(dat)[1]
-  f     <- "~ 0"
-  if(alpha == 1) 
-    f_alpha <- "dummy" else f_alpha <- "dummy_1 + dummy_2"
-  if(phi == 1)
-    f_phi <- "yL" else f_phi <- "yL_1 + yL_2"
-  if(beta == 1)
-    f_beta <- "xL" else f_beta <- "xL_1 + xL_2"
+  # create formula for the model 
+  # (dependent on which parameter is regime-switching)
+  dep <- "y"
   
+  f     <- "~ 0"
+  if(alpha == 1) {
+    f_alpha <- "dummy"
+    c_alpha <- "alpha"
+  } else {
+    f_alpha <- "dummy_1 + dummy_2"
+    c_alpha <- c("alpha_1", "alpha_2")
+  }
+  if(phi == 1) {
+    f_phi <- "yL" 
+    c_phi <- "phi"
+  } else {
+    f_phi <- "yL_1 + yL_2"
+    c_phi <- c("phi_1", "phi_2")
+  }
+  if(beta == 1) {
+    f_beta <- "xL"
+    c_beta <- "beta"
+  } else {
+    f_beta <- "xL_1 + xL_2"
+    c_beta <- c("beta_1", "beta_2")
+  }
+  
+  # paste formula together
   # check if xL should be in the formula
   if(beta != 0)
     f <- as.formula(paste(dep, f, "+", f_alpha, "+", f_phi, "+", f_beta)) else
@@ -86,6 +101,14 @@ estTAR <- function(data, alpha = 2, phi = 2, beta = 2, minObs = 10) {
   # check which model fit best (lowest log likelihood)
   j <- which.min(ll)
   
+  # extract estimated coefficients
+  coefs <- sav[[j]]$coefficients
+  if(beta == 0) {
+    names(coefs) <- c(c_alpha, c_phi)
+  } else {
+    names(coefs) <- c(c_alpha, c_phi, c_beta)
+  }
+  
   # variable indicating which regime is active per measurement occasion
   reg <- as.numeric(data[, 2] < tau[j]) + 1
   
@@ -93,6 +116,7 @@ estTAR <- function(data, alpha = 2, phi = 2, beta = 2, minObs = 10) {
   pred <- numeric()
   pred[as.numeric(names(sav[[j]]$fitted.values))] <- sav[[j]]$fitted.values
   
-  return(list(threshold = tau[j], result = sav[[j]], regime = reg, predicted = pred))
+  return(list(threshold = tau[j], coefficients = coefs, result = sav[[j]], 
+              regime = reg, predicted = pred))
 }
 
