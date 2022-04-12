@@ -107,17 +107,17 @@ plotsServer <- function(id, dataFormat, model, t, dat, tv){
       
       output$carryover <- renderPlot({
         req(dataFormat() == "long")
-        if(input$showCarryoverY) p <- mySSP(dat(), partner = "y", type = "carryover", shiny = T)
-        if(input$showCarryoverX) p <- mySSP(dat(), partner = "x", type = "carryover", shiny = T)
-        if(input$showCarryoverY && input$showCarryoverX) p <- mySSP(dat(), type = "carryover", shiny = T, legend.position = c(.25, .9))
+        if(input$showCarryoverY) p <- mySSP(dat(), partner = "y", type = "carryover", cor = T, shiny = T)
+        if(input$showCarryoverX) p <- mySSP(dat(), partner = "x", type = "carryover", cor = T, shiny = T)
+        if(input$showCarryoverY && input$showCarryoverX) p <- mySSP(dat(), type = "carryover", cor = T, shiny = T, legend.position = c(.25, .9))
         return(p)
       })
 
       output$spillover <- renderPlot({
         req(dataFormat() == "long")
-        if(input$showSpilloverY) p <- mySSP(dat(), partner = "y", type = "spillover", shiny = T)
-        if(input$showSpilloverX) p <- mySSP(dat(), partner = "x", type = "spillover", shiny = T)
-        if(input$showSpilloverY && input$showSpilloverX) p <- mySSP(dat(), type = "spillover", shiny = T,
+        if(input$showSpilloverY) p <- mySSP(dat(), partner = "y", type = "spillover", cor = T, shiny = T)
+        if(input$showSpilloverX) p <- mySSP(dat(), partner = "x", type = "spillover", cor = T, shiny = T)
+        if(input$showSpilloverY && input$showSpilloverX) p <- mySSP(dat(), type = "spillover", cor = T, shiny = T,
                                                                     legend.position = c(.35, .9))
         return(p)
       })
