@@ -4,7 +4,8 @@ source("myTheme.R")
 
 myTS <- function(dat, partner = NULL, regime = F, regimeType = NULL, predicted = F,
                  filename = NULL, width = 5, height = 3,
-                 xlim = NULL, ylim = NULL, cols = NULL, shiny = F, legend.position = NULL){
+                 xlim = NULL, ylim = NULL, cols = NULL, shiny = F, 
+                 legend.position = NULL, textSize = c(14, 12)){
   
   if(is.null(xlim)) xlim <- dat$t
   if(is.null(ylim)) ylim <- dat$value
@@ -123,13 +124,12 @@ myTS <- function(dat, partner = NULL, regime = F, regimeType = NULL, predicted =
                                                       linetype = linetype),
                                   ncol = ncol))
   }
-  p <- myTheme(p, x = xlim, y = ylim, shiny, legend.position = legend.position, cols = pCols)
+  p <- myTheme(p, x = xlim, y = ylim, shiny = shiny, legend.position = legend.position, 
+               textSize = textSize, cols = pCols)
   
   if(!is.null(filename))  ggsave(filename, p, width = width, height = height)
   return(p)
 }
-
-
 
 mySSP <- function(dat, type, tau, partner = NULL,
                   filename = NULL, width = 5, height = 3,
@@ -270,8 +270,9 @@ mySSP <- function(dat, type, tau, partner = NULL,
   if(is.null(xlim)) xlim <- dat$value
   if(is.null(ylim)) ylim <- dat$value
   
-  p <- myTheme(p, x = xlim, y = ylim, legend.position = legend.position, shiny)
-  if(!is.null(filename))  ggsave(filename, p, width = width, height = height)
+  p <- myTheme(p, x = xlim, y = ylim, legend.position = legend.position, shiny = shiny)
+  
+  if(!is.null(filename))  ggsave(filename, p, width = width, height = height, device = "pdf")
   return(p)
 }
 

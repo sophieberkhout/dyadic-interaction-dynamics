@@ -1,0 +1,955 @@
+---
+title: "A Tool to Simulate and Visualize Dyadic Interaction Dynamics"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+---
+
+# Introduction
+
+This report accompanies the paper "A Tool to Simulate and Visualize Dyadic Interaction Dynamics" by Berkhout, Schuurman and Hamaker (manuscript). It illustrates how the models discussed in the paper can be estimated using two empirical examples.
+
+```{r echo = FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+```
+
+# Packages
+
+The following R packages are required to fit the models.
+
+* ``dynr``: to fit the VAR, latent VAR, and Markov-switching VAR models and the Hidden Markov model.
+* ``mgcv``: to fit the time-varying VAR model.
+
+Note that the ``dynr`` package requires some additional setup as it compiles C code. You will also need to install Rtools and GSL. You can find the installation manual for the package [here](https://cran.r-project.org/web/packages/dynr/vignettes/InstallationForUsers.pdf).
+
+Moreover, to fit the threshold VAR model we use adapted code from Madhyastha et al (2011) since there is no R package available at the time of writing that could estimate this model the way we describe in our paper.
+
+```{r}
+# only install packages if not already installed
+if (!require('dynr')) install.packages('dynr')
+if (!require('mgcv')) install.packages('mgcv')
+
+# load packages
+library("dynr")
+library("mgcv")
+library("tsDyn")
+
+# threshold VAR estimation code adapted from Madhyastha et al (2011)
+source("TVAR estimation.R")
+
+# functions from "plotFunctions.R" are used to create plots
+source("plotFunctions.R")
+```
+
+# Example 1: Rating Dial
+
+To illustrate the models discussed in our review, we apply them to empirical data retrieved from Butler and Barnard (2019), available at https://github.com/ebmtnprof/qid. The data consist of measurements from 74 couples who participated in a laboratory study where they were videotaped while discussing the importance of a healthy lifestyle with their partner. After their discussion, both partners rewatched the recording and used a dial to continuously indicate how they remembered feeling (from 0 to 5, where 0 represents negative and 5 positive feeling), and these measurements were aggregated into two-second units.
+
+The data contain the following information:
+
+* **couple**: an id given to each couple.
+* **person**: an id given to each person.
+* **time**: a variable indicating the measurement occasion (e.g., 1 means the first measurement).
+* **dial**: the continuous dial rating of a specific person at a specific measurement occasion.
+* **male/sub/stress**: time-invariant covariates that are not considered in this example.
+
+We analyze the data from couple #23. Both partners had a total of 227 measurement occasions.
+
+## Import rating dial data
+
+```{r}
+load("QID_exampleData.RData")
+
+# get a subset of the data with only couple #23
+idCouple <- 23
+dyad <- QID_exampleData[QID_exampleData$couple == idCouple, ]
+
+# create a data frame with only the dial measurements in wide format
+idPerson <- unique(dyad$person)
+df <- data.frame(x = dyad$dial[dyad$person == idPerson[1]], 
+                 y = dyad$dial[dyad$person == idPerson[2]])
+df <- na.omit(df) # omit any missing variables
+head(df)
+
+# for the plot functions, data in long format is required
+df_long         <- dyad[, c("person", "time", "dial")]
+names(df_long)  <- c("partner", "t", "value") # adjust column names for plotting
+df_long$partner <- ifelse(df_long$partner == idPerson[1], "x", "y") # call first person x and second y
+df_long$partner <- as.factor(df_long$partner)
+
+# for the dynr package it is useful to create an object with class "ts"
+df_ts   <- ts(df)
+rawData <- dynr.data(df_ts)
+```
+
+## Descriptive plots
+
+You can inspect the time-series, carryover and spillover state-space, and cross-correlation plots of the data before analyzing. As you can see the time-series plot illustrates that partner $y$ varied a lot more in their dial ratings and seemed the be feeling more negatively than partner $x$, while partner $x$ indicated to feel positive most of the time. From this plot, we could expect that there might be two different states, where in one state the dyad feels very positive, while in the other state the dyad feels neutral or even negative. The cross-correlation function shows that the cross-correlations tend to fluctuate across lags and seems to be overall higher for the negative lags, meaning that the cross-correlation is higher when $y$ precedes $x$. The state-space plots shows that the data really vary a lot. Moreover, the carryover state-space plot shows there is a positive carryover relation and that $y$ has two clusters around the middle and top right of the plot while $x$ only has a cluster in the top right. The spillover state-space plot shows that $y_{t-1}$ has only a small positive spillover to $x$ while $x_{t-1}$ has a larger spillover on $y$.
+
+```{r  echo=F, fig.show="hold", out.width="50%"}
+myTS(df_long, legend.position = c(.1, .15), filename =  "Plots/Butler/Descriptives/butler_ts.pdf")
+mySSP(df_long, "carryover", legend.position = c(.1, .85), filename =  "Plots/Butler/Descriptives/butler_ss.pdf")
+mySSP(df_long, "spillover", legend.position = c(.15, .15), filename =  "Plots/Butler/Descriptives/butler_sohw.pdf")
+myCF(df_long, "CCF", partner = "y", filename =  "Plots/Butler/Descriptives/butler_ccf.pdf")
+```
+
+## VAR(1)
+
+To fit the first-order vector autoregressive (VAR(1)) model, we use the ``dynr`` package. We chose this package as it offers a wide variety of modelling options, such as regime-switching, nonlinearity, and continuous time modeling (Ou et al., 2019).
+
+Before we can fit the model, we need to first 'prepare' each part of the model:
+
+* ``prep.measurement()``: with this function you specify how the latent (dynamic) variables are related to the observed variables. ``dynr`` assumes that the dynamic part of the model is represented within and between the latent variables. Since the VAR(1) model does not contain latent variables, we have to indicate that the model should treat the observed variables as the latent variables. We do this by giving `state.names` and `obs.names` the same names and by fixing the factor loadings to 1 and 0. 
+
+```{r}
+measVAR <- prep.measurement(
+  values.load = matrix(c(1, 0,
+                         0, 1), ncol = 2), # the loading matrix
+  params.load = matrix(rep("fixed", 4), ncol = 2), # fix the loadings so they are not freely estimated
+  state.names = c("x", "y"), # state.names identical to obs.names
+  obs.names   = c("x", "y")
+)
+```
+
+* ``prep.formulaDynamics()`` (or ``prep.matrixDynamics()``): with these functions you can specify the dynamics of the model (here we use the formula option, later we show how to use the matrix option for the HMM and MSVAR models). The formula defines what parameters need to be estimated (based on one-step-ahead prediction). The model also needs starting values for the estimation of these parameters. We choose to set all starting values for estimation to 0.01 because we want small starting values that do not equal zero.
+
+```{r}
+formVAR <- list(
+  x ~ alpha_x + phi_x * x + beta_x * y, # enter the formulas for both persons
+  y ~ alpha_y + phi_y * y + beta_y * x
+)
+
+dynmVAR <- prep.formulaDynamics(
+  formula          = formVAR, # starting values for the parameters in the formulas
+  startval         = c(alpha_x = .01, phi_x = .01, beta_x = .01,
+                       alpha_y = .01, phi_y = .01, beta_y = .01), 
+  isContinuousTime = FALSE # the VAR model uses discrete time
+)
+```
+
+* ``prep.initial()``: with this function you define the initial mean vector and covariance matrix of the latent variables estimates (assumed to be multivariate normally distributed over all measurement occasions). These are the starting points for the estimation procedure. You can indicate whether you want these initial values to be 'fixed' (like we do here) or if you want to estimate those too (in the latter case, you will also need to provide initial values and parameter names). 
+
+```{r}
+initVAR <- prep.initial(
+  values.inistate = rep(0, 2), # set initial means to zero
+  params.inistate = rep("fixed", 2), # fix the initial means so they are not estimated
+  values.inicov   = matrix(c(1, 0,
+                             0, 1), ncol = 2), # set the initial variances to 1 and covariances to 0
+  params.inicov   = matrix(rep("fixed", 4), ncol = 2) # fix the covariance matrix
+)
+```
+
+* ``prep.noise()``: with this function you define the covariance structure for the measurement noise and the latent (or dynamic) noise. Since we want a VAR(1) model without latent variables, we can only estimate dynamic noise. Therefore, we have to fix the measurement noise to zero. To estimate the dynamic (latent) noise, we need to provide initial values and parameter names.
+
+```{r}
+initNoise <- var(df) / 2
+
+noiseVAR <- prep.noise(
+  values.latent   = initNoise, # initial values dynamic noise
+  params.latent   = matrix(c("z_x",  "z_xy",
+                             "z_xy", "z_y"), ncol = 2, byrow = T), # parameter names dynamic noise
+  values.observed = diag(rep(0, 2)), # fix measurement noise to zero
+  params.observed = matrix(rep("fixed", 4), ncol = 2)
+)
+```
+
+Now, we can put all our model parts together using the function ``dynr.model()`` and estimate the model using the function ``dynr.cook()``. Note that the estimation process can take a while.
+
+If you are unsure whether you specified the model correctly, you can plot the formula using the function ``plotFormula()``.
+
+```{r}
+modVAR <- dynr.model(dynamics    = dynmVAR, 
+                     measurement = measVAR,
+                     noise       = noiseVAR, 
+                     initial     = initVAR, 
+                     data        = rawData)
+plotFormula(modVAR, modVAR$param.names)
+```
+
+```{r estimateVAR3, cache=T}
+resVAR <- dynr.cook(modVAR, verbose = FALSE, debug_flag = TRUE) # verbose = FALSE leaves out output during estimation
+```
+
+We can inspect the model parameters by using the ``summary()`` function.
+
+```{r}
+sumVAR <- summary(resVAR)
+sumVAR
+```
+
+Thus, the estimated formulas for $x$ and $y$ are
+
+\begin{align}
+x = `r round(sumVAR[[1]][[1]][1], 2)` + `r round(sumVAR[[1]][[1]][2], 2)` x_{t-1} + `r round(sumVAR[[1]][[1]][3], 2)` y_{t-1} \\
+y = `r round(sumVAR[[1]][[1]][4], 2)` + `r round(sumVAR[[1]][[1]][5], 2)` y_{t-1} + `r round(sumVAR[[1]][[1]][6], 2)` x_{t-1},
+\end{align}
+
+with innovations $\Sigma = \big(\begin{smallmatrix} `r round(sumVAR[[1]][[1]][7], 2)` & `r round(sumVAR[[1]][[1]][8], 2)`\\ `r round(sumVAR[[1]][[1]][8], 2)` & `r round(sumVAR[[1]][[1]][9], 2)`\end{smallmatrix}\big)$.
+
+We can inspect how well the model performed by looking at how close the predicted values are to the observed values.
+
+```{r echo=F}
+predVAR <- resVAR$eta_predicted
+predVAR[, 1] <- NA
+df_long$predicted <- c(predVAR[1, ], predVAR[2, ])
+
+myTS(df_long, predicted = T, legend.position = c(.2, .15), filename = "Plots/Butler/Predictions/butler_VAR.pdf", width = 6.67, height = 4, textSize = c(18.67, 12))
+```
+
+## Latent VAR(1)
+
+To fit the latent VAR(1) (LVAR(1)) model, we use the same ``dynr`` package as with the VAR(1) model. So, we again need to prepare several parts of the model before we can estimate it. For a more detailed explanation of these functions, we refer to the previous section.
+
+Since we now do want to have latent variables in our model, we now have to specify that ``state.names`` and ``obs.names`` are not the same. Moreover, it is possible to estimate factor loadings. However, with our data we only have one indicator per latent variable, therefore we choose to fix the loadings.
+
+```{r}
+measLVAR <- prep.measurement(
+  values.load = matrix(c(1, 0,
+                         0, 1), ncol = 2), 
+  params.load = matrix(rep("fixed", 4), ncol = 2), # fix the factor loadings
+  state.names = c("xi", "eta"), # different name for the states
+  obs.names   = c("x", "y"),
+  values.int = matrix(c(.01, .01), ncol = 1),
+  params.int = matrix(c("mu_x", "mu_y"), ncol = 1)
+)
+```
+
+The dynamics in the model take place within and between the latent variables. Therefore, we have to use the latent (state) names in the formula.
+
+```{r}
+formLVAR = list(
+  xi  ~ phi_x * xi  + beta_x * eta,
+  eta ~ phi_y * eta + beta_y * xi
+)
+
+dynmLVAR  <- prep.formulaDynamics(
+  formula          = formLVAR, # starting values for the parameters in the formulas
+  startval         = c(phi_x = .01, beta_x = .01,
+                       phi_y = .01, beta_y = .01), 
+  isContinuousTime = FALSE # the VAR model uses discrete time
+)
+```
+
+Similar to the VAR(1) model, we fix the initial mean and covariance matrix values.
+
+```{r}
+initLVAR <- prep.initial(
+  values.inistate = rep(0, 2),
+  params.inistate = rep("fixed", 2),
+  values.inicov   = matrix(c(1, 0,
+                             0, 1), ncol = 2),
+  params.inicov   = matrix(rep("fixed", 4), ncol = 2) # fix all initial values
+)
+```
+
+Since the latent VAR(1) allows us to estimate the measurement error, we have to indicate this by not fixing the ``params.observed``.
+
+```{r}
+initNoisePsi <- initNoise
+initNoisePsi[row(initNoisePsi) != col(initNoisePsi)] <- 0
+
+initNoiseSigma <- initNoise
+initNoiseSigma[row(initNoiseSigma) != col(initNoiseSigma)] <- 0
+
+noiseLVAR <- prep.noise(
+  values.latent   = initNoise * 0.25, 
+  params.latent   = matrix(c("sigma_x",  "sigma_xy",
+                             "sigma_xy", "sigma_y"), ncol = 2, byrow = T), 
+  values.observed = initNoisePsi * 0.25, 
+  params.observed = matrix(c("psi_x",  "fixed", 
+                             "fixed", "psi_y"), 
+                           ncol = 2, byrow = T) # estimate the measurement error
+)
+```
+
+Now we can esimate the model.
+
+```{r estimLVAR10, cache=T}
+modLVAR <- dynr.model(dynamics = dynmLVAR,  measurement = measLVAR,
+                      noise    = noiseLVAR, initial     = initLVAR, data = rawData)
+plotFormula(modLVAR, modLVAR$param.names)
+resLVAR <- dynr.cook(modLVAR, verbose = FALSE, debug_flag = TRUE)
+```
+
+```{r}
+sumLVAR <- summary(resLVAR)
+sumLVAR
+```
+
+The estimated formulas for $x$ and $y$ are
+
+\begin{align}
+x = `r round(sumLVAR[[1]][[1]][5], 2)` + `r round(sumLVAR[[1]][[1]][1], 2)` \xi_{t-1} + `r round(sumLVAR[[1]][[1]][2], 2)` \eta_{t-1} \\
+y = `r round(sumLVAR[[1]][[1]][6], 2)` + `r round(sumLVAR[[1]][[1]][3], 2)` \eta_{t-1} + `r round(sumLVAR[[1]][[1]][4], 2)` \xi_{t-1},
+\end{align}
+
+with innovations $\Sigma_\zeta = \big(\begin{smallmatrix} `r round(sumLVAR[[1]][[1]][7], 2)` & `r round(sumLVAR[[1]][[1]][8], 2)`\\ `r round(sumLVAR[[1]][[1]][8], 2)` & `r round(sumLVAR[[1]][[1]][9], 2)`\end{smallmatrix}\big)$ and measurement error $\Sigma_\varepsilon = \big(\begin{smallmatrix} `r round(sumLVAR[[1]][[1]][10], 2)` & 0 \\ 0 & `r round(sumLVAR[[1]][[1]][11], 2)`\end{smallmatrix}\big)$.
+
+The predicted versus observed values are shown in the plot below.
+
+```{r echo=F}
+predLVAR <- resLVAR$eta_predicted
+predLVAR[1, ] <- predLVAR[1, ] + resLVAR$fitted.parameters[5]
+predLVAR[2, ] <- predLVAR[2, ] + resLVAR$fitted.parameters[6]
+predLVAR[, 1] <- NA
+
+df_long$predicted <- c(predLVAR[1, ], predLVAR[2, ])
+myTS(df_long, predicted = T, legend.position = c(.2, .15), filename = "Plots/Butler/Predictions/butler_LVAR.pdf", width = 6.67, height = 4, textSize = c(18.67, 12))
+```
+
+## Time-varying VAR(1)
+
+The time-varying VAR(1) (TV-VAR(1)) is estimated using a different package, namely ``mgcv`` and we have to fit the model separately for $x$ and $y$. Moreover, we need to create lagged variables so we can use them as predictors in the model. We indicate that all parameters are time-varying by adding a smoothing function ``s()`` to all in the formula. One can also include stable, time-invariant parameters by leaving out the smooth function.
+
+Because this estimation method cannot estimate the model at multivariately (i.e., we need to fit two univariate models), it does not provide an estimate for the innovations covariance matrix $\Sigma$.
+
+```{r cache=T}
+df$x_l <- c(NA, df$x[-length(df$x)]) # create lag1 of x
+df$y_l <- c(NA, df$y[-length(df$y)]) # create lag1 of y
+tt <- 1:nrow(df)
+
+k <- 10
+
+resTVVAR_y <- gam(y ~ s(tt, k = k) + s(tt, by = y_l, k = k) + s(tt, by = x_l, k = k),
+                  data = df)
+resTVVAR_x <- gam(x ~ s(tt, k = k) + s(tt, by = x_l, k = k) + s(tt, by = y_l, k = k),
+                  data = df)
+```
+
+Now we can have a look at the results and plot the estimated parameters over time.
+
+```{r}
+sumTVy <- summary(resTVVAR_y)
+sumTVy
+sumTVx <- summary(resTVVAR_x)
+sumTVx
+```
+
+```{r echo=F, fig.show="hold", out.width="33%"}
+tvA <- myTVfit(resTVVAR_x, resTVVAR_y, par = "alpha")
+tvP <- myTVfit(resTVVAR_x, resTVVAR_y, par = "phi")
+tvB <- myTVfit(resTVVAR_x, resTVVAR_y, par = "beta")
+tvA
+tvP
+tvB
+ggsave("Plots/Butler/Predictions/tv/tvAlpha.pdf", tvA, width = 5, height = 3)
+ggsave("Plots/Butler/Predictions/tv/tvPhi.pdf", tvP, width = 5, height = 3)
+ggsave("Plots/Butler/Predictions/tv/tvBeta.pdf", tvB, width = 5, height = 3)
+```
+
+Time-invariance is measured by effective degrees of freedom (edf), which are the number of parameters needed to represent the smooth functions (Bringmann et al., 2017), where an edf of 1 or 2 can indicate either a horizontal time-invariant line or a linearly time-varying in- or decreasing line, and the higher the edf value the more time-varying the parameter (Bringmann et al., 2017). The plots of the parameters also show how the parameters change over time.
+
+Here, we see that for $y$, the intercept $\alpha_y$ is not significant but the edf does indicate it is time-varying. $\beta_y$ is both significant and time-varying, while $\phi_y$ is significant but not time-varying. For $x$, all parameters seem to be time-varying, and the spillover $\beta_x$ is the only not significant parameter.
+
+```{r echo=F}
+predTVVARy <- c(NA, resTVVAR_y$fitted.values)
+predTVVARx <- c(NA, resTVVAR_x$fitted.values)
+
+
+df_long$predicted <- c(predTVVARx, predTVVARy)
+myTS(df_long, predicted = T, legend.position = c(.2, .15), filename = "Plots/Butler/Predictions/butler_TV-VAR.pdf", width = 6.67, height = 4, textSize = c(18.67, 12))
+```
+
+## Threshold VAR(1)
+
+Also for the threshold VAR(1) we cannot use the ``dynr`` package, in this case we use code adapted from Madhyastha et al (2011) and we have to fit the models separately for $x$ and $y$. We created a function ``estTAR`` that estimates a univariate model. So, we want the model for $y$ to use $x$ as the threshold variable, and vice versa.
+
+Similar to the TV-VAR(1), innovations matrix $\Sigma$ is not estimated because we estimate are two univariate models.
+
+```{r estTVAR3, cache=T}
+resTVAR_y <- estTAR(df) # variable "y" is dependent and "x" is threshold
+df_x <- df
+names(df_x) <- c("y", "x") # change names to estimate model for "x"
+resTVAR_x <- estTAR(df_x)
+```
+
+We can inspect the estimated coefficients and see what proportion of the measurement occasions falls in the first and second regime.
+
+```{r}
+resTVAR_y$coefficients
+resTVAR_x$coefficients
+
+table(resTVAR_y$regime)/length(resTVAR_y$regime)
+table(resTVAR_x$regime)/length(resTVAR_x$regime)
+```
+
+So, $y$ falls into the second regime when $x > `r round(resTVAR_y[["threshold"]], 2)`$ and $x$ falls into the second regime when $y > `r round(resTVAR_x[["threshold"]], 2)`$.
+
+We can also visualize the predicted versus the observed values and the regimes per measurement occasions by adding these to the time-series plot.
+
+```{r echo=F}
+datTAR <- df_long
+
+# get the regimes per person per occasion
+datTAR$regime <- c(resTVAR_x$regime, resTVAR_y$regime)
+
+predTVARx <- resTVAR_x$predicted
+predTVARy <- resTVAR_y$predicted
+datTAR$predicted <- c(predTVARx, predTVARy)
+
+myTS(datTAR, regime = T, regimeType = "points", predicted = T, legend.position = c(.25, .25), filename = "Plots/Butler/Predictions/butler_TVAR.pdf", width = 6.67, height = 4, textSize = c(18.67, 12))
+```
+
+The points indicate when the second regime is active.
+
+## Hidden Markov model
+
+For the hidden Markov model, we can use the ``dynr`` package again. We need to make sure that the model does not include any dynamic parameters. We do this by fixing the dynamic parameters to zero.
+
+Creating regime-switching parameters is rather easy, as you just need to add a second matrix for the parameters in the second regime. Additionally, we now need to add another part of the model with ``prep.regimes`` which assigns the initial regime-switching probabilities.
+
+We need to specify that there are no latent variables in the model. We do this similarly to the VAR(1) model.
+
+```{r}
+measHMM <- prep.measurement(
+  values.load = matrix(c(1, 0, 
+                         0, 1), ncol = 2),
+  obs.names   = c("x", "y"),
+  state.names = c("x0", "y0"),
+  values.int = list(matrix(c(.1, .1), ncol = 1),
+                    matrix(c(.1, .1), ncol = 1)),
+  params.int = list(matrix(c("mu_x1", "mu_y1"), ncol = 1),
+                    matrix(c("mu_x2", "mu_y2"), ncol = 1))
+)
+```
+
+Here, we specify that we want the residual variances and covariances to only have one regime.
+
+```{r}
+noiseHMM <- prep.noise(
+  values.observed   = list(initNoise, initNoise),
+  params.observed   = list(matrix(c("e_x1",  "e_xy1",
+                                    "e_xy1", "e_y1"), ncol = 2, byrow = T),
+                           matrix(c("e_x2",  "e_xy2",
+                                    "e_xy2", "e_y2"), ncol = 2, byrow = T)),
+  values.latent = diag(0, 2),
+  params.latent = matrix(rep("fixed", 4), ncol = 2)
+)
+```
+
+We have to indicate that there are no dynamics in the model using the ``prep.formulaDynamics()`` function which we used before in the VAR(1) and latent VAR(1) models. Now we have to specify that there the dynamic part of the model is equal to zero.
+
+```{r}
+formHMM <- list(
+  list(
+    x0 ~ 0, # set dynamics of x and y to zero
+    y0 ~ 0
+  ),
+  list(
+    x0 ~ 0, # same for second regime
+    y0 ~ 0
+  )
+)
+
+dynmHMM <- prep.formulaDynamics(
+  formula          = formHMM, 
+  isContinuousTime = FALSE
+)
+```
+
+We only need to estimate the probabilities of staying in regime 1 ($\pi_{11}$) and of staying in regime 2 ($\pi_{22}$), because not staying in regime 1 means switching to regime 2 ($\pi_{12}$), and vice versa ($\pi_{21}$).
+
+```{r}
+regHMM <- prep.regimes(
+  values = diag(0.5, 2),
+  params = matrix(c("p11", "fixed", 
+                    "fixed", "p22"), ncol = 2, byrow = T)
+)
+```
+
+Again, we fix all initial conditions to zero, but note that we have to add two extra arguments ``values.regimep`` and ``params.regimep``.
+
+```{r}
+initHMM <- prep.initial(
+  values.inistate = rep(0, 2),
+  params.inistate = rep("fixed", 2),
+  values.inicov   = matrix(c(1, 0,
+                             0, 1), ncol = 2),
+  params.inicov   = matrix(rep("fixed", 4), ncol = 2),
+  values.regimep  = c(.5, .5),
+  params.regimep  = rep("fixed", 2)
+)
+```
+
+Estimate the model. 
+
+```{r estimateHMM5, cache=T}
+modHMM <- dynr.model(dynamics = dynmHMM, measurement = measHMM, noise = noiseHMM, 
+                     initial  = initHMM, regimes     = regHMM,  data  = rawData)
+plotFormula(modHMM, modHMM$param.names)
+resHMM <- dynr.cook(modHMM, verbose = FALSE, debug_flag = TRUE)
+```
+
+```{r fig.height=6}
+sumHMM <- summary(resHMM)
+sumHMM
+
+# percentage of observations in each regime
+perHMM <- table(apply(resHMM@pr_t_given_T, 2, which.max))/nrow(df)
+
+# transform to get the right probability
+p11HMM <- sumHMM$Coefficients["p11", 1] # estimated p11 parameter
+p22HMM <- sumHMM$Coefficients["p22", 1] # estimated p22 paramater
+p11HMM <- exp(p11HMM)/(exp(p11HMM) + exp(0)) # transform p11 to probability
+p22HMM <- exp(p22HMM)/(exp(p22HMM) + exp(0)) # transoform p22 to probability
+```
+
+There are `r round(perHMM[[1]] * 100)`% of the measurement occasions in the first regime, and `r round((1 - perHMM[[1]]) * 100)`% in the second regime.
+
+The estimated regime-switching probabilities are in logit format, so we have to do a transformation first to get the probabilities.
+
+When the dyad is in regime 1, it has a probability of `r round(p11HMM, 2)` to stay in regime 1 and a probability of `r round(1 - p11HMM, 2)` to switch to the second regime. When the dyad is in regime 2, it has a probability of `r round(p22HMM, 2)` to stay in the second regime and a probability of `r round(1 - p22HMM, 2)` to switch to the first regime.
+
+```{r echo=F}
+datHMM <- df_long
+
+# get regimes per occasion
+datHMM$regime <- apply(resHMM@pr_t_given_T, 2, which.max)
+
+# get predicted values
+p <- dynr.ggplot(resHMM, modHMM, style = 2, numSubjDemo = 1)
+predicted <- p$data[p$data$variable == "x.predicted" | p$data$variable == "y.predicted", "value"]
+predicted[c(1, (nrow(df) + 1))] <- NA
+datHMM$predicted <- predicted
+
+myTS(datHMM, regime = T, regimeType = "points", predicted = T, legend.position = c(.15, .20), filename = "Plots/Butler/Predictions/butler_HMM.pdf", width = 6.67, height = 4, textSize = c(18.67, 12))
+```
+
+## Markov-switching VAR(1)
+
+The Markov-switching VAR(1) (MS-VAR(1)) has regime-switching dynamic parameters. We can estimated this model by using the ``dynr`` package.
+
+There are no latent variables in this model, so we can indicate this similarly to the VAR(1) model.
+
+```{r}
+measMSVAR <- prep.measurement(
+  values.load = list(matrix(c(1, 0, 
+                              0, 1), ncol = 2),
+                     matrix(c(1, 0, 
+                              0, 1), ncol = 2)),
+  obs.names   = c("x", "y"),
+  state.names = c("x", "y")
+)
+```
+
+We want the noise to be regime dependent, meaning that each regime has its own covariance matrix $\Sigma_{s_t}$. We do this by making a list of two matrices with starting values and parameter names.
+
+```{r}
+noiseMSVAR <- prep.noise(
+  values.latent   = list(initNoise,
+                         initNoise),
+  params.latent   = list(matrix(c("z_x1",  "z_xy1",
+                                  "z_xy1", "z_y1"), ncol = 2, byrow = T),
+                         matrix(c("z_x2",  "z_xy2",
+                                  "z_xy2", "z_y2") ,ncol = 2, byrow = T)),
+  values.observed = diag(0, 2),
+  params.observed = matrix(rep("fixed", 4), ncol = 2)
+)
+```
+
+To specify the dynamics of the model, we use ``prep.matrixDynamics()``. Note that this is a different function that the ``prep.formulaDynamics()`` function used so far. We need to provide two matrices for the dynamic parameters and the intercept to indicate that the model needs to estimate different values for those parameters per regime.
+
+```{r}
+dynmMSVAR <- prep.matrixDynamics(
+  values.dyn = list(matrix(rep(.01, 4), ncol = 2), 
+                    matrix(rep(.01, 4), ncol = 2)),
+  params.dyn = list(matrix(c("phi_x1", "beta_x1", 
+                             "beta_y1", "phi_y1"), ncol = 2, byrow = T), 
+                    matrix(c("phi_x2", "beta_x2", 
+                             "beta_y2", "phi_y2"), ncol = 2, byrow = T)),
+  values.int = list(matrix(rep(.01, 2), ncol = 1), 
+                    matrix(rep(.01, 2), ncol = 1)),
+  params.int = list(matrix(c("alpha_x1", "alpha_y1"), ncol = 1), 
+                    matrix(c("alpha_x2", "alpha_y2"), ncol = 1)),
+  isContinuousTime = FALSE
+)
+```
+
+Similar to the HMM, we only have to estimate $\pi_{11}$ and $\pi_{22}$. 
+
+```{r}
+regMSVAR <- prep.regimes(
+  values = diag(0.5, 2),
+  params = matrix(c("p11", "fixed", 
+                    "fixed", "p22"), ncol = 2, byrow = T)
+)
+```
+
+And like all previous ``dynr`` models, we do not estimate the initial values.
+
+```{r}
+initMSVAR <- prep.initial(
+  values.inistate = rep(0, 2),
+  params.inistate = matrix(rep("fixed", 2), ncol = 1),
+  values.inicov   = matrix(c(1, 0, 
+                             0, 1), ncol = 2),
+  params.inicov   = matrix(rep("fixed", 4), ncol = 2),
+  values.regimep  = c(.5, .5),
+  params.regimep  = rep("fixed", 2)
+)
+```
+
+```{r estimateMSVAR4, cache=T}
+modMSVAR <- dynr.model(dynamics = dynmMSVAR, measurement = measMSVAR, noise = noiseMSVAR,
+                       initial  = initMSVAR, regimes     = regMSVAR,  data  = rawData)
+plotFormula(modMSVAR, modMSVAR$param.names)
+resMSVAR <- dynr.cook(modMSVAR, verbose = FALSE, debug_flag = TRUE)
+```
+
+```{r fig.height=6}
+sumMSVAR <- summary(resMSVAR)
+sumMSVAR
+
+# percentage of observations in each regime
+perMSVAR <- table(apply(resMSVAR@pr_t_given_T, 2, which.max))/nrow(df)
+
+# transform probabilities
+p11MSVAR <- sumMSVAR$Coefficients["p11", 1] # estimated p11 parameter
+p22MSVAR <- sumMSVAR$Coefficients["p22", 1] # estimated p22 parameter
+p11MSVAR <- exp(p11MSVAR)/(exp(p11MSVAR) + exp(0)) # transform p11 to probability
+p22MSVAR <- exp(p22MSVAR)/(exp(p22MSVAR) + exp(0)) # transform p22 to probability
+```
+
+There are `r round(perMSVAR[[1]] * 100)`% of the measurement occasions in the first regime, and `r round((1 - perMSVAR[[1]]) * 100)`% in the second regime.
+
+When the dyad is in regime 1, it has a probability of `r round(p11MSVAR, 2)` to stay in regime 1 and a probability of `r round(1 - p11MSVAR, 2)` to switch to the second regime. When the dyad is in regime 2, it has a probability of `r round(p22MSVAR, 2)` to stay in the second regime and a probability of `r round(1 - p22MSVAR, 2)` to switch to the first regime.
+
+```{r echo=F}
+datMSVAR <- df_long
+
+# get regime per occasion
+datMSVAR$regime <- apply(resMSVAR@pr_t_given_T, 2, which.max)
+
+predMSVAR <- resMSVAR$eta_predicted
+predMSVAR[, 1] <- NA
+datMSVAR$predicted <- c(predMSVAR[1, ], predMSVAR[2, ])
+
+myTS(datMSVAR, regime = T, regimeType = "points", predicted = T, legend.position = c(.15, .20), filename = "Plots/Butler/Predictions/butler_MSVAR.pdf", width = 6.67, height = 4, textSize = c(18.67, 12))
+```
+
+# Example 2: Daily Diary
+The second example uses data of a couple that rated positive affect items on a daily basis for 91 days (see Bringmann Et Al (2018); data are openly available at: https://www.researchgate.net/publication/323561134_data). The data consist of averages across 10 items for positive affect, where a score of 5 is high positive affect and a score of 1 is low positive affect, and contain the following columns:
+
+* **paf**: positive affect of the female.
+* **pam**: positive affect of the male.
+
+## Import daily diary data
+
+```{r}
+dat <- read.table("data.txt")
+
+# create a data frame with only the pa measurements in wide format
+df <- data.frame(x = dat$paf, 
+                 y = dat$pam)
+head(df)
+
+# for the plot functions, data in long format is required
+df_long         <- data.frame(partner = rep(c("x", "y"), each = nrow(df)),
+                              t = rep(1:nrow(df), 2),
+                              value = c(dat$paf, dat$pam))
+
+df_long$partner <- as.factor(df_long$partner)
+
+# for the dynr and tsDyn packages it is useful to create an object with class "ts"
+df_ts   <- ts(df)
+rawData <- dynr.data(df_ts)
+```
+
+## Descriptive plots
+```{r echo=F, fig.show="hold", out.width="50%"}
+myTS(df_long, legend.position = c(.1, .9), filename =  "Plots/Bringmann/Descriptives/bringmann_ts.pdf")
+mySSP(df_long, "carryover", legend.position = c(.1, .9), filename =  "Plots/Bringmann/Descriptives/bringmann_ss.pdf")
+mySSP(df_long, "spillover", legend.position = c(.15, .15), filename =  "Plots/Bringmann/Descriptives/bringmann_sohw.pdf")
+myCF(df_long, "CCF", partner = "y", filename =  "Plots/Bringmann/Descriptives/bringmann_ccf.pdf")
+```
+
+## VAR(1)
+The model specifications are similar to the VAR(1) model in example 1. However, since we use the variance of the data as initial values for the dynamic noise, we have to specify this separately.
+
+```{r}
+initNoise <- var(df) / 2 # take half of the variance in the data
+
+noiseVAR <- prep.noise(
+  values.latent   = initNoise, # initial values dynamic noise
+  params.latent   = matrix(c("z_x",  "z_xy",
+                             "z_xy", "z_y"), ncol = 2, byrow = T), # parameter names dynamic noise
+  values.observed = diag(rep(0, 2)), # fix measurement noise to zero
+  params.observed = matrix(rep("fixed", 4), ncol = 2)
+)
+
+modVAR <- dynr.model(dynamics    = dynmVAR, 
+                     measurement = measVAR,
+                     noise       = noiseVAR, 
+                     initial     = initVAR, 
+                     data        = rawData)
+plotFormula(modVAR, modVAR$param.names)
+```
+
+```{r estimateVAR_daily2, cache=T}
+resVAR <- dynr.cook(modVAR, verbose = FALSE, debug_flag = TRUE)
+```
+
+```{r}
+sumVAR <- summary(resVAR)
+sumVAR
+```
+
+The formulas for $x$ and $y$ are
+
+\begin{align}
+x = `r round(sumVAR[[1]][[1]][1], 2)` + `r round(sumVAR[[1]][[1]][2], 2)` x_{t-1} + `r round(sumVAR[[1]][[1]][3], 2)` y_{t-1} \\
+y = `r round(sumVAR[[1]][[1]][4], 2)` + `r round(sumVAR[[1]][[1]][5], 2)` y_{t-1} + `r round(sumVAR[[1]][[1]][6], 2)` x_{t-1},
+\end{align}
+
+with innovations $\Sigma = \big(\begin{smallmatrix} `r round(sumVAR[[1]][[1]][7], 2)` & `r round(sumVAR[[1]][[1]][8], 2)`\\ `r round(sumVAR[[1]][[1]][8], 2)` & `r round(sumVAR[[1]][[1]][9], 2)`\end{smallmatrix}\big)$.
+
+```{r ech=F}
+predVAR <- resVAR$eta_predicted
+predVAR[, 1] <- NA
+df_long$predicted <- c(predVAR[1, ], predVAR[2, ])
+
+myTS(df_long, predicted = T, legend.position = c(.75, .15), filename = "Plots/Bringmann/Predictions/bringmann_VAR.pdf", width = 6.67, height = 4, textSize = c(18.67, 12))
+```
+
+## Latent VAR(1) 
+
+```{r estimLVAR_daily7, cache=T}
+noiseLVAR <- prep.noise(
+  values.latent   = initNoise * 0.75,
+  params.latent   = matrix(c("z_x",  "z_xy",
+                             "z_xy", "z_y"), ncol = 2, byrow = T), 
+  values.observed = initNoise * 0.25,
+  params.observed = matrix(c("e_x",  "e_xy", 
+                             "e_xy", "e_y"), 
+                           ncol = 2, byrow = T) # estimate the measurement error
+)
+
+modLVAR <- dynr.model(dynamics = dynmLVAR,  measurement = measLVAR,
+                      noise    = noiseLVAR, initial     = initLVAR, data = rawData)
+plotFormula(modLVAR, modLVAR$param.names)
+resLVAR <- dynr.cook(modLVAR, verbose = FALSE, debug_flag = TRUE)
+```
+
+```{r}
+sumLVAR <- summary(resLVAR)
+sumLVAR
+```
+
+The estimated formulas for $x$ and $y$ are
+
+\begin{align}
+x = `r round(sumLVAR[[1]][[1]][5], 2)` + `r round(sumLVAR[[1]][[1]][1], 2)` \xi_{t-1} + `r round(sumLVAR[[1]][[1]][2], 2)` \eta_{t-1} \\
+y = `r round(sumLVAR[[1]][[1]][6], 2)` + `r round(sumLVAR[[1]][[1]][3], 2)` \eta_{t-1} + `r round(sumLVAR[[1]][[1]][4], 2)` \xi_{t-1},
+\end{align}
+
+with innovations $\Sigma_\zeta = \big(\begin{smallmatrix} `r round(sumLVAR[[1]][[1]][7], 2)` & `r round(sumLVAR[[1]][[1]][8], 2)`\\ `r round(sumLVAR[[1]][[1]][8], 2)` & `r round(sumLVAR[[1]][[1]][9], 2)`\end{smallmatrix}\big)$ and measurement error $\Sigma_\varepsilon = \big(\begin{smallmatrix} `r round(sumLVAR[[1]][[1]][10], 2)` & 0 \\ 0 & `r round(sumLVAR[[1]][[1]][11], 2)`\end{smallmatrix}\big)$.
+
+```{r echo=F}
+predLVAR <- resLVAR$eta_predicted
+predLVAR[1, ] <- predLVAR[1, ] + resLVAR$fitted.parameters[5]
+predLVAR[2, ] <- predLVAR[2, ] + resLVAR$fitted.parameters[6]
+predLVAR[, 1] <- NA
+
+df_long$predicted <- c(predLVAR[1, ], predLVAR[2, ])
+myTS(df_long, predicted = T, legend.position = c(.75, .15), filename = "Plots/Bringmann/Predictions/bringmann_LVAR.pdf", width = 6.67, height = 4, textSize = c(18.67, 12))
+```
+
+## Time-varying VAR(1)
+
+```{r cache=T}
+df$x_l <- c(NA, df$x[-length(df$x)]) # create lag1 of x
+df$y_l <- c(NA, df$y[-length(df$y)]) # create lag1 of y
+tt <- 1:nrow(df)
+
+k <- 10
+
+resTVVAR_y <- gam(y ~ s(tt, k = k) + s(tt, by = y_l, k = k) + s(tt, by = x_l, k = k),
+                  data = df)
+resTVVAR_x <- gam(x ~ s(tt, k = k) + s(tt, by = x_l, k = k) + s(tt, by = y_l, k = k),
+                  data = df)
+```
+
+Now we can have a look at the results and plot the estimated parameters over time.
+
+```{r}
+sumTVy <- summary(resTVVAR_y)
+sumTVy
+sumTVx <- summary(resTVVAR_x)
+sumTVx
+```
+
+```{r echo=F, fig.show="hold", out.width="33%"}
+tvA <- myTVfit(resTVVAR_x, resTVVAR_y, par = "alpha")
+tvP <- myTVfit(resTVVAR_x, resTVVAR_y, par = "phi")
+tvB <- myTVfit(resTVVAR_x, resTVVAR_y, par = "beta")
+tvA
+tvP
+tvB
+ggsave("Plots/Bringmann/Predictions/tv/tvAlpha.pdf", tvA, width = 5, height = 3)
+ggsave("Plots/Bringmann/Predictions/tv/tvPhi.pdf", tvP, width = 5, height = 3)
+ggsave("Plots/Bringmann/Predictions/tv/tvBeta.pdf", tvB, width = 5, height = 3)
+```
+
+Here, we see that for $y$, all parameters are significant and only $\phi_y$ is not time-varying, while for $x$ none of the parameters are significant.
+
+```{r echo=F}
+predTVVARy <- c(NA, resTVVAR_y$fitted.values)
+predTVVARx <- c(NA, resTVVAR_x$fitted.values)
+
+df_long$predicted <- c(predTVVARx, predTVVARy)
+myTS(df_long, predicted = T, legend.position = c(.75, .15), filename = "Plots/Bringmann/Predictions/bringmann_TV-VAR.pdf", width = 6.67, height = 4, textSize = c(18.67, 12))
+```
+
+## Threshold VAR(1)
+
+```{r estTVARdd2, cache=T}
+resTVAR_y <- estTAR(df) # variable "y" is dependent and "x" is threshold
+df_x <- df
+names(df_x) <- c("y", "x") # change names to estimate model for "x"
+resTVAR_x <- estTAR(df_x)
+```
+
+```{r}
+resTVAR_y$coefficients
+resTVAR_x$coefficients
+
+table(resTVAR_y$regime)/length(resTVAR_y$regime)
+table(resTVAR_x$regime)/length(resTVAR_x$regime)
+```
+
+So, $y$ falls into the second regime when $x > `r round(resTVAR_y[["threshold"]], 2)`$ and $x$ falls into the second regime when $y > `r round(resTVAR_x[["threshold"]], 2)`$.
+
+```{r echo=F}
+datTAR <- df_long
+
+# get the regimes per person per occasion
+datTAR$regime <- c(resTVAR_x$regime, resTVAR_y$regime)
+
+predTVARx <- resTVAR_x$predicted
+predTVARy <- resTVAR_y$predicted
+datTAR$predicted <- c(predTVARx, predTVARy)
+
+myTS(datTAR, regime = T, regimeType = "points", predicted = T, legend.position = c(.75, .15),  filename = "Plots/Bringmann/Predictions/bringmann_TVAR.pdf", width = 6.67, height = 4, textSize = c(18.67, 12))
+```
+
+The points indicate when the second regime is active.
+
+## Hidden Markov model
+
+```{r estimateHMM_daily4, cache=T}
+noiseHMM <- prep.noise(
+  values.observed   = list(initNoise, initNoise),
+  params.observed   = list(matrix(c("e_x1",  "e_xy1",
+                                    "e_xy1", "e_y1"), ncol = 2, byrow = T),
+                           matrix(c("e_x2",  "e_xy2",
+                                    "e_xy2", "e_y2"), ncol = 2, byrow = T)),
+  values.latent = diag(0, 2),
+  params.latent = matrix(rep("fixed", 4), ncol = 2)
+)
+
+modHMM <- dynr.model(dynamics = dynmHMM, measurement = measHMM, noise = noiseHMM, 
+                     initial  = initHMM, regimes     = regHMM,  data  = rawData)
+plotFormula(modHMM, modHMM$param.names)
+resHMM <- dynr.cook(modHMM, verbose = FALSE, debug_flag = TRUE)
+```
+
+```{r fig.height=6}
+sumHMM <- summary(resHMM)
+sumHMM
+
+# percentage of observations in each regime
+perHMM <- table(apply(resHMM@pr_t_given_T, 2, which.max))/nrow(df)
+
+# transform to get the right probability
+p11HMM <- sumHMM$Coefficients["p11", 1] # estimated p11 parameter
+p22HMM <- sumHMM$Coefficients["p22", 1] # estimated p22 paramater
+p11HMM <- exp(p11HMM)/(exp(p11HMM) + exp(0)) # transform p11 to probability
+p22HMM <- exp(p22HMM)/(exp(p22HMM) + exp(0)) # transoform p22 to probability
+```
+
+There are `r round(perHMM[[1]] * 100)`% of the measurement occasions in the first regime, and `r round((1 - perHMM[[1]]) * 100)`% in the second regime.
+
+When the dyad is in regime 1, it has a probability of `r round(p11HMM, 2)` to stay in regime 1 and a probability of `r round(1 - p11HMM, 2)` to switch to the second regime. When the dyad is in regime 2, it has a probability of `r round(p22HMM, 2)` to stay in the second regime and a probability of `r round(1 - p22HMM, 2)` to switch to the first regime.
+
+```{r echo=F}
+datHMM <- df_long
+
+# get regimes per occasion
+datHMM$regime <- apply(resHMM@pr_t_given_T, 2, which.max)
+
+# get predicted values
+p <- dynr.ggplot(resHMM, modHMM, style = 2, numSubjDemo = 1)
+predicted <- p$data[p$data$variable == "x.predicted" | p$data$variable == "y.predicted", "value"]
+predicted[c(1, (nrow(df) + 1))] <- NA
+datHMM$predicted <- predicted
+
+myTS(datHMM, regime = T, regimeType = "points", predicted = T, legend.position = c(.75, .15), filename = "Plots/Bringmann/Predictions/bringmann_HMM.pdf", width = 6.67, height = 4, textSize = c(18.67, 12))
+```
+
+## Markov-switching VAR(1)
+
+```{r estimateMSVAR_daily3, cache=T}
+noiseMSVAR <- prep.noise(
+  values.latent   = list(initNoise,
+                         initNoise),
+  params.latent   = list(matrix(c("z_x1",  "z_xy1",
+                                  "z_xy1", "z_y1"), ncol = 2, byrow = T),
+                         matrix(c("z_x2",  "z_xy2",
+                                  "z_xy2", "z_y2") ,ncol = 2, byrow = T)),
+  values.observed = diag(0, 2),
+  params.observed = matrix(rep("fixed", 4), ncol = 2)
+)
+
+modMSVAR <- dynr.model(dynamics = dynmMSVAR, measurement = measMSVAR, noise = noiseMSVAR,
+                       initial  = initMSVAR, regimes     = regMSVAR,  data  = rawData)
+plotFormula(modMSVAR, modMSVAR$param.names)
+resMSVAR <- dynr.cook(modMSVAR, verbose = FALSE, debug_flag = TRUE)
+```
+
+```{r fig.height=6}
+sumMSVAR <- summary(resMSVAR)
+sumMSVAR
+
+# percentage of observations in each regime
+perMSVAR <- table(apply(resMSVAR@pr_t_given_T, 2, which.max))/nrow(df)
+
+# transform probabilities
+p11MSVAR <- sumMSVAR$Coefficients["p11", 1] # estimated p11 parameter
+p22MSVAR <- sumMSVAR$Coefficients["p22", 1] # estimated p22 parameter
+p11MSVAR <- exp(p11MSVAR)/(exp(p11MSVAR) + exp(0)) # transform p11 to probability
+p22MSVAR <- exp(p22MSVAR)/(exp(p22MSVAR) + exp(0)) # transform p22 to probability
+```
+
+There are `r round(perMSVAR[[1]] * 100)`% of the measurement occasions in the first regime, and `r round((1 - perMSVAR[[1]]) * 100)`% in the second regime.
+
+When the dyad is in regime 1, it has a probability of `r round(p11MSVAR, 2)` to stay in regime 1 and a probability of `r round(1 - p11MSVAR, 2)` to switch to the second regime. When the dyad is in regime 2, it has a probability of `r round(p22MSVAR, 2)` to stay in the second regime and a probability of `r round(1 - p22MSVAR, 2)` to switch to the first regime.
+
+```{r echo=F}
+datMSVAR <- df_long
+
+# get regime per occasion
+datMSVAR$regime <- apply(resMSVAR@pr_t_given_T, 2, which.max)
+
+predMSVAR <- resMSVAR$eta_predicted
+predMSVAR[, 1] <- NA
+datMSVAR$predicted <- c(predMSVAR[1, ], predMSVAR[2, ])
+
+myTS(datMSVAR, regime = T, regimeType = "points", predicted = T, legend.position = c(.75, .15), filename = "Plots/Bringmann/Predictions/bringmann_MSVAR.pdf", width = 6.67, height = 4, textSize = c(18.67, 12))
+```
+
+# References
+Berkhout, S.W., Schuurman, N. L., Hamaker, E.L. (manuscript). Statistical Techniques for Analyzing Dyadic Interactions.
+
+Bringmann, L. F., Hamaker, E. L., Vigo, D. E., Aubert, A., Borsboom, D., & Tuerlinckx, F. (2017). Changing dynamics: Time-varying autoregressive models using generalized additive modeling. *Psychological Methods, 22*(3), 409–425. https://doi.org/10.1037/met0000085
+
+Bringmann, L. F., Pe, M. L., Vissers, N., Ceulemans, E., Borsboom, D., Vanpaemel, W., Tuerlinckx, F., & Kuppens, P. (2016). Assessing Temporal Emotion Dynamics Using Networks. *Assessment, 23*(4), 425–435. https://doi.org/10.1177/1073191116645909
+
+Butler, E. A., & Barnard, K. J. (2019). Quantifying Interpersonal Dynamics for Studying Socio-Emotional Processes and Adverse Health Behaviors. *Psychosomatic Medicine, 81*(8), 749–758. https://doi.org/10.1097/PSY.0000000000000703
+
+Madhyastha, T. M., Hamaker, E. L., & Gottman, J. M. (2011). Investigating Spousal Influence using Moment-to-Moment Affect Data from Marital Conflict. *Journal of Family Psychology, 25(2)*, 292–300. https://doi.org/10.1037/a0023028
+
+Ou, L., Hunter, M., D., & Chow, S.-M. (2019). Whats for dynr: A Package for Linear and Nonlinear Dynamic Modeling in R. *The R Journal, 11*(1), 91. https://doi.org/10.32614/RJ-2019-012
+
+
