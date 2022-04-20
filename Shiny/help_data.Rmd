@@ -32,4 +32,4 @@ Hidden Markov model and Regime-switching VAR(1)
 
 #### Download data
 
-Downloads a CSV file named 'dyadicinteractions.csv' containing the data shown in the tab.
+Downloads a CSV file named 'dyadic-interaction-dynamics.csv' containing the data shown in the tab.

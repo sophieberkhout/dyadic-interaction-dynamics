@@ -15,8 +15,8 @@ library("ggplot2")
 library("plotly")
 
 # source required files
-source("../simVARS.R", chdir = T)
-source("../plotFunctions.R", chdir = T)
+source("simVARS.R")
+source("plotFunctions.R")
 
 # set options for app
 options(shiny.autoreload = TRUE)
@@ -39,7 +39,7 @@ ui <-
   tabPanel("By using this app you agree with the Terms of Usage.",
            fluidRow(
              column(6,
-              includeMarkdown("tou.Rmd"))
+              includeMarkdown("Shiny/tou.Rmd"))
           )),
   tabPanel("Simulation", value = "sim",
      fluidRow(style = "height:50%;",
@@ -186,13 +186,13 @@ ui <-
   tabPanel("Info", value = "info",
            fluidRow(
              column(4,
-                    includeMarkdown("help.Rmd")
+                    includeMarkdown("Shiny/help.Rmd")
              ),
              column(4,
-                    includeMarkdown("help_data.Rmd")
+                    includeMarkdown("Shiny/help_data.Rmd")
              ),
              column(4,
-                    sidebarPanel(includeMarkdown("info.Rmd"), width = 12)
+                    sidebarPanel(includeMarkdown("Shiny/info.Rmd"), width = 12)
              )
            )
   )
@@ -451,7 +451,7 @@ server <- function(input, output, session) {
 
   # DOWNLOAD BUTTON
   output$downloadData <- downloadHandler(
-    filename = "dyadicinteractions.csv",
+    filename = "dyadic-interaction-dynamics.csv",
     content = function(file){
       write.csv(dat(), file, row.names = F)
     }

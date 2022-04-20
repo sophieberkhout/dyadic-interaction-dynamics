@@ -21,7 +21,7 @@ VAR1 <- function(occasions, params_y, params_x, z){
   return(dat)
 }
 
-LVAR1 <- function(occasions, params_y, params_x, indicators_y, indicators_x, e, z){
+LVAR1 <- function(occasions, params_y, params_x, indicators_y, indicators_x, errors, z){
   
   alpha_y <- params_y[[1]]
   phi_y   <- params_y[[2]]
