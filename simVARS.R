@@ -1,11 +1,11 @@
+source("modelFunctions.R")
+
 simVARS <- function(occasions, burnin, 
                     type, probs, 
                     params_y, params_x, # list(alpha =, phi = , beta =, tau = ),
                     indicators_y = NULL, indicators_x = NULL, errors = c(.1, .03, .1),
                     innovations = c(.1, .03, .1),
                     longformat = T){
-  
-  source("modelFunctions.R", local = T)
   
   o_bi <- occasions + burnin # add burnin
   

@@ -4,8 +4,24 @@ output:
   html_fragment
 ---
 
-### Dyadic Interactions Simulation
-This Shiny app generates data from several models that are used to analyze dyadic interactions. It supplements the paper "Statistical Techniques for Analyzing Dyadic Interactions" by S.W. Berkhout, N.K. Schuurman, and E.L. Hamaker.
+### Dyadic Interaction Dynamics
+This Shiny app allows users to generate data from the models that are discussed in the paper by Berkhout et al (2022).
 
 #### Contact information
 If you have any questions or comments, please contact S.W. Berkhout ([s.w.berkhout@uu.nl](mailto:s.w.berkhout@uu.nl)).
+
+#### Citation
+Berkhout, S. W., Schuurman, N. K., & Hamaker, E. L. (2022). *Dyadic Interaction Dynamics* [Shiny application version 1.0]. https://utrecht-university.shinyapps.io/dyadic-interaction-dynamics/
+
+```{latex eval = F}
+@Manual{,
+  title = {Dyadic Interaction Dynamics},
+  author = {Sophie W Berkhout and Noémi K Schuurman and Ellen L Hamaker},
+  year = {2022},
+  note = {Shiny application version 1.0},
+  url = {https://utrecht-university.shinyapps.io/dyadic-interaction-dynamics/},
+}
+```
+
+#### Reference
+Berkhout, S. W., Schuurman, N. K., & Hamaker, E. L. (2022). *A Tool to Simulate and Visualize Dyadic Interaction Dynamics*.

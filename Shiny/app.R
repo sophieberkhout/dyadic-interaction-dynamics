@@ -1,4 +1,4 @@
-library(shiny)
+# install required packages
 if(!("shinycssloaders" %in% installed.packages())) install.packages("shinycssloaders")
 if(!("ggplot2" %in% installed.packages())) install.packages("ggplot2")
 if(!("plotly" %in% installed.packages())) install.packages("plotly")
@@ -7,26 +7,46 @@ if(!("viridis" %in% installed.packages())) install.packages("viridis")
 if(!("oddsratio" %in% installed.packages())) install.packages("oddsratio")
 if(!("MASS" %in% installed.packages())) install.packages("MASS")
 if(!("stringr" %in% installed.packages())) install.packages("stringr")
+
+# load packages
+library("shiny")
 library("shinycssloaders")
 library("ggplot2")
 library("plotly")
+
+# source required files
+source("../simVARS.R", chdir = T)
+source("../plotFunctions.R", chdir = T)
+
+# set options for app
 options(shiny.autoreload = TRUE)
-source("../simVARS.R")
-source("../plotFunctions.R")
 options(shiny.error = F)
 options(spinner.type = 7)
 options(spinner.size = 0.2)
 options(spinner.color = "grey")
 
-ui <- navbarPage("Dyadic Interactions", id = "navbar",
+ui <- 
+  tagList(
+    tags$head(tags$style(HTML("
+                           .navbar-nav {
+                           float: none !important;
+                           }
+                           .navbar-nav > li:nth-child(1) {
+                           float: right;
+                           }
+                           "))),
+  navbarPage("Dyadic Interaction Dynamics", id = "navbar", selected = "sim",
+  tabPanel("By using this app you agree with the Terms of Usage.",
+           fluidRow(
+             column(6,
+              includeMarkdown("tou.Rmd"))
+          )),
   tabPanel("Simulation", value = "sim",
      fluidRow(style = "height:50%;",
               column(6,
        methodUI("method"),
-       # column(7,
        column(7, style = 'border-right:1px solid; border-color:LightGrey;',
               formulaModelUI("formula_model_y"),
-              # h3(em("y"), align = "right"),
               tabsetPanel(id = "yTabs",
                           tabPanel("Regression coefficients",
                                    inputVARUI("yParameters")
@@ -63,7 +83,6 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
        column(6,
        column(7, style = 'border-right:1px solid; border-color:LightGrey;',
               formulaModelUI("formula_model_x"),
-              # h3(em("x"), align = "right"),
               tabsetPanel(id = "xTabs",
                 tabPanel("Regression coefficients",
                          inputVARUI("xParameters")
@@ -177,6 +196,7 @@ ui <- navbarPage("Dyadic Interactions", id = "navbar",
              )
            )
   )
+)
 )
 
 server <- function(input, output, session) {

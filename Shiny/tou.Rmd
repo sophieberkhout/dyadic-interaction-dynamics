@@ -1,0 +1,11 @@
+---
+title: "Terms of Usage"
+output: 
+  html_fragment
+---
+
+### Terms of Usage
+#### Utrecht Unversity Shiny Server
+1. Purpose of the service “utrecht-university.shinyapps.io” is to provide a digital place for trying out, evaluating and/or comparing methods developed by researchers of Utrecht University for the scientific community worldwide. The app and its contents may not be preserved in such a way that it can be cited or can be referenced to.
+2. The web application is provided ‘as is’ and ‘as available’ and is without any warranty. Your use of this web application is solely at your own risk.
+3. By using this app you agree to be bound by the above terms.
