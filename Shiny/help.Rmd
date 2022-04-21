@@ -76,11 +76,11 @@ Only for the Hidden Markov and the Markov-switching VAR(1) model. The transition
 * **Time-series**:
 Plots the sequence of a partner's values against time.
 
-* **Carryover state-space**:
-Plots a partner's value at time $t$ against itself at a previous occasion ($t - 1$).
+* **Scatter plot auto**:
+Plots a partner's value at time $t$ against itself at a previous occasion ($t - 1$). The autocorrelation $r$ is also shown.
 
-* **Spillover state-space**:
-Plots a partner's value at time $t$ against the other partner's value at a previous occasion ($t - 1$).
+* **Scatter plot cross-lagged**:
+Plots a partner's value at time $t$ against the other partner's value at a previous occasion ($t - 1$). The cross-correlation $r$ is also shown.
 
 * **3D state-space**:
 A combination of the time-series plot and the carryover state-space. The line connects each occasion to the next occasion to show how the sequence develops over time.
