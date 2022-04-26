@@ -40,9 +40,9 @@ myTheme <- function(p, x = NULL, y = NULL, legend.position = NULL,
     p <- p + scale_color_manual(values = cols,
                                 labels = legendLabels)
 
-    p <- p + theme(text = element_text(size = 20, family = "serif"),
-                   axis.text = element_text(size = 18),
-                   legend.text = element_text(size = 18),
+    p <- p + theme(text = element_text(size = 16, family = "serif"),
+                   axis.text = element_text(size = 14),
+                   legend.text = element_text(size = 14),
                    legend.position = legend.position)
   }
   

@@ -34,7 +34,7 @@ ui <- tagList(
                               float: right;
                             }
                             #element {
-                              transform: scale(1);
+                              transform: scale(0.95);
                               transform-origin: top center;
                             }
                             "
@@ -47,6 +47,7 @@ ui <- tagList(
          column(6, includeMarkdown("Shiny/tou.Rmd")))
        ),
     tabPanel("Simulation", value = "sim",
+      div(id = "element",
        fluidRow(
          column(3, methodUI("method")),
          column(3,
@@ -151,7 +152,7 @@ ui <- tagList(
                                numericInput("pi_t", "Stay in 2", .5, 0, 1, .1, width = "60%")
                         )
                       )
-                    )                            
+                    )
                   ), ns = NS("method")
                 ),
                 hr(),
@@ -166,6 +167,7 @@ ui <- tagList(
        ),
        hr(),
        plotsInputUI("inputPlots")
+     )
     ),
     tabPanel("Data", value = "data",
       fluidRow(

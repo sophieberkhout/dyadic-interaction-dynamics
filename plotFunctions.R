@@ -202,7 +202,7 @@ mySSP <- function(dat, type, tau, partner = NULL,
       pCols <- viridis::viridis(2, begin = .8, end = .4, option = "A")
       if(partner == "y") pCols <- pCols[2]
       if(partner == "x") pCols <- pCols[1]
-      rSize <- 18 * 0.352777778
+      rSize <- 14 * 0.352777778
     } else { 
       pCols <- "black"
       rSize <- 12 * 0.352777778
@@ -393,7 +393,8 @@ myTSsimple <- function(t, y, xlab = NULL, ylab = NULL,
     labs(x = xlab, y = ylab)
   p <- myTheme(p, x = xlim, y = ylim, shiny = shiny)
   p <- p + theme(text = element_text(size = 16),
-                 axis.text = element_text(size = 10))
+                 axis.text = element_text(size = 12),
+                 axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
   if(!is.null(filename))  ggsave(filename, p, width = width, height = height)
   return(p)
 }
