@@ -9,7 +9,7 @@ simVARS <- function(occasions, burnin,
   
   o_bi <- occasions + burnin # add burnin
   
-  # COVARYING INNOVATIONS
+  # generate covarying innovations
   if(type != "T" | !is.list(innovations)){
     ifelse(!is.list(innovations), covs <- innovations, covs <- innovations[[1]]) # get vector indicating (co)variances
     covs <- append(covs, covs[2], after = 2)
@@ -17,7 +17,7 @@ simVARS <- function(occasions, burnin,
     z <- as.data.frame(MASS::mvrnorm(o_bi, c(0, 0), Sigma = m))          # simulate innovations for each occasion
   }
   
-  # Markov-switching and HMM models have different variances between regimes
+  # covarying innovations MS-VAR and HMM models second regime
   if(type == "MS" | type == "HMM"){
     if(type == "MS") er <- innovations else er <- errors
     ifelse(!is.list(er), covs2 <- er, covs2 <- er[[2]])
@@ -27,13 +27,16 @@ simVARS <- function(occasions, burnin,
     z  <- list(z, z2)
   }
   
+  # covarying innovations for TVAR model
   if(type == "T"){
     if(is.list(innovations)){
       v <- c(innovations[[1]][1], innovations[[1]][3], 
              innovations[[2]][1], innovations[[2]][3])
-      m <- diag(v)
+      m <- diag(v) # variances for two regimes
       v <- sqrt(v)
-      c <- innovations[[1]][2]
+      c <- innovations[[1]][2] # correlation
+      # this calculates covariances that gives 
+      # all regime and variable combinations the same correlation
       m[1, 2:4] <- v[1] * v[-1] * c
       m[2, 3:4] <- v[2] * v[3:4] * c
       m[3, 4]   <- v[3] * v[4] * c
@@ -46,12 +49,13 @@ simVARS <- function(occasions, burnin,
     }
   }
 
+  # generate data for different models
   if(type == "VAR"){
     dat <- VAR1(o_bi, params_y, params_x, z)
   }
   if(type == "L"){
     if(is.null(indicators_y) | is.null(indicators_x)) stop("You have to specify indicators for x and y.")
-    errors <- append(errors, errors[2], after = 2)
+    errors <- append(errors, errors[2], after = 2) # add covariance twice
     dat <- LVAR1(o_bi, params_y, params_x, indicators_y, indicators_x, errors, z)
   }
   if(type == "TV"){
@@ -68,12 +72,14 @@ simVARS <- function(occasions, burnin,
   }
 
   dat <- dat[1:occasions + burnin, ] # remove burnin
-  dat$t <- 1:occasions
+  dat$t <- 1:occasions               # add t column for measurement occasion
   
-  if(longformat){ # longformat option for plotting
+  # longformat option for plotting
+  if(longformat){
     if(type != "T") {
       partners <- c("y", "x")
       
+      # if LVAR has multiple indicators
       if(type == "L" & (length(indicators_x[[1]]) > 1 | length(indicators_y[[1]]) > 1)){
         partners <- grep("_", names(dat), value = T)
       }
@@ -93,7 +99,7 @@ simVARS <- function(occasions, burnin,
   return(dat)
 }
 
-## Time-varying
+## time-varying parameters
 change_linear <- function(int, slope, t){
   n <- 1:t
   x <- int + slope * n

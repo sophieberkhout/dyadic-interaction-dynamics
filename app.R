@@ -25,178 +25,175 @@ options(spinner.type = 7)
 options(spinner.size = 0.2)
 options(spinner.color = "grey")
 
-ui <- 
-  tagList(
-    tags$head(tags$style(HTML("
-                           .navbar-nav {
-                           float: none !important;
-                           }
-                           .navbar-nav > li:nth-child(1) {
-                           float: right;
-                           }
-                           "))),
+ui <- tagList(
+  tags$head(tags$style(HTML("
+                            .navbar-nav {
+                              float: none !important;
+                            }
+                            .navbar-nav > li:nth-child(1) {
+                              float: right;
+                            }
+                            #element {
+                              transform: scale(1);
+                              transform-origin: top center;
+                            }
+                            "
+                       )
+            )
+  ),
   navbarPage("Dyadic Interaction Dynamics", id = "navbar", selected = "sim",
-  tabPanel("By using this app you agree with the Terms of Usage.",
-           fluidRow(
-             column(6,
-              includeMarkdown("Shiny/tou.Rmd"))
-          )),
-  tabPanel("Simulation", value = "sim",
-     fluidRow(style = "height:50%;",
-              column(6,
-       methodUI("method"),
-       column(7, style = 'border-right:1px solid; border-color:LightGrey;',
-              formulaModelUI("formula_model_y"),
-              tabsetPanel(id = "yTabs",
-                          tabPanel("Regression coefficients",
-                                   inputVARUI("yParameters")
-                          ),
-                          tabPanel(HTML("Intercept &#120572;"),
-                                   tvUI("intercept_y", type = "num"),
-                          ),
-                          tabPanel(HTML("Carryover &#120601;"),
-                                   tvUI("carryover_y"),
-                          ),
-                          tabPanel(HTML("Spillover &#120573;"),
-                                   tvUI("spillover_y"),
-                          ),
-                          tabPanel("Means",
-                                   meansUI("means_y")
-                          ),
-                          tabPanel("Indicator",
-                                   indicatorUI("i_y")
-                          ),
-                          tabPanel("Second regime",
-                                   inputVARUI("ySecondRegime")
-                          )
-              ),
-              conditionalPanel(condition =  "input.model == 'T'",
-                               hr(),
-                               fluidRow(
-                                 column(3,
-                                        numericInput("tau_y", HTML("Threshold &#120591;"), 0)
-                                 )
-                               ), ns = NS("method")
-              )
-       )
+    tabPanel("By using this app you agree with the Terms of Usage.",
+       fluidRow(
+         column(6, includeMarkdown("Shiny/tou.Rmd")))
        ),
-       column(6,
-       column(7, style = 'border-right:1px solid; border-color:LightGrey;',
-              formulaModelUI("formula_model_x"),
-              tabsetPanel(id = "xTabs",
-                tabPanel("Regression coefficients",
-                         inputVARUI("xParameters")
+    tabPanel("Simulation", value = "sim",
+       fluidRow(
+         column(3, methodUI("method")),
+         column(3,
+                formulaModelUI("formula_model_y"),
+                tabsetPanel(id = "yTabs",
+                            tabPanel("Regression coefficients",
+                                     inputVARUI("yParameters")
+                            ),
+                            tabPanel(HTML("Intercept &#120572;"),
+                                     tvUI("intercept_y", type = "num"),
+                            ),
+                            tabPanel(HTML("Carryover &#120601;"),
+                                     tvUI("carryover_y"),
+                            ),
+                            tabPanel(HTML("Spillover &#120573;"),
+                                     tvUI("spillover_y"),
+                            ),
+                            tabPanel("Means",
+                                     meansUI("means_y")
+                            ),
+                            tabPanel("Indicator",
+                                     indicatorUI("i_y")
+                            ),
+                            tabPanel("Second regime",
+                                     inputVARUI("ySecondRegime")
+                            )
                 ),
-                tabPanel(HTML("Intercept &#120572;"),
-                         tvUI("intercept_x", type = "num"),
+                hr(),
+                conditionalPanel(condition =  "input.model == 'T'",
+                                 numericInput("tau_y", HTML("Threshold &#120591;"), 0, width = "30%"),
+                                 ns = NS("method")
                 ),
-                tabPanel(HTML("Carryover &#120601;"),
-                         tvUI("carryover_x"),
+                formulaUI_y("formula")
+         ),
+         column(3,
+                formulaModelUI("formula_model_x"),
+                tabsetPanel(id = "xTabs",
+                  tabPanel("Regression coefficients",
+                           inputVARUI("xParameters")
+                  ),
+                  tabPanel(HTML("Intercept &#120572;"),
+                           tvUI("intercept_x", type = "num"),
+                  ),
+                  tabPanel(HTML("Carryover &#120601;"),
+                           tvUI("carryover_x"),
+                  ),
+                  tabPanel(HTML("Spillover &#120573;"),
+                           tvUI("spillover_x"),
+                  ),
+                  tabPanel("Means",
+                           meansUI("means_x")
+                  ),
+                  tabPanel("Indicator",
+                           indicatorUI("i_x")
+                  ),
+                  tabPanel("Second regime",
+                           inputVARUI("xSecondRegime")
+                  )
                 ),
-                tabPanel(HTML("Spillover &#120573;"),
-                         tvUI("spillover_x"),
+                hr(),
+                conditionalPanel(condition =  "input.model == 'T'",
+                                 numericInput("tau_x", HTML("Threshold &#120591;"), 0, width = "30%"),
+                                 ns = NS("method")
                 ),
-                tabPanel("Means",
-                         meansUI("means_x")
+                formulaUI_x("formula")
+         ),
+         column(3,
+                formulaModelUI("formula_model_z"),
+                tabsetPanel(id = "errors",
+                            tabPanel("Innovation parameters",
+                                     errorsUI("innovations")
+                            ),
+                            tabPanel("Measurement error parameters",
+                                     errorsUI("measurementError")
+                            ),
+                            tabPanel("Second regime",
+                                     errorsUI("measurementErrorSecondRegime")
+                            ),
+                            tabPanel("Second regime ",
+                                     errorsUI("innovationsSecondRegime")
+                            )
                 ),
-                tabPanel("Indicator",
-                         indicatorUI("i_x")
+                conditionalPanel(condition = "input.model == 'T'",
+                                 hr(),
+                                 h5("For all regime combinations"),
+                                 fluidRow(
+                                   column(6,
+                                          numericInput("yx_T", "Correlation", .3, -1, 1, .1),
+                                   )
+                                 ), ns = NS("method")
                 ),
-                tabPanel("Second regime",
-                         inputVARUI("xSecondRegime")
-                )
-              ),
-              conditionalPanel(condition =  "input.model == 'T'",
-                               hr(),
-                               fluidRow(
-                                 column(3,
-                                        numericInput("tau_x", HTML("Threshold &#120591;"), 0)
-                                 )
-                               ), ns = NS("method")
-              )
-       ),
-       column(5,
-              formulaModelUI("formula_model_z"),
-              tabsetPanel(id = "errors",
-                          tabPanel("Innovation parameters",
-                                   errorsUI("innovations")
-                          ),
-                          tabPanel("Measurement error parameters",
-                                   errorsUI("measurementError")
-                          ),
-                          tabPanel("Second regime",
-                                   errorsUI("measurementErrorSecondRegime")
-                          ),
-                          tabPanel("Second regime ",
-                                   errorsUI("innovationsSecondRegime")
-                          )
-              ),
-              conditionalPanel(condition = "input.model == 'T'",
-                               hr(),
-                               h5("For all regime combinations"),
-                               fluidRow(
-                                 column(6,
-                                        numericInput("yx_T", "Correlation", .3, -1, 1, .1),
-                                 )
-                               ), ns = NS("method")
-              ),
-              conditionalPanel(condition = "input.model == 'MS' || input.model == 'HMM'",
-                tabsetPanel(id = "transition",
-                  tabPanel("Transition probabilities",
-                    fluidRow(style = "padding-top:5px",
-                      column(6,
-                             numericInput("pi_o", "Stay in 1", .5, 0, 1, .1),
-                             tableOutput("pi_ot")
-                      ),
-                      column(6,
-                             tableOutput("pi_to"),
-                             numericInput("pi_t", "Stay in 2", .5, 0, 1, .1)
+                conditionalPanel(condition = "input.model == 'MS' || input.model == 'HMM'",
+                  tabsetPanel(id = "transition",
+                    tabPanel("Transition probabilities",
+                      fluidRow(style = "padding-top:5px",
+                        column(6,
+                               numericInput("pi_o", "Stay in 1", .5, 0, 1, .1, width = "60%"),
+                               tableOutput("pi_ot")
+                        ),
+                        column(6,
+                               tableOutput("pi_to"),
+                               numericInput("pi_t", "Stay in 2", .5, 0, 1, .1, width = "60%")
+                        )
                       )
-                    )
-                  )                            
-                ), ns = NS("method")
-              )
-       )
-       )
-     ),
-     conditionalPanel(condition =  "input.model == 'TV'",
-                      hr(), 
-                      h4("Parameters plotted over time"),
-                      plotstvUI("tvPlots"),
-                      ns = NS("method")
-     ),
-     hr(),
-     formulaUI("formula"),
-     hr(),
-     plotsInputUI("inputPlots"),
-  ),
-  tabPanel("Data", value = "data",
-    fluidRow(
-      column(9,
-             withSpinner(DT::dataTableOutput("table"))
-      ),
-      column(3,
-            radioButtons("dataFormat", "Choose data format",
-                         choices = list('"Wide"' = "wide", "Long" = "long")
-            ),
-            downloadButton("downloadData", "Download data")
+                    )                            
+                  ), ns = NS("method")
+                ),
+                hr(),
+                formulaUI_z("formula")
+         )
+       ),
+       conditionalPanel(condition =  "input.model == 'TV'",
+                        hr(), 
+                        h4("Parameters plotted over time"),
+                        plotstvUI("tvPlots"),
+                        ns = NS("method")
+       ),
+       hr(),
+       plotsInputUI("inputPlots")
+    ),
+    tabPanel("Data", value = "data",
+      fluidRow(
+        column(9,
+               withSpinner(DT::dataTableOutput("table"))
+        ),
+        column(3,
+              radioButtons("dataFormat", "Choose data format",
+                           choices = list('"Wide"' = "wide", "Long" = "long")
+              ),
+              downloadButton("downloadData", "Download data")
+        )
       )
-    )
-  ),
-  tabPanel("Info", value = "info",
-           fluidRow(
-             column(4,
-                    includeMarkdown("Shiny/help.Rmd")
-             ),
-             column(4,
-                    includeMarkdown("Shiny/help_data.Rmd")
-             ),
-             column(4,
-                    sidebarPanel(includeMarkdown("Shiny/info.Rmd"), width = 12)
+    ),
+    tabPanel("Info", value = "info",
+             fluidRow(
+               column(4,
+                      includeMarkdown("Shiny/help.Rmd")
+               ),
+               column(4,
+                      includeMarkdown("Shiny/help_data.Rmd")
+               ),
+               column(4,
+                      sidebarPanel(includeMarkdown("Shiny/info.Rmd"), width = 12)
+               )
              )
-           )
+    )
   )
-)
 )
 
 server <- function(input, output, session) {
@@ -458,14 +455,17 @@ server <- function(input, output, session) {
   )
 }
 
-shinyApp(ui = tagList(
-                tags$style("
-                  body {
-                 -moz-transform: scale(0.8, 0.8); /* Moz-browsers */
-                 zoom: 0.8; /* Other non-webkit browsers */
-                 zoom: 80%; /* Webkit browsers */
-                 }
-                 "), 
-                ui
-              ), 
+# shinyApp(ui = tagList(
+#                 tags$style("
+#                   body {
+#                  -moz-transform: scale(0.8, 0.8); /* Moz-browsers */
+#                  zoom: 0.8; /* Other non-webkit browsers */
+#                  zoom: 80%; /* Webkit browsers */
+#                  }
+#                  "), 
+#                 ui
+#               ), 
+#          server = server)
+
+shinyApp(ui = ui, 
          server = server)

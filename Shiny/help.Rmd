@@ -7,9 +7,11 @@ output:
 ### Simulation
 The *Simulation* tab generates dyadic data according to the options on top. Below follow descriptions of each of the options. Be aware that some options change when a different model is selected because the models may use different parameters.
 
+*Tip: Zoom out your browser to view the options and plots at the same time.*
+
 #### Method
 
-* **Model**:
+* **Data generating model**:
 Which model to generate data from. Some models use different parameters, so the input menus may change accordingly.
 
   - *First-order vector autoregressive VAR(1).* The VAR(1) model is a linear model where multiple variables are regressed on themselves and the other variables at previous measurement occasions.

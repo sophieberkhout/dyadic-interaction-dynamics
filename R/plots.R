@@ -3,80 +3,85 @@ plotsInputUI <- function(id){
 
   fluidRow(
     column(3,
-    sidebarPanel(width = 10,
-                 h4("Plots"),
-                 fluidRow(column(6, h5("Time-series")),
-                          column(3,
-                                 checkboxInput(ns("showTSy"), "y", value = T)
-                          ),
-                          column(3,
-                                 checkboxInput(ns("showTSx"), "x", value = T)
-                          )
-                 ),
-                 fluidRow(column(6, h5("Scatter plot auto")),
-                          column(3,
-                                 checkboxInput(ns("showCarryoverY"), "y")
-                          ),
-                          column(3,
-                                 checkboxInput(ns("showCarryoverX"), "x")
-                          )
-                 ),
-                 fluidRow(column(6, h5("Scatter plot cross-lagged")),
-                          column(3,
-                                 checkboxInput(ns("showSpilloverY"), "y")
-                          ),
-                          column(3,
-                                 checkboxInput(ns("showSpilloverX"), "x")
-                          )
-                 ),
-                 fluidRow(column(6, h5("3D state space")),
-                          column(3,
-                                 checkboxInput(ns("show3Dy"), "y")
-                          ),
-                          column(3,
-                                 checkboxInput(ns("show3Dx"), "x")
-                          )
-                 ),
-                 fluidRow(column(6, h5("Autocorrelation function")),
-                          column(3,
-                                 checkboxInput(ns("showACFy"), "y")
-                          ),
-                          column(3,
-                                 checkboxInput(ns("showACFx"), "x")
-                          )
-                 ),
-                 fluidRow(column(6, h5("Cross-correlation function")),
-                          column(3,
-                                 checkboxInput(ns("showCCFy"), "y*x")
-                          ),
-                          column(3,
-                                 checkboxInput(ns("showCCFx"), "x*y")
-                          )
-                 )
-    )),
-    conditionalPanel(condition = "input.showTSy | input.showTSx",
-                     column(6, h4("Time-series"),
-                            withSpinner(plotOutput(ns("ts"), height = "350px"))), ns = ns
+      sidebarPanel(width = 12,
+                   h4("Plots"),
+                   fluidRow(column(6, h5("Time-series")),
+                            column(3,
+                                   checkboxInput(ns("showTSy"), "y", value = T)
+                            ),
+                            column(3,
+                                   checkboxInput(ns("showTSx"), "x", value = T)
+                            )
+                   ),
+                   fluidRow(column(6, h5("Scatter plot auto")),
+                            column(3,
+                                   checkboxInput(ns("showCarryoverY"), "y")
+                            ),
+                            column(3,
+                                   checkboxInput(ns("showCarryoverX"), "x")
+                            )
+                   ),
+                   fluidRow(column(6, h5("Scatter plot cross-lagged")),
+                            column(3,
+                                   checkboxInput(ns("showSpilloverY"), "y")
+                            ),
+                            column(3,
+                                   checkboxInput(ns("showSpilloverX"), "x")
+                            )
+                   ),
+                   fluidRow(column(6, h5("3D state space")),
+                            column(3,
+                                   checkboxInput(ns("show3Dy"), "y")
+                            ),
+                            column(3,
+                                   checkboxInput(ns("show3Dx"), "x")
+                            )
+                   ),
+                   fluidRow(column(6, h5("Autocorrelation function")),
+                            column(3,
+                                   checkboxInput(ns("showACFy"), "y")
+                            ),
+                            column(3,
+                                   checkboxInput(ns("showACFx"), "x")
+                            )
+                   ),
+                   fluidRow(column(6, h5("Cross-correlation function")),
+                            column(3,
+                                   checkboxInput(ns("showCCFy"), "y*x")
+                            ),
+                            column(3,
+                                   checkboxInput(ns("showCCFx"), "x*y")
+                            )
+                   )
+      )
     ),
-    conditionalPanel(condition = "input.showCarryoverY | input.showCarryoverX",
-                     column(3,  h4("Scatter plot auto"),
-                            withSpinner(plotOutput(ns("carryover"), height = "350px"))), ns = ns
-    ),
-    conditionalPanel(condition = "input.showSpilloverY | input.showSpilloverX",
-                     column(3, h4("Scatter plot cross-lagged"),
-                            withSpinner(plotOutput(ns("spillover"), height = "350px"))), ns = ns
-    ),
-    conditionalPanel(condition = "input.showACFy | input.showACFx",
-                     column(3, h4("Autocorrelation function"),
-                            withSpinner(plotOutput(ns("acf"), height = "350px"))), ns = ns
-    ),       
-    conditionalPanel(condition = "input.showCCFy | input.showCCFx",
-                     column(3, h4("Cross-correlation function"),
-                            withSpinner(plotOutput(ns("ccf"), height = "350px"))), ns = ns
-    ),
-    conditionalPanel(condition = "input.show3Dy | input.show3Dx", ns = ns,
-                     column(10, h4("3D state space"),
-                            withSpinner(plotly::plotlyOutput(ns("plotly"))), height = 600)
+    column(9,
+      fluidRow(
+        conditionalPanel(condition = "input.showTSy | input.showTSx",
+                         column(8, h4("Time-series"),
+                                withSpinner(plotOutput(ns("ts"), height = "250px"))), ns = ns
+        ),
+        conditionalPanel(condition = "input.showCarryoverY | input.showCarryoverX",
+                         column(4,  h4("Scatter plot auto"),
+                                withSpinner(plotOutput(ns("carryover"), height = "250px"))), ns = ns
+        ),
+        conditionalPanel(condition = "input.showSpilloverY | input.showSpilloverX",
+                         column(4, h4("Scatter plot cross-lagged"),
+                                withSpinner(plotOutput(ns("spillover"), height = "250px"))), ns = ns
+        ),
+        conditionalPanel(condition = "input.show3Dy | input.show3Dx", ns = ns,
+                         column(8, h4("3D state space"),
+                                withSpinner(plotly::plotlyOutput(ns("plotly"), height = "300px")))
+        ),
+        conditionalPanel(condition = "input.showACFy | input.showACFx",
+                         column(4, h4("Autocorrelation function"),
+                                withSpinner(plotOutput(ns("acf"), height = "250px"))), ns = ns
+        ),       
+        conditionalPanel(condition = "input.showCCFy | input.showCCFx",
+                         column(4, h4("Cross-correlation function"),
+                                withSpinner(plotOutput(ns("ccf"), height = "250px"))), ns = ns
+        )
+      )
     )
   )
 }
@@ -153,13 +158,13 @@ plotsServer <- function(id, dataFormat, model, t, dat, tv){
 plotstvUI <- function(id){
   ns <- NS(id)
   fluidRow(
-   column(2, plotOutput(ns("alpha_y"), height = "200px")),
-   column(2, plotOutput(ns("phi_y"), height = "200px")),
-   column(2, style = 'border-right:1px solid; border-color:LightGrey;',
-          plotOutput(ns("beta_y"), height = "200px")),
-   column(2, plotOutput(ns("alpha_x"), height = "200px")),
-   column(2, plotOutput(ns("phi_x"), height = "200px")),
-   column(2, plotOutput(ns("beta_x"), height = "200px"))
+   column(2, plotOutput(ns("alpha_y"), height = "150px")),
+   column(2, plotOutput(ns("phi_y"), height = "150px")),
+   column(2, plotOutput(ns("beta_y"), height = "150px"),
+          style = 'border-right:1px solid; border-color:LightGrey;'),
+   column(2, plotOutput(ns("alpha_x"), height = "150px")),
+   column(2, plotOutput(ns("phi_x"), height = "150px")),
+   column(2, plotOutput(ns("beta_x"), height = "150px"))
   )
 }
 
@@ -169,11 +174,6 @@ plotstvServer <- function(id, t, tv){
     function(input, output, session){
       output$alpha_y <- renderPlot({
         p <- myTSsimple(1:t(), tv$alpha_y$p(), ylab = bquote(Intercept ~ italic(alpha["y,t"])), shiny = T)
-        # p <- myTVpars(list(alpha = tv$alpha_y$p(),
-        #                    phi = tv$phi_y$p(),
-        #                    beta = tv$beta_y$p()),
-        #               partner = "y",
-        #               shiny = T)
         return(p)
       })
       output$phi_y <- renderPlot({

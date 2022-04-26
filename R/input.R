@@ -1,7 +1,7 @@
 methodUI <- function(id){
   ns <- NS(id)
   
-  sidebarPanel(width = 5,
+  sidebarPanel(width = 12,
                h4("Method"),
                selectInput(ns("model"), "Data generating model",
                            list("First-order vector autoregressive VAR(1)" = "VAR",
@@ -9,10 +9,9 @@ methodUI <- function(id){
                                 "Time-varying VAR(1)" = "TV",
                                 "Threshold VAR(1)" = "T",
                                 "Hidden Markov model" = "HMM",
-                                "Markov-switching VAR(1)" = "MS"), selected = "VAR", width = "95%"),
-               numericInput(ns("t"), "Measurement occasions", 300, min = 2, step = 50, width = "60%"), # 1 does not work
-               # numericInput(ns("burnin"), "Burnin", 20, min = 0, step = 10, width = "60%"),
-               numericInput(ns("seed"), "Seed", 1, min = 1, max = .Machine$integer.max, width = "60%")
+                                "Markov-switching VAR(1)" = "MS"), selected = "VAR"),
+               numericInput(ns("t"), "Measurement occasions", 300, min = 2, step = 50), # 1 does not work
+               numericInput(ns("seed"), "Seed", 1, min = 1, max = .Machine$integer.max)
   )
 }
 
@@ -28,13 +27,6 @@ methodServer <- function(id){
         }
       })
       
-      # observeEvent(input$burnin, {
-      #   if(!is.integer(input$burnin)){
-      #     newBurnin <- round(input$burnin)
-      #     updateNumericInput(session, "burnin", value = newBurnin)
-      #   }
-      # })
-      
       observeEvent(input$t, {
         if(!is.integer(input$t)){
           newT <- round(input$t)
@@ -46,7 +38,6 @@ methodServer <- function(id){
         list(
           model  = reactive({ input$model }),
           t      = reactive({ input$t }),
-          # burnin = reactive({ input$burnin }),
           seed   = reactive({ input$seed })
         )
       )
@@ -54,28 +45,13 @@ methodServer <- function(id){
   )
 }
 
-# Server <- function(id){
-#   moduleServer(
-#     id,
-#     function(input, output, server){
-#       
-#     }
-#   )
-# }
-
-
 inputVARUI <- function(id){
   ns <- NS(id)
-  
   fluidRow(style = "padding-top:5px",
     column(12,
-      fluidRow(
-        column(4,
-               numericInput(ns("alpha"), HTML("Intercept &#120572;"), 0)
-        )
-      ),
-      sliderInput(ns("phi"), HTML("Carryover &#120601;"), -1, 1, .5, .1),
-      sliderInput(ns("beta"), HTML("Spillover &#120573;"), -1, 1, .2, .1)
+           numericInput(ns("alpha"), HTML("Intercept &#120572;"), 0, width = "30%"),
+           sliderInput(ns("phi"), HTML("Carryover &#120601;"), -1, 1, .5, .1),
+           sliderInput(ns("beta"), HTML("Spillover &#120573;"), -1, 1, .2, .1)
     )
   )
 }
@@ -101,14 +77,14 @@ errorsUI <- function(id){
   
   fluidRow(style = "padding-top:5px",
     column(6,
-           numericInput(ns("y"), "Variance y", .1, 0, 1, .05),
+           numericInput(ns("y"), "Variance y", .1, 0, 1, .05, width = "60%"),
            conditionalPanel(condition = "input.model != 'T'",
-                            numericInput(ns("yx"), "Correlation", .3, -1, 1, .1),
+                            numericInput(ns("yx"), "Correlation", .3, -1, 1, .1, width = "60%"),
                             ns = NS("method")
                             )
     ),
     column(6,
-           numericInput(ns("x"), "Variance x", .1, 0, 1, .05)
+           numericInput(ns("x"), "Variance x", .1, 0, 1, .05, width = "60%")
     )
   )
 }
@@ -141,7 +117,7 @@ tvUI <- function(id, type = "slider"){
   
   if(type == "num"){
     stablePanel <- conditionalPanel(condition = "input.tv == 'stable'",
-                                    numericInput(ns("stable"), "Value", 0, width = "50%"),
+                                    numericInput(ns("stable"), "Value", 0, width = "30%"),
                                     ns = ns)
     step <- 1
     def_amp <- 1
@@ -238,8 +214,8 @@ meansUI <- function(id){
   
   fluidRow(style = "padding-top:5px",
            column(12,
-                  numericInput(ns("mean_1"), "First regime", 0, width = "50%"),
-                  numericInput(ns("mean_2"), "Second regime", 0, width = "50%")
+                  numericInput(ns("mean_1"), "First regime", 0, width = "30%"),
+                  numericInput(ns("mean_2"), "Second regime", 0, width = "30%")
            )
   )
 }
@@ -263,7 +239,7 @@ indicatorUI <- function(id){
   
   fluidRow(style = "padding-top:5px",
            column(12,
-                  numericInput(ns("mean"), "Mean", 0, width = "50%")
+                  numericInput(ns("mean"), "Mean", 0, width = "30%")
            )
   )
 }

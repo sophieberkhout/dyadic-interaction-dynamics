@@ -1,6 +1,5 @@
 formulaModelUI <- function(id){
   ns <- NS(id)
-
   tagList(
     uiOutput(ns("formula_model"))
   )
@@ -93,16 +92,6 @@ formulaModelServer <- function(id, model, columnName){
                 \\end{cases}
              \\end{aligned}"
           
-          # formula_z <- sprintf(
-          #   "\\begin{aligned}
-          #     E_1 &\\sim \\mathcal{N}(0, \\Sigma_1), && \\Sigma_1 =
-          #     \\begin{bmatrix} %1$.2f & %2$.2f \\\\ %2$.2f & %3$.2f \\end{bmatrix} \\\\
-          #     E_2 &\\sim \\mathcal{N}(0, \\Sigma_2), && \\Sigma_2 =
-          #     \\begin{bmatrix} %4$.2f & %5$.2f \\\\ %5$.2f & %6$.2f \\end{bmatrix}
-          #    \\end{aligned}",
-          #   measurement_errors$y(), measurement_errors$c_yx(), measurement_errors$x(),
-          #   measurement_errors_2$y(), measurement_errors_2$c_yx(), measurement_errors_2$x()
-          # )
           formula_z <- "$$ E \\sim \\mathcal{N}(0, \\Sigma) $$"
         }
         if(model() == "MS") {
@@ -124,17 +113,6 @@ formulaModelServer <- function(id, model, columnName){
                 \\end{cases}
              \\end{aligned}"
           
-          # formula_z <- sprintf(
-          #   "\\begin{aligned}
-          #     Z_1 &\\sim \\mathcal{N}(0, \\Sigma_1), && \\Sigma_1 =
-          #     \\begin{bmatrix} %1$.2f & %2$.2f \\\\ %2$.2f & %3$.2f \\end{bmatrix} \\\\
-          #     Z_2 &\\sim \\mathcal{N}(0, \\Sigma_2), && \\Sigma_2 =
-          #     \\begin{bmatrix} %4$.2f & %5$.2f \\\\ %5$.2f & %6$.2f \\end{bmatrix}
-          #    \\end{aligned}",
-          #   innovations$y(), innovations$c_yx(), innovations$x(),
-          #   innovations_2$y(), innovations_2$c_yx(), innovations_2$x()
-          # )
-          
           formula_z <- "$$ Z \\sim \\mathcal{N}(0, \\Sigma) $$"
         }
         
@@ -151,22 +129,33 @@ formulaModelServer <- function(id, model, columnName){
   )
 }
 
-formulaUI <- function(id){
+# formulaUI <- function(id){
+#   ns <- NS(id)
+#   fluidRow(
+#     column(3, offset = 3, uiOutput(ns("formula_y"))),
+#     column(3, uiOutput(ns("formula_x"))),
+#     column(3, uiOutput(ns("formula_z")))
+#   )
+# }
+
+formulaUI_y <- function(id){
   ns <- NS(id)
-  fluidRow(
-    column(6,
-    column(7, offset = 5,
-           uiOutput(ns("formula_y"))
-    )
-    ),
-    column(6,
-    column(7,
-           uiOutput(ns("formula_x"))
-    ),
-    column(5,
-           uiOutput(ns("formula_z"))
-    )
-    )
+  tagList(
+    uiOutput(ns("formula_y"))
+  )
+}
+
+formulaUI_x <- function(id){
+  ns <- NS(id)
+  tagList(
+    uiOutput(ns("formula_x"))
+  )
+}
+
+formulaUI_z <- function(id){
+  ns <- NS(id)
+  tagList(
+    uiOutput(ns("formula_z"))
   )
 }
 
@@ -332,22 +321,6 @@ formulaServer <- function(id, model,
             params_x_2$alpha(), params_x_2$phi(), params_x_2$beta(), tau_x()
           )
           
-          ###############################
-          ###############################
-          ###############################
-          # cov_T = correlation, not covariance!
-          # formula_z <- sprintf(
-          #   "\\begin{aligned}
-          #     Z &\\sim \\mathcal{N}(0, \\Sigma), && \\Sigma =
-          #     \\begin{cases}
-          #     \\begin{bmatrix} %1$.2f & %2$.2f \\\\ %2$.2f & %3$.2f \\end{bmatrix} \\\\
-          #     \\begin{bmatrix} %4$.2f & %5$.2f \\\\ %5$.2f & %6$.2f \\end{bmatrix}
-          #     \\end{cases}
-          #    \\end{aligned}",
-          #   innovations$y(), cov_T(), innovations$x(),
-          #   innovations_2$y(), cov_T(), innovations_2$x()
-          # )
-          
           formula_z <- sprintf(
             "$$ \\Sigma =
               \\begin{align}
@@ -412,16 +385,6 @@ formulaServer <- function(id, model,
             means_x$mu_1(), means_x$mu_2()
           )
           
-          # formula_z <- sprintf(
-          #   "\\begin{aligned}
-          #     E_1 &\\sim \\mathcal{N}(0, \\Sigma_1), && \\Sigma_1 =
-          #     \\begin{bmatrix} %1$.2f & %2$.2f \\\\ %2$.2f & %3$.2f \\end{bmatrix} \\\\
-          #     E_2 &\\sim \\mathcal{N}(0, \\Sigma_2), && \\Sigma_2 =
-          #     \\begin{bmatrix} %4$.2f & %5$.2f \\\\ %5$.2f & %6$.2f \\end{bmatrix}
-          #    \\end{aligned}",
-          #   measurement_errors$y(), measurement_errors$c_yx(), measurement_errors$x(),
-          #   measurement_errors_2$y(), measurement_errors_2$c_yx(), measurement_errors_2$x()
-          # )
           formula_z <- sprintf(
             "\\begin{aligned}
               \\Sigma =
@@ -466,17 +429,6 @@ formulaServer <- function(id, model,
             params_x$alpha(), params_x$phi(), params_x$beta(),
             params_x_2$alpha(), params_x_2$phi(), params_x_2$beta()
           )
-          
-          # formula_z <- sprintf(
-          #   "\\begin{aligned}
-          #     Z_1 &\\sim \\mathcal{N}(0, \\Sigma_1), && \\Sigma_1 =
-          #     \\begin{bmatrix} %1$.2f & %2$.2f \\\\ %2$.2f & %3$.2f \\end{bmatrix} \\\\
-          #     Z_2 &\\sim \\mathcal{N}(0, \\Sigma_2), && \\Sigma_2 =
-          #     \\begin{bmatrix} %4$.2f & %5$.2f \\\\ %5$.2f & %6$.2f \\end{bmatrix}
-          #    \\end{aligned}",
-          #   innovations$y(), innovations$c_yx(), innovations$x(),
-          #   innovations_2$y(), innovations_2$c_yx(), innovations_2$x()
-          # )
           
           formula_z <- sprintf(
             "\\begin{aligned}
