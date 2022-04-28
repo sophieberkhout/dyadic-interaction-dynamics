@@ -34,7 +34,7 @@ ui <- tagList(
                               float: right;
                             }
                             #element {
-                              transform: scale(0.95);
+                              transform: scale(1);
                               transform-origin: top center;
                             }
                             "
@@ -80,7 +80,7 @@ ui <- tagList(
                                  numericInput("tau_y", HTML("Threshold &#120591;"), 0, width = "30%"),
                                  ns = NS("method")
                 ),
-                formulaUI_y("formula")
+                formulaUI_y("formula_y")
          ),
          column(3,
                 formulaModelUI("formula_model_x"),
@@ -112,7 +112,7 @@ ui <- tagList(
                                  numericInput("tau_x", HTML("Threshold &#120591;"), 0, width = "30%"),
                                  ns = NS("method")
                 ),
-                formulaUI_x("formula")
+                formulaUI_x("formula_x")
          ),
          column(3,
                 formulaModelUI("formula_model_z"),
@@ -156,7 +156,7 @@ ui <- tagList(
                   ), ns = NS("method")
                 ),
                 hr(),
-                formulaUI_z("formula")
+                formulaUI_z("formula_z")
          )
        ),
        conditionalPanel(condition =  "input.model == 'TV'",
@@ -418,16 +418,24 @@ server <- function(input, output, session) {
     dat
   })
 
-  formulaServer("formula", method$model,
-                params_y, params_x, params_y_2, params_x_2,
-                reactive({input$tau_y}), reactive({input$tau_x}),
-                reactive({input$yx_T}),
-                i_y, i_x,
-                means_y, means_x,
-                innovations, innovations_2,
-                measurement_errors, measurement_errors_2,
-                tv = list(alpha_y = tv_alpha_y, phi_y = tv_phi_y, beta_y = tv_beta_y,
-                          alpha_x = tv_alpha_x, phi_x = tv_phi_x, beta_x = tv_beta_x))
+  formulaServer_y("formula_y", method$model,
+                  params_y, params_y_2,
+                  reactive({input$tau_y}),
+                  i_y,
+                  means_y,
+                  tv = list(alpha_y = tv_alpha_y, phi_y = tv_phi_y, beta_y = tv_beta_y))
+
+  formulaServer_x("formula_x", method$model,
+                  params_x, params_x_2,
+                  reactive({input$tau_x}),
+                  i_x,
+                  means_x,
+                  tv = list(alpha_x = tv_alpha_x, phi_x = tv_phi_x, beta_x = tv_beta_x))
+
+  formulaServer_z("formula_z", method$model,
+                  reactive({input$yx_T}),
+                  innovations, innovations_2,
+                  measurement_errors, measurement_errors_2)
   
   # PLOTS
   dataFormat <- reactive({ input$dataFormat })
