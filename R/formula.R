@@ -23,13 +23,13 @@ formulaModelServer <- function(id, model, columnName){
           formula_y <-
             "\\begin{aligned}
                 \\eta_{t} &= \\alpha_y + \\phi_y \\eta_{t-1} + \\beta_y \\xi_{t-1} + \\zeta_{y, t} \\\\
-                y_t &= \\mu_y + \\eta_{t} + \\varepsilon_{y, t}
+                y_t &= \\nu_y + \\eta_{t} + \\varepsilon_{y, t}
              \\end{aligned}"
           
           formula_x <-
             "\\begin{aligned}
                 \\xi_{t} &= \\alpha_x + \\phi_x \\xi_{t-1} + \\beta_x \\eta_{t-1} + \\zeta_{x, t} \\\\
-                x_t &= \\mu_x + \\xi_{t} + \\varepsilon_{x, t}
+                x_t &= \\nu_x + \\xi_{t} + \\varepsilon_{x, t}
              \\end{aligned}"
           
           formula_z <-
@@ -166,7 +166,7 @@ tvFormula <- function(tv) {
 }
 
 formulaServer_y <- function(id, model,
-                            params_y, params_y_2,
+                            params_y, params_y_1, params_y_2,
                             tau_y,
                             i_y,
                             means_y,
@@ -227,7 +227,7 @@ formulaServer_y <- function(id, model,
                 %.1f + %.1f y_{t-1} + %.1f x_{t-1} + \\zeta_{y, t} \\enspace \\text{if} \\: x_{t-1} > %7$.1f
                 \\end{cases}
              \\end{aligned} $$",
-            params_y$alpha(), params_y$phi(), params_y$beta(),
+            params_y_1$alpha(), params_y_1$phi(), params_y_1$beta(),
             params_y_2$alpha(), params_y_2$phi(), params_y_2$beta(), tau_y()        
           )
         }
@@ -252,7 +252,7 @@ formulaServer_y <- function(id, model,
                 %.1f + %.1f y_{t-1} + %.1f x_{t-1} + \\zeta_{y, t} \\\\
                 \\end{cases}
              \\end{aligned}",
-            params_y$alpha(), params_y$phi(), params_y$beta(),
+            params_y_1$alpha(), params_y_1$phi(), params_y_1$beta(),
             params_y_2$alpha(), params_y_2$phi(), params_y_2$beta()           
           )
         }
@@ -270,7 +270,7 @@ formulaServer_y <- function(id, model,
 }
 
 formulaServer_x <- function(id, model,
-                            params_x, params_x_2,
+                            params_x, params_x_1, params_x_2,
                             tau_x,
                             i_x,
                             means_x,
@@ -330,7 +330,7 @@ formulaServer_x <- function(id, model,
                 %.1f + %.1f x_{t-1} + %.1f y_{t-1} + \\zeta_{x, t} \\enspace \\text{if} \\: y_{t-1} > %7$.1f
                 \\end{cases}
              \\end{aligned} $$",
-            params_x$alpha(), params_x$phi(), params_x$beta(),
+            params_x_1$alpha(), params_x_1$phi(), params_x_1$beta(),
             params_x_2$alpha(), params_x_2$phi(), params_x_2$beta(), tau_x()
           )
         }
@@ -355,7 +355,7 @@ formulaServer_x <- function(id, model,
                 %.1f + %.1f x_{t-1} + %.1f y_{t-1} + \\zeta_{x, t}
                 \\end{cases}
              \\end{aligned}",
-            params_x$alpha(), params_x$phi(), params_x$beta(),
+            params_x_1$alpha(), params_x_1$phi(), params_x_1$beta(),
             params_x_2$alpha(), params_x_2$phi(), params_x_2$beta()
           )
         }
@@ -374,8 +374,8 @@ formulaServer_x <- function(id, model,
 
 formulaServer_z <- function(id, model,
                             cov_T,
-                            innovations, innovations_2,
-                            measurement_errors, measurement_errors_2){
+                            innovations, innovations_1, innovations_2,
+                            measurement_errors, measurement_errors_1, measurement_errors_2){
   moduleServer(
     id,
     function(input, output, server){
@@ -466,7 +466,7 @@ formulaServer_z <- function(id, model,
               \\end{bmatrix}
              \\end{align}
              $$",
-            innovations$y(), innovations$x(), innovations_2$y(), innovations_2$x(),
+            innovations_1$y(), innovations_1$x(), innovations_2$y(), innovations_2$x(),
             covs()$y1x1, covs()$y1x2, covs()$x1y2, covs()$y2x2
           )
         }
@@ -487,7 +487,7 @@ formulaServer_z <- function(id, model,
               \\begin{bmatrix} %4$.2f & %5$.2f \\\\ %5$.2f & %6$.2f \\end{bmatrix}
               \\end{cases}
              \\end{aligned}",
-            measurement_errors$y(), measurement_errors$c_yx(), measurement_errors$x(),
+            measurement_errors_1$y(), measurement_errors_1$c_yx(), measurement_errors_1$x(),
             measurement_errors_2$y(), measurement_errors_2$c_yx(), measurement_errors_2$x()
           )
         }
@@ -508,7 +508,7 @@ formulaServer_z <- function(id, model,
               \\begin{bmatrix} %4$.2f & %5$.2f \\\\ %5$.2f & %6$.2f \\end{bmatrix}
               \\end{cases}
              \\end{aligned}",
-            innovations$y(), innovations$c_yx(), innovations$x(),
+            innovations_1$y(), innovations_1$c_yx(), innovations_1$x(),
             innovations_2$y(), innovations_2$c_yx(), innovations_2$x()
           )
         }
