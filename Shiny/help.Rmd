@@ -7,7 +7,7 @@ output:
 ### Simulation
 The *Simulation* tab generates dyadic data according to the options on top. Below follow descriptions of each of the options. Be aware that some options change when a different model is selected because the models may use different parameters.
 
-*Tip: Zoom out your browser to view the options and plots at the same time.*
+*Tip: Zoom out your browser to view the options and plots at the same time (press Ctrl/Cmd and -).*
 
 #### Method
 

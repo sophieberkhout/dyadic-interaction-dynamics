@@ -1,11 +1,22 @@
 source("modelFunctions.R")
 
-simVARS <- function(occasions, burnin, 
-                    type, probs, 
-                    params_y, params_x, # list(alpha =, phi = , beta =, tau = ),
-                    indicators_y = NULL, indicators_x = NULL, errors = c(.1, .03, .1),
-                    innovations = c(.1, .03, .1),
-                    longformat = T){
+simVARS <- function(occasions,          # number of measurement occasions
+                    burnin,             # number of iterations at beginning of data generation to discard
+                    type,               # which model;
+                                        # VAR, L (latent), TV (time-varying), T(threshold), HMM (hidden Markov), or MS (Markov-switching)
+                    probs,              # for type HMM or MS;
+                                        # vector of length 2, 1st is prob. to stay in regime 1 and 2nd is prob. to stay in regime 2
+                    params_y, params_x, # list with alpha, phi, and beta value in that order;
+                                        # if type T or MS, two values per coefficient can be given if regime-switching;
+                                        # if type HMM only mean is given with 1 or 2 values
+                    indicators_y = NULL, indicators_x = NULL, # list with means and factor loadings;
+                                                              # the length indicates the number of indicators to generate
+                    errors = c(.1, .03, .1),      # measurement error variance of y, covariance, and variance of x
+                                                  # if type HMM, can be list for regime-switching
+                    innovations = c(.1, .03, .1), # innovation variance of y, covariance, and variance of x
+                                                  # if type T or MS, can be list for regime-switching
+                    longformat = T                # whether to return data in long format or "wide" format
+                    ){
   
   o_bi <- occasions + burnin # add burnin
   
@@ -35,14 +46,15 @@ simVARS <- function(occasions, burnin,
       m <- diag(v) # variances for two regimes
       v <- sqrt(v)
       c <- innovations[[1]][2] # correlation
-      # this calculates covariances that gives 
+      # the following calculates covariances that gives 
       # all regime and variable combinations the same correlation
       m[1, 2:4] <- v[1] * v[-1] * c
       m[2, 3:4] <- v[2] * v[3:4] * c
       m[3, 4]   <- v[3] * v[4] * c
       m[lower.tri(m)] <- t(m)[lower.tri(m)]
+      
       z_both <- MASS::mvrnorm(o_bi, rep(0, 4), m)
-      z <- as.data.frame(z_both[, 1:2])
+      z  <- as.data.frame(z_both[, 1:2])
       z2 <- as.data.frame(z_both[, 3:4])
       names(z) <- names(z2) <- c("y", "x")
       z <- list(z, z2)

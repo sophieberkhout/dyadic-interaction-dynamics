@@ -9,7 +9,7 @@ output:
 
 # Introduction
 
-This report accompanies the paper "A Tool to Simulate and Visualize Dyadic Interaction Dynamics" by Berkhout, Schuurman and Hamaker (manuscript). It illustrates how the models discussed in the paper can be estimated using two empirical examples.
+This report accompanies the paper "A Tool to Simulate and Visualize Dyadic Interaction Dynamics" by Berkhout, Schuurman and Hamaker (2022). It illustrates how the models discussed in the paper can be estimated using two empirical examples.
 
 ```{r echo = FALSE}
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
@@ -940,7 +940,7 @@ myTS(datMSVAR, regime = T, regimeType = "points", predicted = T, legend.position
 ```
 
 # References
-Berkhout, S.W., Schuurman, N. L., Hamaker, E.L. (manuscript). Statistical Techniques for Analyzing Dyadic Interactions.
+Berkhout, S.W., Schuurman, N. L., Hamaker, E.L. (2022). Statistical Techniques for Analyzing Dyadic Interactions. Manuscript submitted for publication.
 
 Bringmann, L. F., Hamaker, E. L., Vigo, D. E., Aubert, A., Borsboom, D., & Tuerlinckx, F. (2017). Changing dynamics: Time-varying autoregressive models using generalized additive modeling. *Psychological Methods, 22*(3), 409–425. https://doi.org/10.1037/met0000085
 
