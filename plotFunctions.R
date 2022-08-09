@@ -134,7 +134,7 @@ myTS <- function(dat, partner = NULL, regime = F, regimeType = NULL, predicted =
 mySSP <- function(dat, type, tau, partner = NULL,
                   filename = NULL, width = 5, height = 3,
                   xlim = NULL, ylim = NULL, shiny = F, cor = F,
-                  legend.position = NULL){
+                  legend.position = NULL, textSize = c(14, 12)){
   
   t <- nrow(dat)/2
   dat$lag1 <- c(NA, dat$value[-nrow(dat)])
@@ -270,7 +270,7 @@ mySSP <- function(dat, type, tau, partner = NULL,
   if(is.null(xlim)) xlim <- dat$value
   if(is.null(ylim)) ylim <- dat$value
   
-  p <- myTheme(p, x = xlim, y = ylim, legend.position = legend.position, shiny = shiny)
+  p <- myTheme(p, x = xlim, y = ylim, legend.position = legend.position, textSize = textSize, shiny = shiny)
   
   if(!is.null(filename))  ggsave(filename, p, width = width, height = height, device = "pdf")
   return(p)

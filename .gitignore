@@ -3,6 +3,7 @@ OSF/
 rsconnect/
 Analyses_cache/
 Analyses_files/
+Poster/
 .Rhistory
 data.txt
 QID_exampleData.RData

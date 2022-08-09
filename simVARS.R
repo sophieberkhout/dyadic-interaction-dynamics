@@ -31,11 +31,15 @@ simVARS <- function(occasions,          # number of measurement occasions
   # covarying innovations MS-VAR and HMM models second regime
   if(type == "MS" | type == "HMM"){
     if(type == "MS") er <- innovations else er <- errors
-    ifelse(!is.list(er), covs2 <- er, covs2 <- er[[2]])
-    covs2 <- append(covs2, covs2[2], after = 2)
-    m2 <- matrix(covs2, 2, 2, dimnames = list(c("y", "x"), c("y", "x")))
-    z2 <- as.data.frame(MASS::mvrnorm(o_bi, c(0, 0), Sigma = m2))
-    z  <- list(z, z2)
+    if(!is.list(er)) {
+      z <- list(z, z)
+    } else {
+    # ifelse(!is.list(er), covs2 <- er, covs2 <- er[[2]])
+      covs2 <- append(covs2, covs2[2], after = 2)
+      m2 <- matrix(covs2, 2, 2, dimnames = list(c("y", "x"), c("y", "x")))
+      z2 <- as.data.frame(MASS::mvrnorm(o_bi, c(0, 0), Sigma = m2))
+      z  <- list(z, z2)
+    }
   }
   
   # covarying innovations for TVAR model
