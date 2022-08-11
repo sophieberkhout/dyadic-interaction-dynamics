@@ -17,6 +17,7 @@ library("plotly")
 # source required files
 source("simVARS.R")
 source("plotFunctions.R")
+source("analysesFunctions.R")
 
 # set options for app
 options(shiny.autoreload = TRUE)
@@ -206,6 +207,16 @@ ui <- tagList(
                       sidebarPanel(includeMarkdown("Shiny/info.Rmd"), width = 12)
                )
              )
+    ),
+    tabPanel("Estimation", value = "estimation",
+             fluidRow(
+               column(4,
+                      actionButton("estimateModel", "Fit model")
+               ),
+               column(4,
+                      withSpinner(DT::dataTableOutput("estimatesTableY"))
+               )
+             )
     )
   )
 )
@@ -336,10 +347,8 @@ server <- function(input, output, session) {
   params_x_1 <- inputVARServer("xFirstRegime")
   params_y_2 <- inputVARServer("ySecondRegime")
   params_x_2 <- inputVARServer("xSecondRegime")
-
-  # GENERATE DATA
-  dat <- reactive({
-    
+  
+  params <- reactive({
     params_y <- list(alpha = params_y$alpha(), phi = params_y$phi(), beta = params_y$beta())
     params_x <- list(alpha = params_x$alpha(), phi = params_x$phi(), beta = params_x$beta())
     
@@ -353,7 +362,7 @@ server <- function(input, output, session) {
       params_y$phi[2]   <- params_y_2$phi()
       params_y$beta[2]  <- params_y_2$beta()
       if(method$model() == "T") params_y$tau <- input$tau_y        
-
+      
       params_x$alpha[2] <- params_x_2$alpha()
       params_x$phi[2]   <- params_x_2$phi()
       params_x$beta[2]  <- params_x_2$beta()
@@ -362,7 +371,7 @@ server <- function(input, output, session) {
       innovations_1 <- c(innovations_1$y(), innovations_1$c_yx(), innovations_1$x())
       innovations_2 <- c(innovations_2$y(), innovations_2$c_yx(), innovations_2$x())
       if(method$model() == "T") innovations_1[2] <- input$yx_T
-
+      
       innovations <- list(firstRegime = innovations_1,
                           secondRegime = innovations_2) 
     }
@@ -396,25 +405,178 @@ server <- function(input, output, session) {
     
     probs <- NULL
     if(method$model() == "MS" || method$model() == "HMM") probs <- c(input$pi_o, input$pi_t)
-
-    ifelse(input$dataFormat == "long", longformat <- T, longformat <- F)
     
+
     if(method$model() != "L" & method$model() != "HMM") measurement_errors <- NULL
+    
+    return(
+      list(
+        y = params_y,
+        x = params_x,
+        innovations = innovations,
+        errors = measurement_errors,
+        indicators_y = indicators_y,
+        indicators_x = indicators_x,
+        probs = probs
+      )
+    )
+  })
+
+  # GENERATE DATA
+  dat <- reactive({
+    
+    # params_y <- list(alpha = params_y$alpha(), phi = params_y$phi(), beta = params_y$beta())
+    # params_x <- list(alpha = params_x$alpha(), phi = params_x$phi(), beta = params_x$beta())
+    # 
+    # innovations <- c(innovations$y(), innovations$c_yx(), innovations$x())
+    # 
+    # if(method$model() == "T" || method$model() == "MS"){
+    #   params_y <- list(alpha = params_y_1$alpha(), phi = params_y_1$phi(), beta = params_y_1$beta())
+    #   params_x <- list(alpha = params_x_1$alpha(), phi = params_x_1$phi(), beta = params_x_1$beta())
+    #   
+    #   params_y$alpha[2] <- params_y_2$alpha()
+    #   params_y$phi[2]   <- params_y_2$phi()
+    #   params_y$beta[2]  <- params_y_2$beta()
+    #   if(method$model() == "T") params_y$tau <- input$tau_y        
+    # 
+    #   params_x$alpha[2] <- params_x_2$alpha()
+    #   params_x$phi[2]   <- params_x_2$phi()
+    #   params_x$beta[2]  <- params_x_2$beta()
+    #   if(method$model() == "T") params_x$tau <- input$tau_x
+    #   
+    #   innovations_1 <- c(innovations_1$y(), innovations_1$c_yx(), innovations_1$x())
+    #   innovations_2 <- c(innovations_2$y(), innovations_2$c_yx(), innovations_2$x())
+    #   if(method$model() == "T") innovations_1[2] <- input$yx_T
+    # 
+    #   innovations <- list(firstRegime = innovations_1,
+    #                       secondRegime = innovations_2) 
+    # }
+    # if(method$model() == "HMM"){
+    #   params_y <- list(mu = c(means_y$mu_1(), means_y$mu_2()))
+    #   params_x <- list(mu = c(means_x$mu_1(), means_x$mu_2()))
+    #   
+    #   measurement_errors_1 <- c(measurement_errors_1$y(), measurement_errors_1$c_yx(), 
+    #                             measurement_errors_1$x())
+    #   
+    #   measurement_errors_2 <- c(measurement_errors_2$y(), measurement_errors_2$c_yx(), 
+    #                             measurement_errors_2$x())
+    #   
+    #   measurement_errors <- list(firstRegime = measurement_errors_1,
+    #                              secondRegime = measurement_errors_2)
+    # }
+    # if(method$model() == "TV"){
+    #   params_y <- list(alpha = tv_alpha_y$p(), phi = tv_phi_y$p(), beta = tv_beta_y$p())
+    #   params_x <- list(alpha = tv_alpha_x$p(), phi = tv_phi_x$p(), beta = tv_beta_x$p())
+    # }
+    # 
+    # indicators_y <- NULL
+    # indicators_x <- NULL
+    # if(method$model() == "L"){
+    #   indicators_y <- list(m = i_y$mean(), l = 1)
+    #   indicators_x <- list(m = i_x$mean(), l = 1)
+    #   
+    #   measurement_errors <- c(measurement_errors$y(), measurement_errors$c_yx(), 
+    #                           measurement_errors$x())
+    # }
+    # 
+    # probs <- NULL
+    # if(method$model() == "MS" || method$model() == "HMM") probs <- c(input$pi_o, input$pi_t)
+    # 
+    # if(method$model() != "L" & method$model() != "HMM") measurement_errors <- NULL
+    
+    ifelse(input$dataFormat == "long", longformat <- T, longformat <- F)
     
     set.seed(method$seed())
     dat <- simVARS(occasions = method$t(), burnin = 100,
                    type = method$model(),
-                   params_y = params_y,
-                   params_x = params_x,
-                   probs = probs,
-                   indicators_y = indicators_y,
-                   indicators_x = indicators_x,
-                   errors = measurement_errors,
-                   innovations = innovations,
+                   params_y = params()$y,
+                   params_x = params()$x,
+                   probs = params()$probs,
+                   indicators_y = params()$indicators_y,
+                   indicators_x = params()$indicators_x,
+                   errors = params()$errors,
+                   innovations = params()$innovations,
                    longformat = longformat)
     
     dat
   })
+  
+  # estimatesY <- reactiveVal(rep(NA, 6))
+  estimates <- reactiveValues()
+  estimates$estimated <- NA
+  estimates$difference <- NA
+
+  observeEvent(input$estimateModel, {
+    # estimatesY(rep(0, 6))
+    estimates$estimated <- 0 # somehow this is needed to get the spinner to work properly
+    estimates$difference <- 0
+    
+    fit <- estVAR1(dat(), dataFormat = input$dataFormat)
+    summaryFit <- summary(fit)
+    est <- summaryFit$Coefficients[c("alpha_y", "phi_y", "beta_y",
+                                     "alpha_x", "phi_x", "beta_x",
+                                     "z_y", "z_xy", "z_x"), 1]
+    true <- as.numeric(c(params()$y, params()$x, params()$innovations))
+    dif <- est - true
+    # new <- c(est, dif)
+    estimates$estimated <- est
+    estimates$difference <- dif
+    # estimatesY(new)
+  })
+
+  output$estimatesTableY <- DT::renderDataTable({
+    true <- as.numeric(c(params()$y, params()$x, params()$innovations))
+    df <- data.frame(true = true, estimated = estimates$estimated, difference = estimates$difference)
+    # df <- data.frame(matrix(c(params()$y, estimatesY()), nrow = 3, byrow = F))
+    table <- DT::datatable(df,
+                           colnames = c("True", "Estimated", "Bias"),
+                           rownames = c("y intercept \u03B1", "y carryover \u03D5", "y spillover \u03B2",
+                                        "x intercept \u03B1", "x carryover \u03D5", "x spillover \u03B2",
+                                        "y innovation variance", "innovation covariance", "x innovation variance"),
+                           options = list(dom = "t", bSort = F))
+    
+    table <- DT::formatRound(table, columns = 1:3, digits = 3)
+    # table <- DT::formatStyle(table, columns = 1:3, textAlign = "right")
+  })
+  
+  observeEvent(params()$y, {
+    # estimatesY(rep(NA, 6))
+    estimates$estimated <- NA
+    estimates$difference <- NA
+    
+  })
+  
+  # output$inputsTableY <- DT::renderDataTable({
+  #   
+  #   df <- data.frame(matrix(params()$y, nrow = 1, byrow = T))
+  #   table <- DT::datatable(df,
+  #                          colnames = c("\u03B1", "\u03D5", "\u03B2"),
+  #                          rownames = "True",
+  #                          options = list(dom = "t", bSort = F))
+  #   
+  #   table <- DT::formatRound(table, columns = 1:3, digits = 3)
+  #   table <- DT::formatStyle(table, columns = 1:3, textAlign = "right")
+  # })
+
+
+# output$estimatesTableY <- DT::renderDataTable({
+# 
+#   df <- data.frame(matrix(c(params()$y, estimatesY()), nrow = 3, byrow = T))
+#   table <- DT::datatable(df,
+#                 colnames = c("\u03B1", "\u03D5", "\u03B2"),
+#                 rownames = c("True", "Estimated", "Bias"),
+#                 options = list(dom = "t", bSort = F))
+# 
+#   table <- DT::formatRound(table, columns = 1:3, digits = 3)
+# })
+
+  # output$estimatesTableX <- DT::renderDataTable({
+  #   DT::datatable(matrix(params()$x, nrow = 1), 
+  #                 colnames = c("\u03B1", "\u03D5", "\u03B2"),
+  #                 options = list(dom = "t", bSort = F))
+  #   
+  # })
+  
 
   formulaServer_y("formula_y", method$model,
                   params_y, params_y_1, params_y_2,
@@ -422,7 +584,7 @@ server <- function(input, output, session) {
                   i_y,
                   means_y,
                   tv = list(alpha_y = tv_alpha_y, phi_y = tv_phi_y, beta_y = tv_beta_y))
-
+  
   formulaServer_x("formula_x", method$model,
                   params_x, params_x_1, params_x_2,
                   reactive({input$tau_x}),
