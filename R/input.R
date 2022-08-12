@@ -1,17 +1,26 @@
 methodUI <- function(id){
   ns <- NS(id)
   
-  sidebarPanel(width = 12,
-               h4("Method"),
+  wellPanel(width = 12,
+               # h4("Method"),
+            fluidRow(
+              column(5,
+            
                selectInput(ns("model"), "Data generating model",
                            list("First-order vector autoregressive VAR(1)" = "VAR",
                                 "Latent VAR(1)" = "L",
                                 "Time-varying VAR(1)" = "TV",
                                 "Threshold VAR(1)" = "T",
                                 "Hidden Markov model" = "HMM",
-                                "Markov-switching VAR(1)" = "MS"), selected = "VAR"),
-               numericInput(ns("t"), "Measurement occasions", 300, min = 2, step = 50), # 1 does not work
+                                "Markov-switching VAR(1)" = "MS"), selected = "VAR")
+               ),
+              column(3,
+               numericInput(ns("t"), "Measurement occasions", 300, min = 2, step = 50) # 1 does not work
+              ),
+              column(3,
                numericInput(ns("seed"), "Seed", 1, min = 1, max = .Machine$integer.max)
+              )
+            )
   )
 }
 

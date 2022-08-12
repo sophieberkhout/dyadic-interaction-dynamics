@@ -38,191 +38,280 @@ ui <- tagList(
                               transform: scale(1);
                               transform-origin: top center;
                             }
+
                             "
                        )
             )
   ),
-  navbarPage("Dyadic Interaction Dynamics", id = "navbar", selected = "sim",
-    tabPanel("By using this app you agree with the Terms of Usage.",
-       fluidRow(
-         column(6, includeMarkdown("Shiny/tou.Rmd")))
-       ),
-    tabPanel("Simulation", value = "sim",
-      div(id = "element",
-       fluidRow(
-         column(3, methodUI("method")),
-         column(3,
-                formulaModelUI("formula_model_y"),
-                tabsetPanel(id = "yTabs",
-                            tabPanel("Regression coefficients",
-                                     inputVARUI("yParameters")
-                            ),
-                            tabPanel(HTML("Intercept &#120572;"),
-                                     tvUI("intercept_y", type = "num"),
-                            ),
-                            tabPanel(HTML("Carryover &#120601;"),
-                                     tvUI("carryover_y"),
-                            ),
-                            tabPanel(HTML("Spillover &#120573;"),
-                                     tvUI("spillover_y"),
-                            ),
-                            tabPanel("Means",
-                                     meansUI("means_y")
-                            ),
-                            tabPanel("Indicator",
-                                     indicatorUI("i_y")
-                            ),
-                            tabPanel("Regime 1",
-                                     inputVARUI("yFirstRegime")
-                            ),
-                            tabPanel("Regime 2",
-                                     inputVARUI("ySecondRegime")
-                            )
-                ),
-                hr(),
-                conditionalPanel(condition =  "input.model == 'T'",
-                                 numericInput("tau_y", HTML("Threshold &#120591;"), 0, width = "30%"),
-                                 ns = NS("method")
-                ),
-                formulaUI_y("formula_y")
-         ),
-         column(3,
-                formulaModelUI("formula_model_x"),
-                tabsetPanel(id = "xTabs",
-                  tabPanel("Regression coefficients",
-                           inputVARUI("xParameters")
-                  ),
-                  tabPanel(HTML("Intercept &#120572;"),
-                           tvUI("intercept_x", type = "num"),
-                  ),
-                  tabPanel(HTML("Carryover &#120601;"),
-                           tvUI("carryover_x"),
-                  ),
-                  tabPanel(HTML("Spillover &#120573;"),
-                           tvUI("spillover_x"),
-                  ),
-                  tabPanel("Means",
-                           meansUI("means_x")
-                  ),
-                  tabPanel("Indicator",
-                           indicatorUI("i_x")
-                  ),
-                  tabPanel("Regime 1",
-                           inputVARUI("xFirstRegime")
-                  ),
-                  tabPanel("Regime 2",
-                           inputVARUI("xSecondRegime")
-                  )
-                ),
-                hr(),
-                conditionalPanel(condition =  "input.model == 'T'",
-                                 numericInput("tau_x", HTML("Threshold &#120591;"), 0, width = "30%"),
-                                 ns = NS("method")
-                ),
-                formulaUI_x("formula_x")
-         ),
-         column(3,
-                formulaModelUI("formula_model_z"),
-                tabsetPanel(id = "errors",
-                            tabPanel("Innovation parameters",
-                                     errorsUI("innovations")
-                            ),
-                            tabPanel("Measurement error parameters",
-                                     errorsUI("measurementError")
-                            ),
-                            tabPanel("Measurement error regime 1",
-                                     errorsUI("measurementErrorFirstRegime")
-                            ),
-                            tabPanel("Measurement error regime 2",
-                                     errorsUI("measurementErrorSecondRegime")
-                            ),
-                            tabPanel("Innovation regime 1",
-                                     errorsUI("innovationsFirstRegime")
-                            ),
-                            tabPanel("Innovation regime 2",
-                                     errorsUI("innovationsSecondRegime")
-                            )
-                ),
-                conditionalPanel(condition = "input.model == 'T'",
-                                 hr(),
-                                 h5("For all regime combinations"),
+  navbarPage("Dyadic Interaction Dynamics", id = "topnavbar", selected = "simulate",
+             tabPanel("By using this app you agree with the Terms of Usage.",
+                      fluidRow(
+                        column(6, includeMarkdown("Shiny/tou.Rmd")))
+             ),
+             tabPanel("Simulate", value = "simulate",
+                      h4("Simulate"),
+                      navlistPanel(id = "simulateTabs", widths = c(2, 10), well = F,
+                                 tabPanel("Set up & Visualization", value = "sim",
+                                          # div(id = "element",
+                                              fluidRow(
+                                                column(12, methodUI("method"))
+                                                ), fluidRow(
+                                                column(4,
+                                                       formulaModelUI("formula_model_y"),
+                                                       tabsetPanel(id = "yTabs",
+                                                                   tabPanel("Regression coefficients",
+                                                                            inputVARUI("yParameters")
+                                                                   ),
+                                                                   tabPanel(HTML("Intercept &#120572;"),
+                                                                            tvUI("intercept_y", type = "num"),
+                                                                   ),
+                                                                   tabPanel(HTML("Carryover &#120601;"),
+                                                                            tvUI("carryover_y"),
+                                                                   ),
+                                                                   tabPanel(HTML("Spillover &#120573;"),
+                                                                            tvUI("spillover_y"),
+                                                                   ),
+                                                                   tabPanel("Means",
+                                                                            meansUI("means_y")
+                                                                   ),
+                                                                   tabPanel("Indicator",
+                                                                            indicatorUI("i_y")
+                                                                   ),
+                                                                   tabPanel("Regime 1",
+                                                                            inputVARUI("yFirstRegime")
+                                                                   ),
+                                                                   tabPanel("Regime 2",
+                                                                            inputVARUI("ySecondRegime")
+                                                                   )
+                                                       ),
+                                                       hr(),
+                                                       conditionalPanel(condition =  "input.model == 'T'",
+                                                                        numericInput("tau_y", HTML("Threshold &#120591;"), 0, width = "30%"),
+                                                                        ns = NS("method")
+                                                       ),
+                                                       formulaUI_y("formula_y")
+                                                ),
+                                                column(4,
+                                                       formulaModelUI("formula_model_x"),
+                                                       tabsetPanel(id = "xTabs",
+                                                                   tabPanel("Regression coefficients",
+                                                                            inputVARUI("xParameters")
+                                                                   ),
+                                                                   tabPanel(HTML("Intercept &#120572;"),
+                                                                            tvUI("intercept_x", type = "num"),
+                                                                   ),
+                                                                   tabPanel(HTML("Carryover &#120601;"),
+                                                                            tvUI("carryover_x"),
+                                                                   ),
+                                                                   tabPanel(HTML("Spillover &#120573;"),
+                                                                            tvUI("spillover_x"),
+                                                                   ),
+                                                                   tabPanel("Means",
+                                                                            meansUI("means_x")
+                                                                   ),
+                                                                   tabPanel("Indicator",
+                                                                            indicatorUI("i_x")
+                                                                   ),
+                                                                   tabPanel("Regime 1",
+                                                                            inputVARUI("xFirstRegime")
+                                                                   ),
+                                                                   tabPanel("Regime 2",
+                                                                            inputVARUI("xSecondRegime")
+                                                                   )
+                                                       ),
+                                                       hr(),
+                                                       conditionalPanel(condition =  "input.model == 'T'",
+                                                                        numericInput("tau_x", HTML("Threshold &#120591;"), 0, width = "30%"),
+                                                                        ns = NS("method")
+                                                       ),
+                                                       formulaUI_x("formula_x")
+                                                ),
+                                                column(4,
+                                                       formulaModelUI("formula_model_z"),
+                                                       tabsetPanel(id = "errors",
+                                                                   tabPanel("Innovation parameters",
+                                                                            errorsUI("innovations")
+                                                                   ),
+                                                                   tabPanel("Measurement error parameters",
+                                                                            errorsUI("measurementError")
+                                                                   ),
+                                                                   tabPanel("Measurement error regime 1",
+                                                                            errorsUI("measurementErrorFirstRegime")
+                                                                   ),
+                                                                   tabPanel("Measurement error regime 2",
+                                                                            errorsUI("measurementErrorSecondRegime")
+                                                                   ),
+                                                                   tabPanel("Innovation regime 1",
+                                                                            errorsUI("innovationsFirstRegime")
+                                                                   ),
+                                                                   tabPanel("Innovation regime 2",
+                                                                            errorsUI("innovationsSecondRegime")
+                                                                   )
+                                                       ),
+                                                       conditionalPanel(condition = "input.model == 'T'",
+                                                                        hr(),
+                                                                        h5("For all regime combinations"),
+                                                                        fluidRow(
+                                                                          column(6,
+                                                                                 numericInput("yx_T", "Correlation", .3, -1, 1, .1),
+                                                                          )
+                                                                        ), ns = NS("method")
+                                                       ),
+                                                       conditionalPanel(condition = "input.model == 'MS' || input.model == 'HMM'",
+                                                                        tabsetPanel(id = "transition",
+                                                                                    tabPanel("Transition probabilities",
+                                                                                             fluidRow(style = "padding-top:5px",
+                                                                                                      column(6,
+                                                                                                             numericInput("pi_o", "Stay in 1", .5, 0, 1, .1, width = "60%"),
+                                                                                                             tableOutput("pi_ot")
+                                                                                                      ),
+                                                                                                      column(6,
+                                                                                                             tableOutput("pi_to"),
+                                                                                                             numericInput("pi_t", "Stay in 2", .5, 0, 1, .1, width = "60%")
+                                                                                                      )
+                                                                                             )
+                                                                                    )
+                                                                        ), ns = NS("method")
+                                                       ),
+                                                       hr(),
+                                                       formulaUI_z("formula_z")
+                                                )
+                                              ),
+                                              conditionalPanel(condition =  "input.model == 'TV'",
+                                                               hr(), 
+                                                               h4("Parameters plotted over time"),
+                                                               plotstvUI("tvPlots"),
+                                                               ns = NS("method")
+                                              ),
+                                              hr()
+                                              # plotsInputUI("inputPlots")
+                                          # )
+                                 ),
+                                 tabPanel("Estimation", value = "estimation",
+                                          estimationUI("estimation")
+                                 ),
+                                 tabPanel("Download", value = "data",
+                                          fluidRow(
+                                            column(9,
+                                                   withSpinner(DT::dataTableOutput("table"))
+                                            ),
+                                            column(3,
+                                                   radioButtons("dataFormat", "Choose data format",
+                                                                choices = list('"Wide"' = "wide", "Long" = "long")
+                                                   ),
+                                                   downloadButton("downloadData", "Download data")
+                                            )
+                                          )
+                                 )
+                      ),
+                      conditionalPanel(condition = "input.simulateTabs == 'sim'",
+                                       plotsInputUI("inputPlots")
+                      )
+             ),
+             tabPanel("Upload",
+                      h4("Data"),
+                      navlistPanel(id = "uploadTabs", widths = c(2, 10), well = F,
+                        tabPanel("Upload & Visualization", value = "upload",
                                  fluidRow(
-                                   column(6,
-                                          numericInput("yx_T", "Correlation", .3, -1, 1, .1),
+                                   column(4, 
+                                          sidebarPanel(width = 12,
+                                                       p("The data file should have three columns: t, x, and y."),
+                                            # Input: Select a file ----
+                                            fileInput("file", "Choose CSV File",
+                                                      multiple = F,
+                                                      accept = c("text/csv",
+                                                                 "text/comma-separated-values,text/plain",
+                                                                 ".csv")),
+                                            hr(),
+                                            # Input: Select separator ----
+                                            fluidRow(
+                                              column(6, 
+                                                radioButtons("sep", "Separator",
+                                                             choices = c(Comma = ",",
+                                                                         Semicolon = ";",
+                                                                         Tab = "\t"),
+                                                             selected = ",")
+                                                  )
+                                              # column(6,
+                                              #  radioButtons("uploadFormat", "Data Format",
+                                              #               choices = list('"Wide"' = "wide", "Long" = "long")
+                                              # )
+                                            )
+                                          )
+                                        ),
+                                   column(8,
+                                          # textOutput("uploadText"),
+                                          DT::dataTableOutput("uploadedDataTable"),
+                                          hr()
                                    )
-                                 ), ns = NS("method")
-                ),
-                conditionalPanel(condition = "input.model == 'MS' || input.model == 'HMM'",
-                  tabsetPanel(id = "transition",
-                    tabPanel("Transition probabilities",
-                      fluidRow(style = "padding-top:5px",
-                        column(6,
-                               numericInput("pi_o", "Stay in 1", .5, 0, 1, .1, width = "60%"),
-                               tableOutput("pi_ot")
+                                 )),
+                        tabPanel("Estimation")
+                      ),
+                      conditionalPanel(condition = "input.uploadTabs == 'upload'",
+                                       plotsInputUI("uploadPlots")
+                      )
+             ),
+             tabPanel("Info", value = "info",
+                      fluidRow(
+                        column(4,
+                               includeMarkdown("Shiny/help.Rmd")
                         ),
-                        column(6,
-                               tableOutput("pi_to"),
-                               numericInput("pi_t", "Stay in 2", .5, 0, 1, .1, width = "60%")
+                        column(4,
+                               includeMarkdown("Shiny/help_data.Rmd")
+                        ),
+                        column(4,
+                               sidebarPanel(includeMarkdown("Shiny/info.Rmd"), width = 12)
                         )
                       )
-                    )
-                  ), ns = NS("method")
-                ),
-                hr(),
-                formulaUI_z("formula_z")
-         )
-       ),
-       conditionalPanel(condition =  "input.model == 'TV'",
-                        hr(), 
-                        h4("Parameters plotted over time"),
-                        plotstvUI("tvPlots"),
-                        ns = NS("method")
-       ),
-       hr(),
-       plotsInputUI("inputPlots")
-     )
-    ),
-    tabPanel("Data", value = "data",
-      fluidRow(
-        column(9,
-               withSpinner(DT::dataTableOutput("table"))
-        ),
-        column(3,
-              radioButtons("dataFormat", "Choose data format",
-                           choices = list('"Wide"' = "wide", "Long" = "long")
-              ),
-              downloadButton("downloadData", "Download data")
-        )
-      )
-    ),
-    tabPanel("Info", value = "info",
-             fluidRow(
-               column(4,
-                      includeMarkdown("Shiny/help.Rmd")
-               ),
-               column(4,
-                      includeMarkdown("Shiny/help_data.Rmd")
-               ),
-               column(4,
-                      sidebarPanel(includeMarkdown("Shiny/info.Rmd"), width = 12)
-               )
              )
-    ),
-    tabPanel("Estimation", value = "estimation",
-             estimationUI("estimation")
-             # fluidRow(
-             #   column(4,
-             #          actionButton("estimateModel", "Fit model")
-             #   ),
-             #   column(6,
-             #          withSpinner(DT::dataTableOutput("estimatesTable"))
-             #   )
-             # )
-    )
   )
 )
 
 server <- function(input, output, session) {
+  
+  # output$uploadText <- renderText({
+  #   if(is.null(input$file)) {
+  #     "Please upload a file."
+  #   } else {
+  #     ""
+  #   }
+  #   # if(!is.null(input$file1) & ncol(uploadedData) < 3) "Check separator."
+  # })
+  
+  uploadedData <- reactive({
+    df <- read.csv(input$file$datapath,
+                   header = T,
+                   sep = input$sep)
+    
+    return(df)
+  })
+  
+  uploadedDataLong <- reactive({
+    df_long <- uploadedData()
+    # if(input$uploadFormat == "wide") {
+      df_long <- tidyr::pivot_longer(df_long, cols = c("x", "y"), 
+                                     names_to = "partner", values_to = "value")
+    # }
+    return(df_long)
+  })
+  
+  output$uploadedDataTable <- DT::renderDataTable({
+    
+    # input$file1 will be NULL initially. After the user selects
+    # and uploads a file, head of that data file by default,
+    # or all rows if selected, will be shown.
+    
+    # req(input$file)
+    validate(need(input$file, message = "Please upload a data file."))
+    
+    dtable <- DT::datatable(uploadedData(), rownames = F,
+                            options = list(dom = "pt", pageLength = 5)) 
+    dtable
+  })
+  
+  plotsServer("uploadPlots", dataFormat, model = function(){"VAR"}, 
+              dat = uploadedDataLong, uploaded = T, uploadedFile = reactive({ input$file }))
+  
   
   # DYNAMIC INPUT
   method <- methodServer("method")
@@ -300,11 +389,11 @@ server <- function(input, output, session) {
     }
   }, priority = 1)
   
-  observeEvent(input$navbar, {
-    if(input$navbar == "sim"){
+  observeEvent(input$simulateTabs, {
+    if(input$simulateTabs == "sim"){
       updateRadioButtons(session, "dataFormat", selected = "long")
     }
-    if(input$navbar == "data"){
+    if(input$simulateTabs == "data"){
       updateRadioButtons(session, "dataFormat", selected = "wide")
     }
   })

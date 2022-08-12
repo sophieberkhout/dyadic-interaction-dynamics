@@ -46,7 +46,8 @@ myTheme <- function(p, x = NULL, y = NULL, legend.position = NULL,
     p <- p + theme(text = element_text(size = textSize[1], family = "serif"),
                    axis.text = element_text(size = textSize[2]),
                    legend.text = element_text(size = textSize[2]),
-                   legend.position = legend.position)
+                   legend.position = legend.position,
+                   legend.background = element_rect(fill = alpha("white", 0.6)))
   }
   
   return(p)
