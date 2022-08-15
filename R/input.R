@@ -4,7 +4,7 @@ methodUI <- function(id){
   wellPanel(width = 12,
                # h4("Method"),
             fluidRow(
-              column(5,
+              column(4,
             
                selectInput(ns("model"), "Data generating model",
                            list("First-order vector autoregressive VAR(1)" = "VAR",
@@ -14,10 +14,10 @@ methodUI <- function(id){
                                 "Hidden Markov model" = "HMM",
                                 "Markov-switching VAR(1)" = "MS"), selected = "VAR")
                ),
-              column(3,
+              column(3, offset = 1,
                numericInput(ns("t"), "Measurement occasions", 300, min = 2, step = 50) # 1 does not work
               ),
-              column(3,
+              column(3, offset = 1,
                numericInput(ns("seed"), "Seed", 1, min = 1, max = .Machine$integer.max)
               )
             )

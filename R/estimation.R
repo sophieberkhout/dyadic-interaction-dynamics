@@ -2,14 +2,22 @@ estimationUI <- function(id) {
   ns <- NS(id)
   
   fluidRow(
-    column(4,
+    column(5,
            sidebarPanel(
-            h4("test"),
+            # h4("test"),
+            selectInput(ns("model"), "Estimation model",
+                        list("First-order vector autoregressive VAR(1)" = "VAR",
+                             "Latent VAR(1)" = "L",
+                             "Time-varying VAR(1)" = "TV",
+                             "Threshold VAR(1)" = "T",
+                             "Hidden Markov model" = "HMM",
+                             "Markov-switching VAR(1)" = "MS"), selected = "VAR"),
+            hr(),
             actionButton(ns("estimateModel"), "Fit model"),
             width = 12
            )
     ),
-    column(6,
+    column(7,
            withSpinner(DT::dataTableOutput(ns("estimatesTable")))
     )
   )
