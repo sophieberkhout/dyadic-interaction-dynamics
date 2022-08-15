@@ -1,4 +1,34 @@
-paramsServer <- function(id, model, t){
+paramsUI <- function(id) {
+    tabsetPanel(id = "yTabs",
+
+        tabPanel("Regression coefficients",
+                inputVARUI("yParameters")
+        ),
+        tabPanel(HTML("Intercept &#120572;"),
+                tvUI("intercept_y", type = "num"),
+        ),
+        tabPanel(HTML("Carryover &#120601;"),
+                tvUI("carryover_y"),
+        ),
+        tabPanel(HTML("Spillover &#120573;"),
+                tvUI("spillover_y"),
+        ),
+        tabPanel("Means",
+                meansUI("means_y")
+        ),
+        tabPanel("Indicator",
+                indicatorUI("i_y")
+        ),
+        tabPanel("Regime 1",
+                inputVARUI("yFirstRegime")
+        ),
+        tabPanel("Regime 2",
+                inputVARUI("ySecondRegime")
+        )
+    )
+}
+
+paramsServer <- function(id, model, t, pi_o, pi_t) {
   moduleServer(
     id,
     function(input, output, session){
@@ -95,7 +125,7 @@ paramsServer <- function(id, model, t){
             }
             
             probs <- NULL
-            if(model() == "MS" || model() == "HMM") probs <- c(input$pi_o, input$pi_t)
+            if(model() == "MS" || model() == "HMM") probs <- c(pi_o(), pi_t())
             
 
             if(model() != "L" & model() != "HMM") measurement_errors <- NULL

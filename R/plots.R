@@ -93,7 +93,7 @@ plotsInputUI <- function(id){
   )
 }
 
-plotsServer <- function(id, dataFormat, model, t, dat, tv, uploaded = F, uploadedFile = NULL){
+plotsServer <- function(id, dataFormat, model, dat, uploaded = F, uploadedFile = NULL){
   moduleServer(
     id,
     function(input, output, session){
