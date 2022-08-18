@@ -533,11 +533,10 @@ server <- function(input, output, session) {
       innovations = params()$innovations,
       longformat = longformat
     )
-
     dat
   })
 
-  estimationServer("estimation", dataFormat, dat, params)
+  estimationServer("estimation", dataFormat, dat, params, method$model)
 
   formulaServer_y("formula_y", method$model,
     params_y, params_y_1, params_y_2,
