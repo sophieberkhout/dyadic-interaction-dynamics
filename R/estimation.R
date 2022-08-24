@@ -21,7 +21,8 @@ estimationUI <- function(id) {
                 selected = "VAR"
               ),
               hr(),
-              actionButton(ns("estimateModel"), "Fit model")
+              actionButton(ns("estimateModel"), "Fit model"),
+              textOutput(ns("exitflagText"))
             )
           ),
           column(
@@ -57,6 +58,8 @@ estimationServer <- function(id, dataFormat, dat, params, trueModel) {
       estimates <- reactiveValues()
       # estimates <- NA
       estimates$estimated <- NA
+      estimates$exitflag <- NA
+      estimates$se <- NA
       # estimates$difference <- NA
 
       output$modelText <- renderText({
@@ -136,26 +139,76 @@ estimationServer <- function(id, dataFormat, dat, params, trueModel) {
       })
 
       observeEvent(input$estimateModel, {
-        # estimates <- 0
         estimates$estimated <- 0 # somehow this is needed to get the spinner to work properly
-        # estimates$difference <- 0
+        estimates$exitflag <- 0
+        estimates$se <- 0
 
-        fit <- tryCatch(dynrEstimation(dat(),
-          model = input$model,
-          dataFormat = dataFormat()
-        ),
-        error = function(e) message("error"),
-        warning = function(w) message("warning")
-        )
-        summaryFit <- summary(fit)
-        est <- summaryFit$Coefficients[mod()[[input$model]]$dynrNames, 1]
+        fit <- dynrEstimation(dat(), model = input$model, dataFormat = dataFormat())
+
+        if (fit$exitflag > 0) {
+          summaryFit <- summary(fit)
+          est <- summaryFit$Coefficients[mod()[[input$model]]$dynrNames, 1]
+          se <- summaryFit$Coefficients[mod()[[input$model]]$dynrNames, 2]
+        } else {
+          est <- NULL
+          se <- NULL
+        }
+
+        # fit <- est <- NULL
+
+        # fit <- tryCatch(
+        #   dynrEstimation(dat(),
+        #     model = input$model,
+        #     dataFormat = dataFormat()
+        #   ),
+        #   error = function(e) NULL,
+        #   warning = function(w) NULL
+        # )
+
+        # if (!is.null(fit)) {
+        #   summaryFit <- summary(fit)
+        #   est <- summaryFit$Coefficients[mod()[[input$model]]$dynrNames, 1]
+        # }
 
         # dif <- est - mod()$params
 
-        # estimates <- est
         estimates$estimated <- est
-        # estimates$difference <- dif
+        estimates$se <- se
+        estimates$exitflag <- fit$exitflag
       })
+
+      # exitflagText <- reactive({
+      #   exitflagText <- ""
+      #   if (!is.na(estimates$exitflag)) {
+      #     if (estimates$exitflag == 2) {
+      #       exitflagText <- "Optimization stopped because objective function reached stopping threshold. Treat estimates with caution."
+      #     }
+      #     if (estimates$exitflag == 5) {
+      #       exitflagText <- "Optimization stopped because the maximum number of function evaluations was reached. Treat estimates with caution."
+      #     }
+      #     if (estimates$exitflag == 2) {
+      #       exitflagText <- "Optimization stopped because the maximum optimization times was reached. Treat estimates with caution."
+      #     }
+      #   }
+      #   return(exitflagText)
+      # })
+
+      output$exitflagText <- renderText({
+        exitflagText <- ""
+        if (!is.na(estimates$exitflag)) {
+          if (estimates$exitflag == 2) {
+            exitflagText <- "Optimization stopped because objective function reached stopping threshold. Treat estimates with caution."
+          }
+          if (estimates$exitflag == 5) {
+            exitflagText <- "Optimization stopped because the maximum number of function evaluations was reached. Treat estimates with caution."
+          }
+          if (estimates$exitflag == 2) {
+            exitflagText <- "Optimization stopped because the maximum optimization times was reached. Treat estimates with caution."
+          }
+        }
+        return(exitflagText)
+      })
+
 
       output$trueTable <- DT::renderDataTable({
         # parNames <- c(rep(c("Intercept \u03B1", "Carryover \u03D5", "Spillover \u03B2"), 2),
@@ -179,31 +232,33 @@ estimationServer <- function(id, dataFormat, dat, params, trueModel) {
         # parNames <- c(rep(c("Intercept \u03B1", "Carryover \u03D5", "Spillover \u03B2"), 2),
         #               "Innovation variance y", "Innovation covariance", "Innovation variance x")
 
+        validate(need(!is.null(estimates$estimated), "Model could not be fit."))
+
         df <- data.frame(
           names = mod()[[input$model]]$parNames,
-          # estimated = estimates
-          estimated = estimates$estimated
+          estimated = estimates$estimated,
+          se = estimates$se
         )
 
         table <- DT::datatable(df,
-          colnames = c("Parameters", "Estimated"),
+          colnames = c("Parameters", "Estimated", "SE"),
           rownames = mod()[[input$model]]$rowNames,
           options = list(dom = "t", bSort = FALSE, pageLength = 15),
         )
 
-        table <- DT::formatRound(table, columns = 2, digits = 3)
+        table <- DT::formatRound(table, columns = 2:3, digits = 3)
       })
 
       observeEvent(params(), {
-        # estimates <- NA
         estimates$estimated <- NA
-        # estimates$difference <- NA
+        estimates$exitflag <- NA
+        estimates$se <- NA
       })
 
       observeEvent(input$model, {
-        # estimates <- NA
         estimates$estimated <- NA
-        # estimates$difference <- NA
+        estimates$exitflag <- NA
+        estimates$se <- NA
       })
     }
   )
