@@ -40,6 +40,12 @@ ui <- tagList(
                             }
 
                             "))),
+  tags$div(HTML("<script type='text/x-mathjax-config' >
+                MathJax.Hub.Config({
+                tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+                });
+                </script >
+                ")),
   navbarPage("Dyadic Interaction Dynamics",
     id = "topnavbar",
     selected = "simulate",
@@ -230,10 +236,10 @@ ui <- tagList(
           ),
           hr()
         ),
-        tabPanel("Estimation",
-          value = "estimation",
-          estimationUI("estimation")
-        ),
+        # tabPanel("Estimation",
+        #   value = "estimation",
+        #   estimationUI("estimation")
+        # ),
         tabPanel("Download",
           value = "data",
           fluidRow(
@@ -265,7 +271,7 @@ ui <- tagList(
           value = "upload",
           uploadInputUI("uploadData")
         ),
-        tabPanel("Estimation")
+        # tabPanel("Estimation")
       ),
       conditionalPanel(
         condition = "input.uploadTabs == 'upload'",
@@ -422,8 +428,14 @@ server <- function(input, output, session) {
   measurement_errors_1 <- errorsServer("measurementErrorFirstRegime")
   measurement_errors_2 <- errorsServer("measurementErrorSecondRegime")
 
-  params_y <- inputVARServer("yParameters")
-  params_x <- inputVARServer("xParameters")
+  params_y <- inputVARServer("yParameters",
+    params = params_x,
+    model = method$model, nu = i_y, partner = "y"
+  )
+  params_x <- inputVARServer("xParameters",
+    params = params_y,
+    model = method$model, nu = i_x, partner = "x"
+  )
   params_y_1 <- inputVARServer("yFirstRegime")
   params_x_1 <- inputVARServer("xFirstRegime")
   params_y_2 <- inputVARServer("ySecondRegime")
@@ -536,7 +548,7 @@ server <- function(input, output, session) {
     dat
   })
 
-  estimationServer("estimation", dataFormat, dat, params, method$model)
+  # estimationServer("estimation", dataFormat, dat, params, method$model)
 
   formulaServer_y("formula_y", method$model,
     params_y, params_y_1, params_y_2,
@@ -587,6 +599,8 @@ server <- function(input, output, session) {
     )
     if (input$dataFormat == "wide") {
       dtable <- DT::formatRound(dtable, columns = c("x", "y"), digits = 3)
+    } else {
+      dtable <- DT::formatRound(dtable, columns = c("value"), digits = 3)
     }
     dtable
   })

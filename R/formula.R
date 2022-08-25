@@ -1,65 +1,65 @@
-formulaModelUI <- function(id){
+formulaModelUI <- function(id) {
   ns <- NS(id)
   tagList(
     uiOutput(ns("formula_model"))
   )
 }
 
-formulaModelServer <- function(id, model, columnName){
+formulaModelServer <- function(id, model, columnName) {
   moduleServer(
     id,
-    function(input, output, server){
-      
+    function(input, output, server) {
       tex <- reactive({
-        if(model() == "VAR") {
-          formula_y <- "$$ y_t = \\alpha_y + \\phi_y y_{t-1} + \\beta_y x_{t-1} + \\zeta_{y, t} $$" 
-          
-          formula_x <- "$$ x_t = \\alpha_x + \\phi_x x_{t-1} + \\beta_y y_{t-1} + \\zeta_{x, t} $$"
-          
+        if (model() == "VAR") {
+          formula_y <-
+            "$$ y_t = \\alpha_y + \\phi_y y_{t-1} + \\beta_y x_{t-1} + \\zeta_{y, t} $$"
+
+          formula_x <- "$$ x_t = \\alpha_x + \\phi_x x_{t-1} + \\beta_x y_{t-1} + \\zeta_{x, t} $$"
+
           formula_z <- "$$ Z \\sim \\mathcal{N}(0, \\Sigma) $$"
         }
-        
-        if(model() == "L") {
+
+        if (model() == "L") {
           formula_y <-
             "\\begin{aligned}
                 \\eta_{t} &= \\alpha_y + \\phi_y \\eta_{t-1} + \\beta_y \\xi_{t-1} + \\zeta_{y, t} \\\\
                 y_t &= \\nu_y + \\eta_{t} + \\varepsilon_{y, t}
              \\end{aligned}"
-          
+
           formula_x <-
             "\\begin{aligned}
                 \\xi_{t} &= \\alpha_x + \\phi_x \\xi_{t-1} + \\beta_x \\eta_{t-1} + \\zeta_{x, t} \\\\
                 x_t &= \\nu_x + \\xi_{t} + \\varepsilon_{x, t}
              \\end{aligned}"
-          
+
           formula_z <-
             "\\begin{aligned}
               Z &\\sim \\mathcal{N}(0, \\Sigma_\\zeta) \\\\
               E &\\sim \\mathcal{N}(0, \\Sigma_\\varepsilon)
              \\end{aligned}"
         }
-        
-        if(model() == "TV") {
+
+        if (model() == "TV") {
           formula_y <- "$$ y_t = \\alpha_{y, t} + \\phi_{y, t} y_{t-1} + \\beta_{y, t} x_{t-1} + \\zeta_{y, t} $$"
-          
+
           formula_x <- "$$ x_t = \\alpha_{x, t} + \\phi_{x, t} x_{t-1} + \\beta_{x, t} y_{t-1} + \\zeta_{x, t} $$"
-          
+
           formula_z <- "$$ Z \\sim \\mathcal{N}(0, \\Sigma) $$"
         }
-        
-        if(model() == "T") {
+
+        if (model() == "T") {
           formula_y <-
             "$$
             \\small
              \\begin{aligned}
-                y_t = 
+                y_t =
                 &\\begin{cases}
                 \\alpha_{y, 1} + \\phi_{y, 1} y_{t-1} + \\beta_{y, 1} x_{t-1} + \\zeta_{y, t} \\enspace \\text{if} \\: x_{t-1} \\leq \\tau_y \\\\
                 \\alpha_{y, 2} + \\phi_{y, 2} y_{t-1} + \\beta_{y, 2} x_{t-1} + \\zeta_{y, t} \\enspace \\text{if} \\: x_{t-1} > \\tau_y
                 \\end{cases}
              \\end{aligned}
              $$"
-          
+
           formula_x <-
             "$$
             \\small
@@ -71,11 +71,10 @@ formulaModelServer <- function(id, model, columnName){
                 \\end{cases}
              \\end{aligned}
              $$"
-          
+
           formula_z <- "$$ \\small Z \\sim \\mathcal{N}(0, \\Sigma) $$"
-          
         }
-        if(model() == "HMM") {
+        if (model() == "HMM") {
           formula_y <-
             "\\begin{aligned}
                 y_t =
@@ -84,7 +83,7 @@ formulaModelServer <- function(id, model, columnName){
                 \\mu_{y, 2} + \\varepsilon_{y, t}
                 \\end{cases}
              \\end{aligned}"
-          
+
           formula_x <-
             "\\begin{aligned}
                 x_t =
@@ -93,10 +92,10 @@ formulaModelServer <- function(id, model, columnName){
                 \\mu_{x, 2} + \\varepsilon_{x, t}
                 \\end{cases}
              \\end{aligned}"
-          
+
           formula_z <- "$$ E \\sim \\mathcal{N}(0, \\Sigma) $$"
         }
-        if(model() == "MS") {
+        if (model() == "MS") {
           formula_y <-
             "\\begin{aligned}
                 y_t =
@@ -105,7 +104,7 @@ formulaModelServer <- function(id, model, columnName){
                 \\alpha_{y, 2} + \\phi_{y, 2} y_{t-1} + \\beta_{y, 2} x_{t-1} + \\zeta_{y, t} \\\\
                 \\end{cases}
              \\end{aligned}"
-          
+
           formula_x <-
             "\\begin{aligned}
                 x_t =
@@ -114,16 +113,21 @@ formulaModelServer <- function(id, model, columnName){
                 \\alpha_{x, 2} + \\phi_{x, 2} x_{t-1} + \\beta_{x, 2} y_{t-1} + \\zeta_{x, t}
                 \\end{cases}
              \\end{aligned}"
-          
+
           formula_z <- "$$ Z \\sim \\mathcal{N}(0, \\Sigma) $$"
         }
-        
-        if(columnName == "y") return(formula_y)
-        if(columnName == "x") return(formula_x)
-        if(columnName == "z") return(formula_z)
-        
+
+        if (columnName == "y") {
+          return(formula_y)
+        }
+        if (columnName == "x") {
+          return(formula_x)
+        }
+        if (columnName == "z") {
+          return(formula_z)
+        }
       })
-      
+
       output$formula_model <- renderUI({
         withMathJax(tex())
       })
@@ -131,21 +135,21 @@ formulaModelServer <- function(id, model, columnName){
   )
 }
 
-formulaUI_y <- function(id){
+formulaUI_y <- function(id) {
   ns <- NS(id)
   tagList(
     uiOutput(ns("formula_y"))
   )
 }
 
-formulaUI_x <- function(id){
+formulaUI_x <- function(id) {
   ns <- NS(id)
   tagList(
     uiOutput(ns("formula_x"))
   )
 }
 
-formulaUI_z <- function(id){
+formulaUI_z <- function(id) {
   ns <- NS(id)
   tagList(
     uiOutput(ns("formula_z"))
@@ -153,14 +157,16 @@ formulaUI_z <- function(id){
 }
 
 tvFormula <- function(tv) {
-  if(tv$tv() == "stable") {
+  if (tv$tv() == "stable") {
     tv_f <- sprintf("%.1f", tv$stable())
   } else {
-    if(tv$change() == "linear") {
+    if (tv$change() == "linear") {
       tv_f <- sprintf("%.1f + %.3f t", tv$int(), tv$slope())
-    } else if(tv$change() == "sine") {
-      tv_f <- sprintf("%.1f \\: sin(2\\pi \\frac{%.1f}{%.0f} (t + %.1f)) + %.1f",
-                      tv$amp(), tv$freq(), tv$t(), tv$phase(), tv$dev())
+    } else if (tv$change() == "sine") {
+      tv_f <- sprintf(
+        "%.1f \\: sin(2\\pi \\frac{%.1f}{%.0f} (t + %.1f)) + %.1f",
+        tv$amp(), tv$freq(), tv$t(), tv$phase(), tv$dev()
+      )
     }
   }
 }
@@ -170,16 +176,15 @@ formulaServer_y <- function(id, model,
                             tau_y,
                             i_y,
                             means_y,
-                            tv){
+                            tv) {
   moduleServer(
     id,
-    function(input, output, server){
-      
+    function(input, output, server) {
       tvPars <- reactive({
         f_alpha_y <- tvFormula(tv$alpha_y)
-        f_phi_y   <- tvFormula(tv$phi_y)
-        f_beta_y  <- tvFormula(tv$beta_y)
-        
+        f_phi_y <- tvFormula(tv$phi_y)
+        f_beta_y <- tvFormula(tv$beta_y)
+
         return(
           list(
             alpha_y = f_alpha_y,
@@ -188,25 +193,24 @@ formulaServer_y <- function(id, model,
           )
         )
       })
-      
+
       tex <- reactive({
-        if(model() == "VAR") {
+        if (model() == "VAR") {
           formula_y <- sprintf(
-            "$$ y_t = %.1f + %.1f y_{t-1} + %.1f x_{t-1} + \\zeta_{y, t} $$", 
+            "$$ y_t = %.1f + %.1f y_{t-1} + %.1f x_{t-1} + \\zeta_{y, t} $$",
             params_y$alpha(), params_y$phi(), params_y$beta()
           )
-          
         }
-        if(model() == "L") {
+        if (model() == "L") {
           formula_y <- sprintf(
             "\\begin{aligned}
                 \\eta_{t} &= %.1f + %.1f \\eta_{t-1} + %.1f \\xi_{t-1} + \\zeta_{y, t} \\\\
                 y_t &= %.1f + \\eta_{t} + \\varepsilon_t
-             \\end{aligned}", 
+             \\end{aligned}",
             params_y$alpha(), params_y$phi(), params_y$beta(), i_y$mean()
           )
         }
-        if(model() == "TV") {
+        if (model() == "TV") {
           formula_y <- sprintf(
             "\\begin{align}
               \\alpha_{y, t} &= %s \\\\
@@ -216,22 +220,22 @@ formulaServer_y <- function(id, model,
             tvPars()$alpha_y, tvPars()$phi_y, tvPars()$beta_y
           )
         }
-        
-        if(model() == "T") {
+
+        if (model() == "T") {
           formula_y <- sprintf(
             "$$ \\small
             \\begin{aligned}
-                y_t = 
+                y_t =
                 &\\begin{cases}
                 %.1f + %.1f y_{t-1} + %.1f x_{t-1} + \\zeta_{y, t} \\enspace \\text{if} \\: x_{t-1} \\leq %7$.1f \\\\
                 %.1f + %.1f y_{t-1} + %.1f x_{t-1} + \\zeta_{y, t} \\enspace \\text{if} \\: x_{t-1} > %7$.1f
                 \\end{cases}
              \\end{aligned} $$",
             params_y_1$alpha(), params_y_1$phi(), params_y_1$beta(),
-            params_y_2$alpha(), params_y_2$phi(), params_y_2$beta(), tau_y()        
+            params_y_2$alpha(), params_y_2$phi(), params_y_2$beta(), tau_y()
           )
         }
-        if(model() == "HMM") {
+        if (model() == "HMM") {
           formula_y <- sprintf(
             "\\begin{aligned}
                 y_t =
@@ -239,11 +243,11 @@ formulaServer_y <- function(id, model,
                 %.1f + \\varepsilon_{y, t} \\\\
                 %.1f + \\varepsilon_{y, t} \\\\
                 \\end{cases}
-             \\end{aligned}", 
+             \\end{aligned}",
             means_y$mu_1(), means_y$mu_2()
           )
         }
-        if(model() == "MS") {
+        if (model() == "MS") {
           formula_y <- sprintf(
             "\\begin{aligned}
                 y_t =
@@ -253,18 +257,16 @@ formulaServer_y <- function(id, model,
                 \\end{cases}
              \\end{aligned}",
             params_y_1$alpha(), params_y_1$phi(), params_y_1$beta(),
-            params_y_2$alpha(), params_y_2$phi(), params_y_2$beta()           
+            params_y_2$alpha(), params_y_2$phi(), params_y_2$beta()
           )
         }
-        
+
         return(formula_y)
-        
       })
-      
+
       output$formula_y <- renderUI({
         withMathJax(tex())
       })
-      
     }
   )
 }
@@ -274,16 +276,15 @@ formulaServer_x <- function(id, model,
                             tau_x,
                             i_x,
                             means_x,
-                            tv){
+                            tv) {
   moduleServer(
     id,
-    function(input, output, server){
-    
+    function(input, output, server) {
       tvPars <- reactive({
         f_alpha_x <- tvFormula(tv$alpha_x)
-        f_phi_x   <- tvFormula(tv$phi_x)
-        f_beta_x  <- tvFormula(tv$beta_x)
-        
+        f_phi_x <- tvFormula(tv$phi_x)
+        f_beta_x <- tvFormula(tv$beta_x)
+
         return(
           list(
             alpha_x = f_alpha_x,
@@ -292,24 +293,24 @@ formulaServer_x <- function(id, model,
           )
         )
       })
-      
+
       tex <- reactive({
-        if(model() == "VAR") {
+        if (model() == "VAR") {
           formula_x <- sprintf(
-            "$$ x_t = %.1f + %.1f x_{t-1} + %.1f y_{t-1} + \\zeta_{x, t} $$", 
+            "$$ x_t = %.1f + %.1f x_{t-1} + %.1f y_{t-1} + \\zeta_{x, t} $$",
             params_x$alpha(), params_x$phi(), params_x$beta()
           )
         }
-        if(model() == "L") {
+        if (model() == "L") {
           formula_x <- sprintf(
             "\\begin{aligned}
                 \\xi_{t} &= %.1f + %.1f \\xi_{t-1} + %.1f \\eta_{t-1} + \\zeta_{x, t} \\\\
                 x_t &= %.1f + \\xi_{t} + \\varepsilon_t
-             \\end{aligned}", 
+             \\end{aligned}",
             params_x$alpha(), params_x$phi(), params_x$beta(), i_x$mean()
           )
         }
-        if(model() == "TV") {
+        if (model() == "TV") {
           formula_x <- sprintf(
             "\\begin{align}
               \\alpha_{x, t} &= %s \\\\
@@ -319,8 +320,8 @@ formulaServer_x <- function(id, model,
             tvPars()$alpha_x, tvPars()$phi_x, tvPars()$beta_x
           )
         }
-        
-        if(model() == "T") {
+
+        if (model() == "T") {
           formula_x <- sprintf(
             "$$ \\small
             \\begin{aligned}
@@ -334,7 +335,7 @@ formulaServer_x <- function(id, model,
             params_x_2$alpha(), params_x_2$phi(), params_x_2$beta(), tau_x()
           )
         }
-        if(model() == "HMM") {
+        if (model() == "HMM") {
           formula_x <- sprintf(
             "\\begin{aligned}
                 x_t =
@@ -342,11 +343,11 @@ formulaServer_x <- function(id, model,
                 %.1f + \\varepsilon_{x, t}\\\\
                 %.1f + \\varepsilon_{x, t}
                 \\end{cases}
-             \\end{aligned}", 
+             \\end{aligned}",
             means_x$mu_1(), means_x$mu_2()
           )
         }
-        if(model() == "MS") {
+        if (model() == "MS") {
           formula_x <- sprintf(
             "\\begin{aligned}
                 x_t =
@@ -359,15 +360,13 @@ formulaServer_x <- function(id, model,
             params_x_2$alpha(), params_x_2$phi(), params_x_2$beta()
           )
         }
-        
-        return(formula_x)
 
+        return(formula_x)
       })
-      
+
       output$formula_x <- renderUI({
         withMathJax(tex())
       })
-      
     }
   )
 }
@@ -375,14 +374,15 @@ formulaServer_x <- function(id, model,
 formulaServer_z <- function(id, model,
                             cov_T,
                             innovations, innovations_1, innovations_2,
-                            measurement_errors, measurement_errors_1, measurement_errors_2){
+                            measurement_errors, measurement_errors_1, measurement_errors_2) {
   moduleServer(
     id,
-    function(input, output, server){
-      
+    function(input, output, server) {
       covs <- reactive({
-        v <- c(innovations$y(), innovations$x(), 
-               innovations_2$y(), innovations_2$x())
+        v <- c(
+          innovations$y(), innovations$x(),
+          innovations_2$y(), innovations_2$x()
+        )
         v <- sqrt(v)
         y1x1 <- v[1] * v[2] * cov_T()
         y1y1 <- v[1] * v[3] * cov_T()
@@ -390,13 +390,15 @@ formulaServer_z <- function(id, model,
         x1y2 <- v[2] * v[3] * cov_T()
         x1x1 <- v[2] * v[4] * cov_T()
         y2x2 <- v[3] * v[4] * cov_T()
-        
-        return(list(y1x1 = y1x1, y1y1 = y1y1, y1x2 = y1x2,
-                    x1y2 = x1y2, x1x1 = x1x1, y2x2 = y2x2))
+
+        return(list(
+          y1x1 = y1x1, y1y1 = y1y1, y1x2 = y1x2,
+          x1y2 = x1y2, x1x1 = x1x1, y2x2 = y2x2
+        ))
       })
-      
+
       tex <- reactive({
-        if(model() == "VAR") {
+        if (model() == "VAR") {
           formula_z <- sprintf(
             "\\begin{equation}
               \\Sigma =
@@ -405,7 +407,7 @@ formulaServer_z <- function(id, model,
             innovations$y(), innovations$c_yx(), innovations$x()
           )
         }
-        if(model() == "L") {
+        if (model() == "L") {
           formula_z <- sprintf(
             "\\begin{aligned}
               \\Sigma_\\zeta &=
@@ -417,7 +419,7 @@ formulaServer_z <- function(id, model,
             measurement_errors$y(), measurement_errors$c_yx(), measurement_errors$x()
           )
         }
-        if(model() == "TV") {
+        if (model() == "TV") {
           formula_z <- sprintf(
             "\\begin{equation}
               \\Sigma =
@@ -426,8 +428,8 @@ formulaServer_z <- function(id, model,
             innovations$y(), innovations$c_yx(), innovations$x()
           )
         }
-        
-        if(model() == "T") {
+
+        if (model() == "T") {
           formula_z <- sprintf(
             "$$ \\small
             \\Sigma =
@@ -436,33 +438,33 @@ formulaServer_z <- function(id, model,
               y1 \\\\
               x1
               \\end{matrix}
-              \\begin{bmatrix} 
+              \\begin{bmatrix}
               %1$.2f & %5$.2f  \\\\
-              %5$.2f & %2$.2f 
+              %5$.2f & %2$.2f
               \\end{bmatrix}
               \\begin{matrix}
               y1 \\\\
               x2
               \\end{matrix}
-              \\begin{bmatrix} 
+              \\begin{bmatrix}
               %1$.2f & %6$.2f  \\\\
-              %6$.2f & %4$.2f 
+              %6$.2f & %4$.2f
               \\end{bmatrix} \\\\
               &\\begin{matrix}
               y2 \\\\
               x1
               \\end{matrix}
-              \\begin{bmatrix} 
+              \\begin{bmatrix}
               %3$.2f & %7$.2f  \\\\
-              %7$.2f & %2$.2f 
+              %7$.2f & %2$.2f
               \\end{bmatrix}
               \\begin{matrix}
               y2 \\\\
               x2
               \\end{matrix}
-              \\begin{bmatrix} 
+              \\begin{bmatrix}
               %3$.2f & %8$.2f  \\\\
-              %8$.2f & %4$.2f 
+              %8$.2f & %4$.2f
               \\end{bmatrix}
              \\end{align}
              $$",
@@ -470,7 +472,7 @@ formulaServer_z <- function(id, model,
             covs()$y1x1, covs()$y1x2, covs()$x1y2, covs()$y2x2
           )
         }
-        if(model() == "HMM") {
+        if (model() == "HMM") {
           formula_z <- sprintf(
             "\\begin{aligned}
               \\Sigma =
@@ -491,7 +493,7 @@ formulaServer_z <- function(id, model,
             measurement_errors_2$y(), measurement_errors_2$c_yx(), measurement_errors_2$x()
           )
         }
-        if(model() == "MS") {
+        if (model() == "MS") {
           formula_z <- sprintf(
             "\\begin{aligned}
               \\Sigma =
@@ -512,16 +514,13 @@ formulaServer_z <- function(id, model,
             innovations_2$y(), innovations_2$c_yx(), innovations_2$x()
           )
         }
-        
+
         return(formula_z)
-        
       })
-      
+
       output$formula_z <- renderUI({
         withMathJax(tex())
       })
-
     }
   )
 }
-
