@@ -99,18 +99,24 @@ inputVARUI <- function(id) {
 }
 
 inputVARServer <- function(id, params = NULL, model = NULL, nu = NULL, 
-partner = NULL) {
+partner = NULL, m) {
   moduleServer(
     id,
     function(input, output, session) {
       output$meanVAR <- renderText({
-        num <- input$alpha * (1 - params$phi()) + input$beta * params$alpha()
-        den <- (1 - input$phi) * (1 - params$phi()) - params$beta() * input$beta
-        m <- num / den
+        # num <- input$alpha * (1 - params$phi()) + input$beta * params$alpha()
+        # den <- (1 - input$phi) * (1 - params$phi()) - params$beta() * input$beta
+        # m <- num / den
+        i <- diag(2)
+        p <- matrix(c(input$phi, input$beta, params$beta(), params$phi()),
+                      nrow = 2, byrow = TRUE)
+        c <- matrix(c(input$alpha, params$alpha()))
+        m <- solve(i - p) %*% c
+        m <- m[1, 1]
 
         if (model() == "L") m <- m + nu$mean()
 
-        m <- round(m, 2)
+        m <- sprintf("%.2f", m)
         as.character(m)
       })
 
