@@ -337,11 +337,17 @@ myCF <- function(dat, type, partner = NULL,
   }
   
   if(!ptrue){
-    cc <- rbind(data.frame(lag = ccx$lag, cf = ccx$acf), data.frame(lag = ccy$lag, cf = ccy$acf))
+    cc <- rbind(
+      data.frame(lag = ccx$lag, cf = ccx$acf),
+      data.frame(lag = ccy$lag, cf = ccy$acf)
+    )
     cc$partner <- rep(c("x", "y"), each = nrow(cc)/2)
     
     p <- ggplot(cc, aes(x = lag, y = cf, color = partner)) +
-      geom_linerange(dat = cc, aes(ymin = 0, ymax = cf), size = 1.2, alpha = .8, position = position_dodge2(.2))
+      geom_linerange(
+        dat = cc, aes(ymin = 0, ymax = cf),
+        size = 1.2, alpha = .8, position = position_dodge2(.2)
+      )
   } else {
     cc <- data.frame(lag = cc$lag, cf = cc$acf)
     pCols <- "black"
@@ -522,5 +528,43 @@ myTVfit <- function(fit1, fit2, par) {
   
   p <- myTheme(p, x = dat$x, y = c(dat$y + dat$se, dat$y - dat$se))
   
+  return(p)
+}
+
+myDistribution <- function(dat, partner = NULL, shiny = F, legend.position = NULL){ 
+  pCols <- c("grey", "black")
+  if(shiny) pCols <- viridis::viridis(2, begin = .8, end = .4, option = "A")
+  xLab <- "Value"
+  
+  p <- ggplot(dat) + 
+    geom_histogram(aes(x = value, y = ..density.., fill = partner), 
+                   alpha = 0.5, position = "identity") + 
+    stat_density(aes(x = value, colour = partner), 
+                 geom = "line", size = 1, position = "identity") +
+    scale_fill_manual(values = pCols) +
+      scale_color_manual(values = pCols) +
+      labs(x = xLab, y = "Density")
+
+  ylim <- c(0, ggplot_build(p)$layout$panel_params[[1]]$y.range[2])
+
+  if (!is.null(partner)) {
+    dat <- dat[dat$partner == partner, ]
+    if (partner == "y") pCols <- pCols[2]
+    if (partner == "x") pCols <- pCols[1]
+    xLab <- bquote(italic(.(partner)))
+
+    p <- ggplot(dat) + 
+    geom_histogram(aes(x = value, y = ..density..), 
+                   alpha = 0.5, position = "identity", fill = pCols) + 
+    stat_density(aes(x = value), geom = "line", 
+                 size = 1, position = "identity", color = pCols) +
+    labs(x = xLab, y = "Density")
+
+    ylim <- c(0, ggplot_build(p)$layout$panel_params[[1]]$y.range[2])
+  }
+  
+  p <- myTheme(p, x = dat$value, y = ylim,
+               shiny = shiny, legend.position = legend.position)
+
   return(p)
 }

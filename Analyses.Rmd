@@ -148,8 +148,8 @@ initNoise <- var(df) / 2
 
 noiseVAR <- prep.noise(
   values.latent   = initNoise, # initial values dynamic noise
-  params.latent   = matrix(c("z_x",  "z_xy",
-                             "z_xy", "z_y"), ncol = 2, byrow = T), # parameter names dynamic noise
+  params.latent   = matrix(c("sigma_x",  "sigma_xy",
+                             "sigma_xy", "sigma_y"), ncol = 2, byrow = T), # parameter names dynamic noise
   values.observed = diag(rep(0, 2)), # fix measurement noise to zero
   params.observed = matrix(rep("fixed", 4), ncol = 2)
 )
@@ -168,7 +168,7 @@ modVAR <- dynr.model(dynamics    = dynmVAR,
 plotFormula(modVAR, modVAR$param.names)
 ```
 
-```{r estimateVAR3, cache=T}
+```{r estimateVAR4, cache=T}
 resVAR <- dynr.cook(modVAR, verbose = FALSE, debug_flag = TRUE) # verbose = FALSE leaves out output during estimation
 ```
 
@@ -212,7 +212,7 @@ measLVAR <- prep.measurement(
   state.names = c("xi", "eta"), # different name for the states
   obs.names   = c("x", "y"),
   values.int = matrix(c(.01, .01), ncol = 1),
-  params.int = matrix(c("mu_x", "mu_y"), ncol = 1)
+  params.int = matrix(c("nu_x", "nu_y"), ncol = 1)
 )
 ```
 
@@ -285,7 +285,7 @@ x = `r round(sumLVAR[[1]][[1]][5], 2)` + `r round(sumLVAR[[1]][[1]][1], 2)` \xi_
 y = `r round(sumLVAR[[1]][[1]][6], 2)` + `r round(sumLVAR[[1]][[1]][3], 2)` \eta_{t-1} + `r round(sumLVAR[[1]][[1]][4], 2)` \xi_{t-1},
 \end{align}
 
-with innovations $\Sigma_\zeta = \big(\begin{smallmatrix} `r round(sumLVAR[[1]][[1]][7], 2)` & `r round(sumLVAR[[1]][[1]][8], 2)`\\ `r round(sumLVAR[[1]][[1]][8], 2)` & `r round(sumLVAR[[1]][[1]][9], 2)`\end{smallmatrix}\big)$ and measurement error $\Sigma_\varepsilon = \big(\begin{smallmatrix} `r round(sumLVAR[[1]][[1]][10], 2)` & 0 \\ 0 & `r round(sumLVAR[[1]][[1]][11], 2)`\end{smallmatrix}\big)$.
+with innovations $\Sigma = \big(\begin{smallmatrix} `r round(sumLVAR[[1]][[1]][7], 2)` & `r round(sumLVAR[[1]][[1]][8], 2)`\\ `r round(sumLVAR[[1]][[1]][8], 2)` & `r round(sumLVAR[[1]][[1]][9], 2)`\end{smallmatrix}\big)$ and measurement error $\Psi = \big(\begin{smallmatrix} `r round(sumLVAR[[1]][[1]][10], 2)` & 0 \\ 0 & `r round(sumLVAR[[1]][[1]][11], 2)`\end{smallmatrix}\big)$.
 
 The predicted versus observed values are shown in the plot below.
 
@@ -420,10 +420,10 @@ Here, we specify that we want the residual variances and covariances to only hav
 ```{r}
 noiseHMM <- prep.noise(
   values.observed   = list(initNoise, initNoise),
-  params.observed   = list(matrix(c("e_x1",  "e_xy1",
-                                    "e_xy1", "e_y1"), ncol = 2, byrow = T),
-                           matrix(c("e_x2",  "e_xy2",
-                                    "e_xy2", "e_y2"), ncol = 2, byrow = T)),
+  params.observed   = list(matrix(c("psi_x1",  "psi_xy1",
+                                    "psi_xy1", "psi_y1"), ncol = 2, byrow = T),
+                           matrix(c("psi_x2",  "psi_xy2",
+                                    "psi_xy2", "psi_y2"), ncol = 2, byrow = T)),
   values.latent = diag(0, 2),
   params.latent = matrix(rep("fixed", 4), ncol = 2)
 )
@@ -475,7 +475,7 @@ initHMM <- prep.initial(
 
 Estimate the model. 
 
-```{r estimateHMM5, cache=T}
+```{r estimateHMM6, cache=T}
 modHMM <- dynr.model(dynamics = dynmHMM, measurement = measHMM, noise = noiseHMM, 
                      initial  = initHMM, regimes     = regHMM,  data  = rawData)
 plotFormula(modHMM, modHMM$param.names)
@@ -540,10 +540,10 @@ We want the noise to be regime dependent, meaning that each regime has its own c
 noiseMSVAR <- prep.noise(
   values.latent   = list(initNoise,
                          initNoise),
-  params.latent   = list(matrix(c("z_x1",  "z_xy1",
-                                  "z_xy1", "z_y1"), ncol = 2, byrow = T),
-                         matrix(c("z_x2",  "z_xy2",
-                                  "z_xy2", "z_y2") ,ncol = 2, byrow = T)),
+  params.latent   = list(matrix(c("sigma_x1",  "sigma_xy1",
+                                  "sigma_xy1", "sigma_y1"), ncol = 2, byrow = T),
+                         matrix(c("sigma_x2",  "sigma_xy2",
+                                  "sigma_xy2", "sigma_y2") ,ncol = 2, byrow = T)),
   values.observed = diag(0, 2),
   params.observed = matrix(rep("fixed", 4), ncol = 2)
 )
@@ -591,7 +591,7 @@ initMSVAR <- prep.initial(
 )
 ```
 
-```{r estimateMSVAR4, cache=T}
+```{r estimateMSVAR5, cache=T}
 modMSVAR <- dynr.model(dynamics = dynmMSVAR, measurement = measMSVAR, noise = noiseMSVAR,
                        initial  = initMSVAR, regimes     = regMSVAR,  data  = rawData)
 plotFormula(modMSVAR, modMSVAR$param.names)
@@ -627,6 +627,31 @@ predMSVAR[, 1] <- NA
 datMSVAR$predicted <- c(predMSVAR[1, ], predMSVAR[2, ])
 
 myTS(datMSVAR, regime = T, regimeType = "points", predicted = T, legend.position = c(.15, .20), filename = "Plots/Butler/Predictions/butler_MSVAR.pdf", width = 6.67, height = 4, textSize = c(18.67, 12))
+```
+
+## Prediction Error Plots
+
+```{r echo=F, fig.show="hold", out.width="50%"}
+errorY <- c(df$y - datTAR$predicted[datTAR$partner == "y"], 
+            df$y - datHMM$predicted[datHMM$partner == "y"], 
+            df$y - datMSVAR$predicted[datMSVAR$partner == "y"])
+
+errorX <- c(df$x - datTAR$predicted[datTAR$partner == "x"], 
+            df$x - datHMM$predicted[datHMM$partner == "x"], 
+            df$x - datMSVAR$predicted[datMSVAR$partner == "x"])
+
+dfError <- data.frame(model = rep(c("TVAR", "HMM", "MSVAR"), 
+                                   each = nrow(df)),
+                      t = rep(1:nrow(df), 3))
+
+dfError$errorY <- errorY
+dfError$errorX <- errorX
+
+ggplot(dfError) + geom_line(aes(x = t, y = errorY, color = model))
+ggplot(dfError) + geom_line(aes(x = t, y = abs(errorY), color = model))
+
+ggplot(dfError) + geom_line(aes(x = t, y = errorX, color = model))
+ggplot(dfError) + geom_line(aes(x = t, y = abs(errorX), color = model))
 ```
 
 # Example 2: Daily Diary
@@ -673,8 +698,8 @@ initNoise <- var(df) / 2 # take half of the variance in the data
 
 noiseVAR <- prep.noise(
   values.latent   = initNoise, # initial values dynamic noise
-  params.latent   = matrix(c("z_x",  "z_xy",
-                             "z_xy", "z_y"), ncol = 2, byrow = T), # parameter names dynamic noise
+  params.latent   = matrix(c("sigma_x",  "sigma_xy",
+                             "sigma_xy", "sigma_y"), ncol = 2, byrow = T), # parameter names dynamic noise
   values.observed = diag(rep(0, 2)), # fix measurement noise to zero
   params.observed = matrix(rep("fixed", 4), ncol = 2)
 )
@@ -708,9 +733,11 @@ with innovations $\Sigma = \big(\begin{smallmatrix} `r round(sumVAR[[1]][[1]][7]
 ```{r ech=F}
 predVAR <- resVAR$eta_predicted
 predVAR[, 1] <- NA
-df_long$predicted <- c(predVAR[1, ], predVAR[2, ])
 
-myTS(df_long, predicted = T, legend.position = c(.75, .15), filename = "Plots/Bringmann/Predictions/bringmann_VAR.pdf", width = 6.67, height = 4, textSize = c(18.67, 12))
+datVAR <- df_long
+datVAR$predicted <- c(predVAR[1, ], predVAR[2, ])
+
+myTS(datVAR, predicted = T, legend.position = c(.75, .15), filename = "Plots/Bringmann/Predictions/bringmann_VAR.pdf", width = 6.67, height = 4, textSize = c(18.67, 12))
 ```
 
 ## Latent VAR(1) 
@@ -718,11 +745,11 @@ myTS(df_long, predicted = T, legend.position = c(.75, .15), filename = "Plots/Br
 ```{r estimLVAR_daily7, cache=T}
 noiseLVAR <- prep.noise(
   values.latent   = initNoise * 0.75,
-  params.latent   = matrix(c("z_x",  "z_xy",
-                             "z_xy", "z_y"), ncol = 2, byrow = T), 
+  params.latent   = matrix(c("sigma_x",  "sigma_xy",
+                             "sigma_xy", "sigma_y"), ncol = 2, byrow = T), 
   values.observed = initNoise * 0.25,
-  params.observed = matrix(c("e_x",  "e_xy", 
-                             "e_xy", "e_y"), 
+  params.observed = matrix(c("psi_x",  "psi_xy", 
+                             "psi_xy", "psi_y"), 
                            ncol = 2, byrow = T) # estimate the measurement error
 )
 
@@ -744,7 +771,7 @@ x = `r round(sumLVAR[[1]][[1]][5], 2)` + `r round(sumLVAR[[1]][[1]][1], 2)` \xi_
 y = `r round(sumLVAR[[1]][[1]][6], 2)` + `r round(sumLVAR[[1]][[1]][3], 2)` \eta_{t-1} + `r round(sumLVAR[[1]][[1]][4], 2)` \xi_{t-1},
 \end{align}
 
-with innovations $\Sigma_\zeta = \big(\begin{smallmatrix} `r round(sumLVAR[[1]][[1]][7], 2)` & `r round(sumLVAR[[1]][[1]][8], 2)`\\ `r round(sumLVAR[[1]][[1]][8], 2)` & `r round(sumLVAR[[1]][[1]][9], 2)`\end{smallmatrix}\big)$ and measurement error $\Sigma_\varepsilon = \big(\begin{smallmatrix} `r round(sumLVAR[[1]][[1]][10], 2)` & 0 \\ 0 & `r round(sumLVAR[[1]][[1]][11], 2)`\end{smallmatrix}\big)$.
+with innovations $\Sigma = \big(\begin{smallmatrix} `r round(sumLVAR[[1]][[1]][7], 2)` & `r round(sumLVAR[[1]][[1]][8], 2)`\\ `r round(sumLVAR[[1]][[1]][8], 2)` & `r round(sumLVAR[[1]][[1]][9], 2)`\end{smallmatrix}\big)$ and measurement error $\Psi = \big(\begin{smallmatrix} `r round(sumLVAR[[1]][[1]][10], 2)` & 0 \\ 0 & `r round(sumLVAR[[1]][[1]][11], 2)`\end{smallmatrix}\big)$.
 
 ```{r echo=F}
 predLVAR <- resLVAR$eta_predicted
@@ -752,8 +779,9 @@ predLVAR[1, ] <- predLVAR[1, ] + resLVAR$fitted.parameters[5]
 predLVAR[2, ] <- predLVAR[2, ] + resLVAR$fitted.parameters[6]
 predLVAR[, 1] <- NA
 
-df_long$predicted <- c(predLVAR[1, ], predLVAR[2, ])
-myTS(df_long, predicted = T, legend.position = c(.75, .15), filename = "Plots/Bringmann/Predictions/bringmann_LVAR.pdf", width = 6.67, height = 4, textSize = c(18.67, 12))
+datLVAR <- df_long
+datLVAR$predicted <- c(predLVAR[1, ], predLVAR[2, ])
+myTS(datLVAR, predicted = T, legend.position = c(.75, .15), filename = "Plots/Bringmann/Predictions/bringmann_LVAR.pdf", width = 6.67, height = 4, textSize = c(18.67, 12))
 ```
 
 ## Time-varying VAR(1)
@@ -798,8 +826,9 @@ Here, we see that for $y$, all parameters are significant and only $\phi_y$ is n
 predTVVARy <- c(NA, resTVVAR_y$fitted.values)
 predTVVARx <- c(NA, resTVVAR_x$fitted.values)
 
-df_long$predicted <- c(predTVVARx, predTVVARy)
-myTS(df_long, predicted = T, legend.position = c(.75, .15), filename = "Plots/Bringmann/Predictions/bringmann_TV-VAR.pdf", width = 6.67, height = 4, textSize = c(18.67, 12))
+datTVVAR <- df_long
+datTVVAR$predicted <- c(predTVVARx, predTVVARy)
+myTS(datTVVAR, predicted = T, legend.position = c(.75, .15), filename = "Plots/Bringmann/Predictions/bringmann_TV-VAR.pdf", width = 6.67, height = 4, textSize = c(18.67, 12))
 ```
 
 ## Threshold VAR(1)
@@ -841,10 +870,10 @@ The points indicate when the second regime is active.
 ```{r estimateHMM_daily4, cache=T}
 noiseHMM <- prep.noise(
   values.observed   = list(initNoise, initNoise),
-  params.observed   = list(matrix(c("e_x1",  "e_xy1",
-                                    "e_xy1", "e_y1"), ncol = 2, byrow = T),
-                           matrix(c("e_x2",  "e_xy2",
-                                    "e_xy2", "e_y2"), ncol = 2, byrow = T)),
+  params.observed   = list(matrix(c("psi_x1",  "psi_xy1",
+                                    "psi_xy1", "psi_y1"), ncol = 2, byrow = T),
+                           matrix(c("psi_x2",  "psi_xy2",
+                                    "psi_xy2", "psi_y2"), ncol = 2, byrow = T)),
   values.latent = diag(0, 2),
   params.latent = matrix(rep("fixed", 4), ncol = 2)
 )
@@ -894,10 +923,10 @@ myTS(datHMM, regime = T, regimeType = "points", predicted = T, legend.position =
 noiseMSVAR <- prep.noise(
   values.latent   = list(initNoise,
                          initNoise),
-  params.latent   = list(matrix(c("z_x1",  "z_xy1",
-                                  "z_xy1", "z_y1"), ncol = 2, byrow = T),
-                         matrix(c("z_x2",  "z_xy2",
-                                  "z_xy2", "z_y2") ,ncol = 2, byrow = T)),
+  params.latent   = list(matrix(c("sigma_x1",  "sigma_xy1",
+                                  "sigma_xy1", "sigma_y1"), ncol = 2, byrow = T),
+                         matrix(c("sigma_x2",  "sigma_xy2",
+                                  "sigma_xy2", "sigma_y2") ,ncol = 2, byrow = T)),
   values.observed = diag(0, 2),
   params.observed = matrix(rep("fixed", 4), ncol = 2)
 )
@@ -937,6 +966,31 @@ predMSVAR[, 1] <- NA
 datMSVAR$predicted <- c(predMSVAR[1, ], predMSVAR[2, ])
 
 myTS(datMSVAR, regime = T, regimeType = "points", predicted = T, legend.position = c(.75, .15), filename = "Plots/Bringmann/Predictions/bringmann_MSVAR.pdf", width = 6.67, height = 4, textSize = c(18.67, 12))
+```
+
+## Prediction Error Plots
+
+```{r echo=F, fig.show="hold", out.width="50%"}
+errorY <- c(df$y - datVAR$predicted[datVAR$partner == "y"], 
+            df$y - datLVAR$predicted[datLVAR$partner == "y"], 
+            df$y - datTVVAR$predicted[datTVVAR$partner == "y"])
+
+errorX <- c(df$x - datVAR$predicted[datVAR$partner == "x"], 
+            df$x - datLVAR$predicted[datLVAR$partner == "x"], 
+            df$x - datTVVAR$predicted[datTVVAR$partner == "x"])
+
+dfError <- data.frame(model = rep(c("VAR", "LVAR", "TV-VAR"), 
+                                   each = nrow(df)),
+                      t = rep(1:nrow(df), 3))
+
+dfError$errorY <- errorY
+dfError$errorX <- errorX
+
+ggplot(dfError) + geom_line(aes(x = t, y = errorY, color = model))
+ggplot(dfError) + geom_line(aes(x = t, y = abs(errorY), color = model))
+
+ggplot(dfError) + geom_line(aes(x = t, y = errorX, color = model))
+ggplot(dfError) + geom_line(aes(x = t, y = abs(errorX), color = model))
 ```
 
 # References

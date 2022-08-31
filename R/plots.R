@@ -15,6 +15,15 @@ plotsInputUI <- function(id){
                                    checkboxInput(ns("showTSx"), "x", value = T)
                             )
                    ),
+                   h5("Distribution"),
+                   fluidRow(
+                            column(6,
+                                   checkboxInput(ns("showDistributionY"), "y")
+                            ),
+                            column(6,
+                                   checkboxInput(ns("showDistributionX"), "x")
+                            )
+                   ),
                    h5("Scatter plot auto"),
                    fluidRow(
                             column(6,
@@ -68,6 +77,10 @@ plotsInputUI <- function(id){
                          column(8, h4("Time-series"),
                                 withSpinner(plotOutput(ns("ts"), height = "250px"))), ns = ns
         ),
+        conditionalPanel(condition = "input.showDistributionY | input.showDistributionX",
+                         column(4,  h4("Distribution"),
+                                withSpinner(plotOutput(ns("distribution"), height = "250px"))), ns = ns
+        ),
         conditionalPanel(condition = "input.showCarryoverY | input.showCarryoverX",
                          column(4,  h4("Scatter plot auto"),
                                 withSpinner(plotOutput(ns("carryover"), height = "250px"))), ns = ns
@@ -116,6 +129,18 @@ plotsServer <- function(id, dataFormat, model, dat, uploaded = F, uploadedFile =
         }
         p <- myTS(dat(), partner = partner, regime = regime, regimeType = regimeType,
                   shiny = T, legend.position = legend.position)
+        return(p)
+      })
+
+      output$distribution <- renderPlot({
+        if(!uploaded) req(dataFormat() == "long")
+        if(uploaded) req(uploadedFile())
+        if(input$showDistributionY)
+          p <- myDistribution(dat(), partner = "y", shiny = T)
+        if(input$showDistributionX)
+          p <- myDistribution(dat(), partner = "x", shiny = T)
+        if(input$showDistributionY && input$showDistributionX)
+          p <- myDistribution(dat(), shiny = T)
         return(p)
       })
       
