@@ -3,11 +3,11 @@ plotsInputUI <- function(id){
 
   fluidRow(
     column(2,
-           div(style = "margin: 0px -15px 0px -15px;",
-      sidebarPanel(width = 12,
+          #  div(style = "margin: 0px -15px 0px -15px;",
+      wellPanel(width = 12,
                    h4("Plots"),
                    h5("Time-series"),
-                   fluidRow(style = "padding-top:5px",
+                   fluidRow(style = "margin-top:-1em; margin-bottom:-1em",
                             column(6,
                                    checkboxInput(ns("showTSy"), "y", value = T)
                             ),
@@ -16,7 +16,7 @@ plotsInputUI <- function(id){
                             )
                    ),
                    h5("Distribution"),
-                   fluidRow(
+                   fluidRow(style = "margin-top:-1em; margin-bottom:-1em",
                             column(6,
                                    checkboxInput(ns("showDistributionY"), "y")
                             ),
@@ -25,7 +25,7 @@ plotsInputUI <- function(id){
                             )
                    ),
                    h5("Scatter plot auto"),
-                   fluidRow(
+                   fluidRow(style = "margin-top:-1em; margin-bottom:-1em",
                             column(6,
                                    checkboxInput(ns("showCarryoverY"), "y")
                             ),
@@ -34,7 +34,7 @@ plotsInputUI <- function(id){
                             )
                    ),
                    h5("Scatter plot cross-lagged"),
-                   fluidRow(
+                   fluidRow(style = "margin-top:-1em; margin-bottom:-1em",
                             column(6,
                                    checkboxInput(ns("showSpilloverY"), "y")
                             ),
@@ -43,7 +43,7 @@ plotsInputUI <- function(id){
                             )
                    ),
                    h5("3D state space"),
-                   fluidRow(
+                   fluidRow(style = "margin-top:-1em; margin-bottom:-1em",
                             column(6,
                                    checkboxInput(ns("show3Dy"), "y")
                             ),
@@ -52,7 +52,7 @@ plotsInputUI <- function(id){
                             )
                    ),
                    h5("Autocorrelation function"),
-                   fluidRow(
+                   fluidRow(style = "margin-top:-1em; margin-bottom:-1em",
                             column(6,
                                    checkboxInput(ns("showACFy"), "y")
                             ),
@@ -61,7 +61,7 @@ plotsInputUI <- function(id){
                             )
                    ),
                    h5("Cross-correlation function"),
-                   fluidRow(
+                   fluidRow(style = "margin-top:-1em; margin-bottom:-1em",
                             column(6,
                                    checkboxInput(ns("showCCFy"), "y * x")
                             ),
@@ -69,7 +69,7 @@ plotsInputUI <- function(id){
                                    checkboxInput(ns("showCCFx"), "x * y")
                             )
                    )
-      )
+      # )
     )),
     column(10,
       fluidRow(

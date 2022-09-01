@@ -3,8 +3,8 @@ uploadInputUI <- function(id) {
   
 
   fluidRow(
-    column(5, 
-           sidebarPanel(width = 12,
+    column(4, 
+          #  sidebarPanel(width = 12,
                         p("The data file should have three columns: t, x, and y."),
                         fileInput(ns("file"), "Choose CSV File",
                                   multiple = F,
@@ -12,22 +12,22 @@ uploadInputUI <- function(id) {
                                              "text/comma-separated-values,text/plain",
                                              ".csv")),
                         hr(),
-                        fluidRow(
-                          column(6, 
+                        # fluidRow(
+                        #   column(6, 
                                  radioButtons(ns("sep"), "Separator",
                                               choices = c(Comma = ",",
                                                           Semicolon = ";",
                                                           Tab = "\t"),
                                               selected = ",")
-                          )
+                          # )
                           # column(6,
                           #  radioButtons(ns("uploadFormat"), "Data Format",
                           #               choices = list('"Wide"' = "wide", "Long" = "long")
                           # )
-                        )
-           )
+                        # )
+          #  )
     ),
-    column(7,
+    column(8,
            DT::dataTableOutput(ns("uploadedDataTable")),
            hr()
     )

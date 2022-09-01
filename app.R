@@ -58,14 +58,29 @@ ui <- tagList(
     tabPanel("Simulate",
       value = "simulate",
       h4("Simulate"),
-      navlistPanel(
-        id = "simulateTabs", widths = c(2, 10),
-        well = FALSE,
+      tabsetPanel(
+        id = "simulateTabs",
         tabPanel("Set up & Visualization",
           value = "sim",
-          fluidRow(
-            column(12, methodUI("method"))
+          br(),
+          selectInput("model", "Choose a data generating model",
+            list(
+              "First-order vector autoregressive VAR(1)" = "VAR",
+              "Latent VAR(1)" = "L",
+              "Time-varying VAR(1)" = "TV",
+              "Threshold VAR(1)" = "T",
+              "Hidden Markov model" = "HMM",
+              "Markov-switching VAR(1)" = "MS"
+            ),
+            selected = "VAR"
           ),
+          hr(),
+          fluidRow(
+            column(style = "padding-top:2em",
+              2,
+              methodUI("method")
+            ),
+          column(10,
           fluidRow(
             column(
               4,
@@ -110,7 +125,6 @@ ui <- tagList(
               conditionalPanel(
                 condition = "input.model == 'T'",
                 numericInput("tau_y", HTML("Threshold &#120591;"), 0, width = "30%"),
-                ns = NS("method")
               ),
               formulaUI_y("formula_y")
             ),
@@ -156,7 +170,6 @@ ui <- tagList(
               conditionalPanel(
                 condition = "input.model == 'T'",
                 numericInput("tau_x", HTML("Threshold &#120591;"), 0, width = "30%"),
-                ns = NS("method")
               ),
               formulaUI_x("formula_x")
             ),
@@ -199,7 +212,7 @@ ui <- tagList(
                     6,
                     numericInput("yx_T", "Correlation", .3, -1, 1, .1),
                   )
-                ), ns = NS("method")
+                )
               ),
               conditionalPanel(
                 condition = "input.model == 'MS' || input.model == 'HMM'",
@@ -221,20 +234,22 @@ ui <- tagList(
                       )
                     )
                   )
-                ), ns = NS("method")
+                )
               ),
               hr(),
               formulaUI_z("formula_z")
             )
-          ),
+          )
+          
+          )),
           conditionalPanel(
             condition = "input.model == 'TV'",
             hr(),
             h4("Parameters plotted over time"),
             plotstvUI("tvPlots"),
-            ns = NS("method")
           ),
-          hr()
+          hr(),
+          plotsInputUI("inputPlots")
         ),
         # tabPanel("Estimation",
         #   value = "estimation",
@@ -242,7 +257,7 @@ ui <- tagList(
         # ),
         tabPanel("Download",
           value = "data",
-          fluidRow(
+          fluidRow(style = "padding-top:5px",
             column(
               9,
               withSpinner(DT::dataTableOutput("table"))
@@ -256,27 +271,14 @@ ui <- tagList(
             )
           )
         )
-      ),
-      conditionalPanel(
-        condition = "input.simulateTabs == 'sim'",
-        plotsInputUI("inputPlots")
       )
     ),
     tabPanel(
       "Upload",
-      h4("Data"),
-      navlistPanel(
-        id = "uploadTabs", widths = c(2, 10), well = FALSE,
-        tabPanel("Upload & Visualization",
-          value = "upload",
-          uploadInputUI("uploadData")
-        ),
-        # tabPanel("Estimation")
-      ),
-      conditionalPanel(
-        condition = "input.uploadTabs == 'upload'",
+      h4("Upload Data"),
+          uploadInputUI("uploadData"),
+          hr(),
         plotsInputUI("uploadPlots")
-      )
     ),
     tabPanel("Info",
       value = "info",
@@ -304,11 +306,11 @@ server <- function(input, output, session) {
   # DYNAMIC INPUT
   method <- methodServer("method")
 
-  formulaModelServer("formula_model_y", method$model, "y")
-  formulaModelServer("formula_model_x", method$model, "x")
-  formulaModelServer("formula_model_z", method$model, "z")
+  formulaModelServer("formula_model_y", reactive({ input$model }), "y")
+  formulaModelServer("formula_model_x", reactive({ input$model }), "x")
+  formulaModelServer("formula_model_z", reactive({ input$model }), "z")
 
-  observeEvent(method$model(),
+  observeEvent(input$model,
     {
       hideTab("yTabs", target = "Regime 1")
       hideTab("xTabs", target = "Regime 1")
@@ -333,21 +335,21 @@ server <- function(input, output, session) {
       hideTab("errors", target = "Measurement error regime 2")
       hideTab("errors", target = "Innovation regime 2")
 
-      if (method$model() == "VAR" || method$model() == "L") {
+      if (input$model == "VAR" || input$model == "L") {
         showTab("yTabs", "Regression coefficients", select = TRUE)
         showTab("xTabs", "Regression coefficients", select = TRUE)
       }
 
-      if (method$model() == "VAR" || method$model() == "L" || method$model() == "TV") {
+      if (input$model == "VAR" || input$model == "L" || input$model == "TV") {
         showTab("errors", "Innovation parameters", select = TRUE)
       }
 
-      if (method$model() == "HMM") {
+      if (input$model == "HMM") {
         showTab("errors", "Measurement error regime 1", select = TRUE)
         showTab("errors", "Measurement error regime 2")
       }
 
-      if (method$model() == "TV") {
+      if (input$model == "TV") {
         showTab("yTabs", HTML("Intercept &#120572;"), select = TRUE)
         showTab("yTabs", HTML("Carryover &#120601;"))
         showTab("yTabs", HTML("Spillover &#120573;"))
@@ -357,18 +359,18 @@ server <- function(input, output, session) {
         showTab("xTabs", HTML("Spillover &#120573;"))
       }
 
-      if (method$model() == "HMM") {
+      if (input$model == "HMM") {
         showTab("yTabs", "Means", select = TRUE)
         showTab("xTabs", "Means", select = TRUE)
       }
 
-      if (method$model() == "L") {
+      if (input$model == "L") {
         showTab("yTabs", "Indicator")
         showTab("xTabs", "Indicator")
         showTab("errors", "Measurement error parameters", select = FALSE)
       }
 
-      if (method$model() == "T" || method$model() == "MS") {
+      if (input$model == "T" || input$model == "MS") {
         showTab("yTabs", "Regime 1")
         showTab("xTabs", "Regime 1")
         showTab("yTabs", "Regime 2")
@@ -430,11 +432,11 @@ server <- function(input, output, session) {
 
   params_y <- inputVARServer("yParameters",
     params = params_x,
-    model = method$model, nu = i_y, partner = "y"
+    model = reactive({ input$model }), nu = i_y, partner = "y"
   )
   params_x <- inputVARServer("xParameters",
     params = params_y,
-    model = method$model, nu = i_x, partner = "x"
+    model = reactive({ input$model }), nu = i_x, partner = "x"
   )
   params_y_1 <- inputVARServer("yFirstRegime")
   params_x_1 <- inputVARServer("xFirstRegime")
@@ -447,30 +449,30 @@ server <- function(input, output, session) {
 
     innovations <- c(innovations$y(), innovations$c_yx(), innovations$x())
 
-    if (method$model() == "T" || method$model() == "MS") {
+    if (input$model == "T" || input$model == "MS") {
       params_y <- list(alpha = params_y_1$alpha(), phi = params_y_1$phi(), beta = params_y_1$beta())
       params_x <- list(alpha = params_x_1$alpha(), phi = params_x_1$phi(), beta = params_x_1$beta())
 
       params_y$alpha[2] <- params_y_2$alpha()
       params_y$phi[2] <- params_y_2$phi()
       params_y$beta[2] <- params_y_2$beta()
-      if (method$model() == "T") params_y$tau <- input$tau_y
+      if (input$model == "T") params_y$tau <- input$tau_y
 
       params_x$alpha[2] <- params_x_2$alpha()
       params_x$phi[2] <- params_x_2$phi()
       params_x$beta[2] <- params_x_2$beta()
-      if (method$model() == "T") params_x$tau <- input$tau_x
+      if (input$model == "T") params_x$tau <- input$tau_x
 
       innovations_1 <- c(innovations_1$y(), innovations_1$c_yx(), innovations_1$x())
       innovations_2 <- c(innovations_2$y(), innovations_2$c_yx(), innovations_2$x())
-      if (method$model() == "T") innovations_1[2] <- input$yx_T
+      if (input$model == "T") innovations_1[2] <- input$yx_T
 
       innovations <- list(
         firstRegime = innovations_1,
         secondRegime = innovations_2
       )
     }
-    if (method$model() == "HMM") {
+    if (input$model == "HMM") {
       params_y <- list(mu = c(means_y$mu_1(), means_y$mu_2()))
       params_x <- list(mu = c(means_x$mu_1(), means_x$mu_2()))
 
@@ -489,14 +491,14 @@ server <- function(input, output, session) {
         secondRegime = measurement_errors_2
       )
     }
-    if (method$model() == "TV") {
+    if (input$model == "TV") {
       params_y <- list(alpha = tv_alpha_y$p(), phi = tv_phi_y$p(), beta = tv_beta_y$p())
       params_x <- list(alpha = tv_alpha_x$p(), phi = tv_phi_x$p(), beta = tv_beta_x$p())
     }
 
     indicators_y <- NULL
     indicators_x <- NULL
-    if (method$model() == "L") {
+    if (input$model == "L") {
       indicators_y <- list(m = i_y$mean(), l = 1)
       indicators_x <- list(m = i_x$mean(), l = 1)
 
@@ -507,10 +509,10 @@ server <- function(input, output, session) {
     }
 
     probs <- NULL
-    if (method$model() == "MS" || method$model() == "HMM") probs <- c(input$pi_o, input$pi_t)
+    if (input$model == "MS" || input$model == "HMM") probs <- c(input$pi_o, input$pi_t)
 
 
-    if (method$model() != "L" & method$model() != "HMM") measurement_errors <- NULL
+    if (input$model != "L" & input$model != "HMM") measurement_errors <- NULL
 
     return(
       list(
@@ -525,7 +527,7 @@ server <- function(input, output, session) {
     )
   })
 
-  # params <- paramsServer("innerParams", model = method$model, t = method$t,
+  # params <- paramsServer("innerParams", model = input$model, t = method$t,
   #                        pi_o = reactive({input$pi_o}), pi_t = reactive({input$pi_t}))
 
   # GENERATE DATA
@@ -535,7 +537,7 @@ server <- function(input, output, session) {
     set.seed(method$seed())
     dat <- simVARS(
       occasions = method$t(), burnin = 100,
-      type = method$model(),
+      type = input$model,
       params_y = params()$y,
       params_x = params()$x,
       probs = params()$probs,
@@ -548,9 +550,9 @@ server <- function(input, output, session) {
     dat
   })
 
-  # estimationServer("estimation", dataFormat, dat, params, method$model)
+  # estimationServer("estimation", dataFormat, dat, params, reactive({ input$model }))
 
-  formulaServer_y("formula_y", method$model,
+  formulaServer_y("formula_y", reactive({ input$model }),
     params_y, params_y_1, params_y_2,
     reactive({
       input$tau_y
@@ -560,7 +562,7 @@ server <- function(input, output, session) {
     tv = list(alpha_y = tv_alpha_y, phi_y = tv_phi_y, beta_y = tv_beta_y)
   )
 
-  formulaServer_x("formula_x", method$model,
+  formulaServer_x("formula_x", reactive({ input$model }),
     params_x, params_x_1, params_x_2,
     reactive({
       input$tau_x
@@ -571,7 +573,7 @@ server <- function(input, output, session) {
   )
 
   formulaServer_z(
-    "formula_z", method$model,
+    "formula_z", reactive({ input$model }),
     reactive({
       input$yx_T
     }),
@@ -583,7 +585,7 @@ server <- function(input, output, session) {
   dataFormat <- reactive({
     input$dataFormat
   })
-  plotsServer("inputPlots", dataFormat, method$model, dat)
+  plotsServer("inputPlots", dataFormat, reactive({ input$model }), dat)
   plotstvServer("tvPlots", method$t,
     tv = list(
       alpha_y = tv_alpha_y, phi_y = tv_phi_y, beta_y = tv_beta_y,
