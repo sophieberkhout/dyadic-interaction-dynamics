@@ -3,7 +3,6 @@ plotsInputUI <- function(id){
 
   fluidRow(
     column(2,
-          #  div(style = "margin: 0px -15px 0px -15px;",
       wellPanel(width = 12,
                    h4("Plots"),
                    h5("Time-series"),
@@ -69,7 +68,6 @@ plotsInputUI <- function(id){
                                    checkboxInput(ns("showCCFx"), "x * y")
                             )
                    )
-      # )
     )),
     column(10,
       fluidRow(

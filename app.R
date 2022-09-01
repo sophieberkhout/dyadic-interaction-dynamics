@@ -76,172 +76,174 @@ ui <- tagList(
           ),
           hr(),
           fluidRow(
-            column(style = "padding-top:2em",
+            column(
+              style = "padding-top:2em",
               2,
               methodUI("method")
             ),
-          column(10,
-          fluidRow(
             column(
-              4,
-              formulaModelUI("formula_model_y"),
-              tabsetPanel(
-                id = "yTabs",
-                #  paramsUI("innerParams"),
-                tabPanel(
-                  "Regression coefficients",
-                  inputVARUI("yParameters")
+              10,
+              fluidRow(
+                column(
+                  4,
+                  formulaModelUI("formula_model_y"),
+                  tabsetPanel(
+                    id = "yTabs",
+                    #  paramsUI("innerParams"),
+                    tabPanel(
+                      "Regression coefficients",
+                      inputVARUI("yParameters")
+                    ),
+                    tabPanel(
+                      HTML("Intercept &#120572;"),
+                      tvUI("intercept_y", type = "num")
+                    ),
+                    tabPanel(
+                      HTML("Carryover &#120601;"),
+                      tvUI("carryover_y")
+                    ),
+                    tabPanel(
+                      HTML("Spillover &#120573;"),
+                      tvUI("spillover_y")
+                    ),
+                    tabPanel(
+                      "Means",
+                      meansUI("means_y")
+                    ),
+                    tabPanel(
+                      "Indicator",
+                      indicatorUI("i_y")
+                    ),
+                    tabPanel(
+                      "Regime 1",
+                      inputVARUI("yFirstRegime")
+                    ),
+                    tabPanel(
+                      "Regime 2",
+                      inputVARUI("ySecondRegime")
+                    )
+                  ),
+                  hr(),
+                  conditionalPanel(
+                    condition = "input.model == 'T'",
+                    numericInput("tau_y", HTML("Threshold &#120591;"), 0, width = "30%"),
+                  ),
+                  formulaUI_y("formula_y")
                 ),
-                tabPanel(
-                  HTML("Intercept &#120572;"),
-                  tvUI("intercept_y", type = "num")
+                column(
+                  4,
+                  formulaModelUI("formula_model_x"),
+                  tabsetPanel(
+                    id = "xTabs",
+                    tabPanel(
+                      "Regression coefficients",
+                      inputVARUI("xParameters")
+                    ),
+                    tabPanel(
+                      HTML("Intercept &#120572;"),
+                      tvUI("intercept_x", type = "num")
+                    ),
+                    tabPanel(
+                      HTML("Carryover &#120601;"),
+                      tvUI("carryover_x")
+                    ),
+                    tabPanel(
+                      HTML("Spillover &#120573;"),
+                      tvUI("spillover_x")
+                    ),
+                    tabPanel(
+                      "Means",
+                      meansUI("means_x")
+                    ),
+                    tabPanel(
+                      "Indicator",
+                      indicatorUI("i_x")
+                    ),
+                    tabPanel(
+                      "Regime 1",
+                      inputVARUI("xFirstRegime")
+                    ),
+                    tabPanel(
+                      "Regime 2",
+                      inputVARUI("xSecondRegime")
+                    )
+                  ),
+                  hr(),
+                  conditionalPanel(
+                    condition = "input.model == 'T'",
+                    numericInput("tau_x", HTML("Threshold &#120591;"), 0, width = "30%"),
+                  ),
+                  formulaUI_x("formula_x")
                 ),
-                tabPanel(
-                  HTML("Carryover &#120601;"),
-                  tvUI("carryover_y")
-                ),
-                tabPanel(
-                  HTML("Spillover &#120573;"),
-                  tvUI("spillover_y")
-                ),
-                tabPanel(
-                  "Means",
-                  meansUI("means_y")
-                ),
-                tabPanel(
-                  "Indicator",
-                  indicatorUI("i_y")
-                ),
-                tabPanel(
-                  "Regime 1",
-                  inputVARUI("yFirstRegime")
-                ),
-                tabPanel(
-                  "Regime 2",
-                  inputVARUI("ySecondRegime")
-                )
-              ),
-              hr(),
-              conditionalPanel(
-                condition = "input.model == 'T'",
-                numericInput("tau_y", HTML("Threshold &#120591;"), 0, width = "30%"),
-              ),
-              formulaUI_y("formula_y")
-            ),
-            column(
-              4,
-              formulaModelUI("formula_model_x"),
-              tabsetPanel(
-                id = "xTabs",
-                tabPanel(
-                  "Regression coefficients",
-                  inputVARUI("xParameters")
-                ),
-                tabPanel(
-                  HTML("Intercept &#120572;"),
-                  tvUI("intercept_x", type = "num")
-                ),
-                tabPanel(
-                  HTML("Carryover &#120601;"),
-                  tvUI("carryover_x")
-                ),
-                tabPanel(
-                  HTML("Spillover &#120573;"),
-                  tvUI("spillover_x")
-                ),
-                tabPanel(
-                  "Means",
-                  meansUI("means_x")
-                ),
-                tabPanel(
-                  "Indicator",
-                  indicatorUI("i_x")
-                ),
-                tabPanel(
-                  "Regime 1",
-                  inputVARUI("xFirstRegime")
-                ),
-                tabPanel(
-                  "Regime 2",
-                  inputVARUI("xSecondRegime")
-                )
-              ),
-              hr(),
-              conditionalPanel(
-                condition = "input.model == 'T'",
-                numericInput("tau_x", HTML("Threshold &#120591;"), 0, width = "30%"),
-              ),
-              formulaUI_x("formula_x")
-            ),
-            column(
-              4,
-              formulaModelUI("formula_model_z"),
-              tabsetPanel(
-                id = "errors",
-                tabPanel(
-                  "Innovation parameters",
-                  errorsUI("innovations")
-                ),
-                tabPanel(
-                  "Measurement error parameters",
-                  errorsUI("measurementError")
-                ),
-                tabPanel(
-                  "Measurement error regime 1",
-                  errorsUI("measurementErrorFirstRegime")
-                ),
-                tabPanel(
-                  "Measurement error regime 2",
-                  errorsUI("measurementErrorSecondRegime")
-                ),
-                tabPanel(
-                  "Innovation regime 1",
-                  errorsUI("innovationsFirstRegime")
-                ),
-                tabPanel(
-                  "Innovation regime 2",
-                  errorsUI("innovationsSecondRegime")
-                )
-              ),
-              conditionalPanel(
-                condition = "input.model == 'T'",
-                hr(),
-                h5("For all regime combinations"),
-                fluidRow(
-                  column(
-                    6,
-                    numericInput("yx_T", "Correlation", .3, -1, 1, .1),
-                  )
-                )
-              ),
-              conditionalPanel(
-                condition = "input.model == 'MS' || input.model == 'HMM'",
-                tabsetPanel(
-                  id = "transition",
-                  tabPanel(
-                    "Transition probabilities",
+                column(
+                  4,
+                  formulaModelUI("formula_model_z"),
+                  tabsetPanel(
+                    id = "errors",
+                    tabPanel(
+                      "Innovation parameters",
+                      errorsUI("innovations")
+                    ),
+                    tabPanel(
+                      "Measurement error parameters",
+                      errorsUI("measurementError")
+                    ),
+                    tabPanel(
+                      "Measurement error regime 1",
+                      errorsUI("measurementErrorFirstRegime")
+                    ),
+                    tabPanel(
+                      "Measurement error regime 2",
+                      errorsUI("measurementErrorSecondRegime")
+                    ),
+                    tabPanel(
+                      "Innovation regime 1",
+                      errorsUI("innovationsFirstRegime")
+                    ),
+                    tabPanel(
+                      "Innovation regime 2",
+                      errorsUI("innovationsSecondRegime")
+                    )
+                  ),
+                  conditionalPanel(
+                    condition = "input.model == 'T'",
+                    hr(),
+                    h5("For all regime combinations"),
                     fluidRow(
-                      style = "padding-top:5px",
                       column(
                         6,
-                        numericInput("pi_o", "Stay in 1", .5, 0, 1, .1, width = "60%"),
-                        tableOutput("pi_ot")
-                      ),
-                      column(
-                        6,
-                        tableOutput("pi_to"),
-                        numericInput("pi_t", "Stay in 2", .5, 0, 1, .1, width = "60%")
+                        numericInput("yx_T", "Correlation", .3, -1, 1, .1),
                       )
                     )
-                  )
+                  ),
+                  conditionalPanel(
+                    condition = "input.model == 'MS' || input.model == 'HMM'",
+                    tabsetPanel(
+                      id = "transition",
+                      tabPanel(
+                        "Transition probabilities",
+                        fluidRow(
+                          style = "padding-top:5px",
+                          column(
+                            6,
+                            numericInput("pi_o", "Stay in 1", .5, 0, 1, .1, width = "60%"),
+                            tableOutput("pi_ot")
+                          ),
+                          column(
+                            6,
+                            tableOutput("pi_to"),
+                            numericInput("pi_t", "Stay in 2", .5, 0, 1, .1, width = "60%")
+                          )
+                        )
+                      )
+                    )
+                  ),
+                  hr(),
+                  formulaUI_z("formula_z")
                 )
-              ),
-              hr(),
-              formulaUI_z("formula_z")
+              )
             )
-          )
-          
-          )),
+          ),
           conditionalPanel(
             condition = "input.model == 'TV'",
             hr(),
@@ -257,7 +259,8 @@ ui <- tagList(
         # ),
         tabPanel("Download",
           value = "data",
-          fluidRow(style = "padding-top:5px",
+          fluidRow(
+            style = "padding-top:5px",
             column(
               9,
               withSpinner(DT::dataTableOutput("table"))
@@ -276,9 +279,9 @@ ui <- tagList(
     tabPanel(
       "Upload",
       h4("Upload Data"),
-          uploadInputUI("uploadData"),
-          hr(),
-        plotsInputUI("uploadPlots")
+      uploadInputUI("uploadData"),
+      hr(),
+      plotsInputUI("uploadPlots")
     ),
     tabPanel("Info",
       value = "info",
@@ -306,9 +309,15 @@ server <- function(input, output, session) {
   # DYNAMIC INPUT
   method <- methodServer("method")
 
-  formulaModelServer("formula_model_y", reactive({ input$model }), "y")
-  formulaModelServer("formula_model_x", reactive({ input$model }), "x")
-  formulaModelServer("formula_model_z", reactive({ input$model }), "z")
+  formulaModelServer("formula_model_y", reactive({
+    input$model
+  }), "y")
+  formulaModelServer("formula_model_x", reactive({
+    input$model
+  }), "x")
+  formulaModelServer("formula_model_z", reactive({
+    input$model
+  }), "z")
 
   observeEvent(input$model,
     {
@@ -432,11 +441,15 @@ server <- function(input, output, session) {
 
   params_y <- inputVARServer("yParameters",
     params = params_x,
-    model = reactive({ input$model }), nu = i_y, partner = "y"
+    model = reactive({
+      input$model
+    }), nu = i_y, partner = "y"
   )
   params_x <- inputVARServer("xParameters",
     params = params_y,
-    model = reactive({ input$model }), nu = i_x, partner = "x"
+    model = reactive({
+      input$model
+    }), nu = i_x, partner = "x"
   )
   params_y_1 <- inputVARServer("yFirstRegime")
   params_x_1 <- inputVARServer("xFirstRegime")
@@ -552,28 +565,34 @@ server <- function(input, output, session) {
 
   # estimationServer("estimation", dataFormat, dat, params, reactive({ input$model }))
 
-  formulaServer_y("formula_y", reactive({ input$model }),
-    params_y, params_y_1, params_y_2,
-    reactive({
-      input$tau_y
-    }),
-    i_y,
-    means_y,
-    tv = list(alpha_y = tv_alpha_y, phi_y = tv_phi_y, beta_y = tv_beta_y)
+  formulaServer_y("formula_y", reactive({
+    input$model
+  }),
+  params_y, params_y_1, params_y_2,
+  reactive({
+    input$tau_y
+  }),
+  i_y,
+  means_y,
+  tv = list(alpha_y = tv_alpha_y, phi_y = tv_phi_y, beta_y = tv_beta_y)
   )
 
-  formulaServer_x("formula_x", reactive({ input$model }),
-    params_x, params_x_1, params_x_2,
-    reactive({
-      input$tau_x
-    }),
-    i_x,
-    means_x,
-    tv = list(alpha_x = tv_alpha_x, phi_x = tv_phi_x, beta_x = tv_beta_x)
+  formulaServer_x("formula_x", reactive({
+    input$model
+  }),
+  params_x, params_x_1, params_x_2,
+  reactive({
+    input$tau_x
+  }),
+  i_x,
+  means_x,
+  tv = list(alpha_x = tv_alpha_x, phi_x = tv_phi_x, beta_x = tv_beta_x)
   )
 
   formulaServer_z(
-    "formula_z", reactive({ input$model }),
+    "formula_z", reactive({
+      input$model
+    }),
     reactive({
       input$yx_T
     }),
@@ -585,7 +604,9 @@ server <- function(input, output, session) {
   dataFormat <- reactive({
     input$dataFormat
   })
-  plotsServer("inputPlots", dataFormat, reactive({ input$model }), dat)
+  plotsServer("inputPlots", dataFormat, reactive({
+    input$model
+  }), dat)
   plotstvServer("tvPlots", method$t,
     tv = list(
       alpha_y = tv_alpha_y, phi_y = tv_phi_y, beta_y = tv_beta_y,

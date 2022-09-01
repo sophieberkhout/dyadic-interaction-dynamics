@@ -69,8 +69,8 @@ inputVARUI <- function(id) {
   )
 }
 
-inputVARServer <- function(id, params = NULL, model = NULL, nu = NULL, 
-partner = NULL, m) {
+inputVARServer <- function(id, params = NULL, model = NULL, nu = NULL,
+                           partner = NULL, m) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -80,7 +80,8 @@ partner = NULL, m) {
         # m <- num / den
         i <- diag(2)
         p <- matrix(c(input$phi, input$beta, params$beta(), params$phi()),
-                      nrow = 2, byrow = TRUE)
+          nrow = 2, byrow = TRUE
+        )
         c <- matrix(c(input$alpha, params$alpha()))
         m <- solve(i - p) %*% c
         m <- m[1, 1]
