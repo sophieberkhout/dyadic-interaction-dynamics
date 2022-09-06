@@ -194,14 +194,34 @@ plotsServer <- function(id, dataFormat, model, dat, uploaded = F, uploadedFile =
 
 plotstvUI <- function(id){
   ns <- NS(id)
+
   fluidRow(
-   column(2, plotOutput(ns("alpha_y"), height = "150px")),
-   column(2, plotOutput(ns("phi_y"), height = "150px")),
-   column(2, plotOutput(ns("beta_y"), height = "150px"),
-          style = 'border-right:1px solid; border-color:LightGrey;'),
-   column(2, plotOutput(ns("alpha_x"), height = "150px")),
-   column(2, plotOutput(ns("phi_x"), height = "150px")),
-   column(2, plotOutput(ns("beta_x"), height = "150px"))
+    column(10,
+      fluidRow(
+        column(11,
+          offset = 1,
+          fluidRow(
+            column(3,
+              plotOutput(ns("mean_y"), height = "150px"),
+              plotOutput(ns("phi_y"), height = "150px")
+            ),
+            column(3,
+              plotOutput(ns("alpha_y"), height = "150px"),
+              plotOutput(ns("beta_y"), height = "150px"),
+              style = "border-right:1px solid; border-color:LightGrey;"
+            ),
+            column(3,
+              plotOutput(ns("mean_x"), height = "150px"),
+              plotOutput(ns("phi_x"), height = "150px")
+            ),
+            column(3,
+              plotOutput(ns("alpha_x"), height = "150px"),
+              plotOutput(ns("beta_x"), height = "150px")
+            )
+          )
+        )
+      )
+    )
   )
 }
 
@@ -234,6 +254,39 @@ plotstvServer <- function(id, t, tv){
         p <- myTSsimple(1:t(), tv$beta_x$p(), ylab = bquote(Spillover ~ italic(beta["x,t"])), shiny = T)
         return(p)
       })
+
+      tvMean <- reactive({
+        mean_y <- numeric(t())
+        mean_x <- numeric(t())
+        for(i in 1:t()) {
+          m <- .meanVar1(
+            coefs_y = list(
+              alpha = tv$alpha_y$p()[i],
+              phi = tv$phi_y$p()[i],
+              beta = tv$beta_y$p()[i]
+            ),
+            coefs_x = list(
+              alpha = tv$alpha_x$p()[i],
+              phi = tv$phi_x$p()[i],
+              beta = tv$beta_x$p()[i]
+            )
+          )
+          mean_y[i] <- m[1, 1]
+          mean_x[i] <- m[2, 1]
+        }
+        return(list(y = mean_y, x = mean_x))
+      })
+
+      output$mean_y <- renderPlot({
+        p <- myTSsimple(1:t(), tvMean()$y, ylab = bquote(Mean ~ italic("y"[t])), shiny = T)
+        return(p)
+      })
+
+      output$mean_x <- renderPlot({
+        p <- myTSsimple(1:t(), tvMean()$x, ylab = bquote(Mean ~ italic("x"[t])), shiny = T)
+        return(p)
+      })
+
     }
   )
 }

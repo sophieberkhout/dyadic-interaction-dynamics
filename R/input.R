@@ -59,7 +59,7 @@ inputVARUI <- function(id) {
         6,
         conditionalPanel(
           condition = "input.model == 'VAR' || input.model == 'L'",
-          strong(uiOutput(ns("meanTextVAR"))), ns = NS("method"),
+          strong(uiOutput(ns("meanTextVAR"))),
           textOutput(ns("meanVAR"))
         )
       )
@@ -78,12 +78,16 @@ inputVARServer <- function(id, params = NULL, model = NULL, nu = NULL,
         # num <- input$alpha * (1 - params$phi()) + input$beta * params$alpha()
         # den <- (1 - input$phi) * (1 - params$phi()) - params$beta() * input$beta
         # m <- num / den
-        i <- diag(2)
-        p <- matrix(c(input$phi, input$beta, params$beta(), params$phi()),
-          nrow = 2, byrow = TRUE
+        # i <- diag(2)
+        # p <- matrix(c(input$phi, input$beta, params$beta(), params$phi()),
+        #   nrow = 2, byrow = TRUE
+        # )
+        # c <- matrix(c(input$alpha, params$alpha()))
+        # m <- solve(i - p) %*% c
+        m <- .meanVar1(
+          coefs_y = list(alpha = input$alpha, phi = input$phi, beta = input$beta),
+          coefs_x = list(alpha = params$alpha(), phi = params$phi(), beta = params$beta())
         )
-        c <- matrix(c(input$alpha, params$alpha()))
-        m <- solve(i - p) %*% c
         m <- m[1, 1]
 
         if (model() == "L") m <- m + nu$mean()
@@ -246,7 +250,7 @@ tvServer <- function(id, t) {
         )
 
         if (input$tv == "stable") {
-          p <- input$stable
+          p <- rep(input$stable, t())
         } else if (input$change == "linear") {
           p <- change_linear(input$int, input$slope, t())
         } else if (input$change == "sine") {
