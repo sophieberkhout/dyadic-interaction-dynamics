@@ -57,7 +57,7 @@ ui <- tagList(
     ),
     tabPanel("Simulate",
       value = "simulate",
-      h4("Simulate"),
+      h4("Simulate Data"),
       tabsetPanel(
         id = "simulateTabs",
         tabPanel("Set up & Visualization",
@@ -622,11 +622,18 @@ server <- function(input, output, session) {
       rownames = FALSE,
       options = list(dom = "pt", pageLength = 15)
     )
-    if (input$dataFormat == "wide") {
-      dtable <- DT::formatRound(dtable, columns = c("x", "y"), digits = 3)
-    } else {
-      dtable <- DT::formatRound(dtable, columns = c("value"), digits = 3)
-    }
+    # if (input$dataFormat == "wide") {
+    #   dtable <- DT::formatRound(dtable, columns = c("x", "y"), digits = 3)
+    # } else {
+    #   dtable <- DT::formatRound(dtable, columns = c("value"), digits = 3)
+    # }
+    cols <- names(dplyr::select(dat(), where(is.numeric)))
+    cols <- cols[-which(cols == "t" |
+      cols == "regime" | cols == "regime_y" | cols == "regime_x")]
+
+    dtable <- DT::formatRound(dtable,
+      columns = cols, digits = 3
+    )
     dtable
   })
 
