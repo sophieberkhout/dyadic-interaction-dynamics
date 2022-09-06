@@ -104,7 +104,7 @@ plotsInputUI <- function(id){
   )
 }
 
-plotsServer <- function(id, dataFormat, model, dat, uploaded = F, uploadedFile = NULL){
+plotsServer <- function(id, dataFormat, model, dat, uploaded = F, uploadedFile = NULL, tau){
   moduleServer(
     id,
     function(input, output, session){
@@ -152,12 +152,18 @@ plotsServer <- function(id, dataFormat, model, dat, uploaded = F, uploadedFile =
       })
 
       output$spillover <- renderPlot({
-        if(!uploaded) req(dataFormat() == "long")
-        if(uploaded) req(uploadedFile())
-        if(input$showSpilloverY) p <- mySSP(dat(), partner = "y", type = "spillover", cor = T, shiny = T)
-        if(input$showSpilloverX) p <- mySSP(dat(), partner = "x", type = "spillover", cor = T, shiny = T)
-        if(input$showSpilloverY && input$showSpilloverX) p <- mySSP(dat(), type = "spillover", cor = T, shiny = T,
-                                                                    legend.position = c(.35, .9))
+        if (!uploaded) req(dataFormat() == "long")
+        if (uploaded) req(uploadedFile())
+        type <- "spillover"
+        if (model() == "T") type <- "spillover_threshold"
+        if (input$showSpilloverY) p <- mySSP(dat(), partner = "y", type = type, cor = T, shiny = T, tau = tau()$y)
+        if (input$showSpilloverX) p <- mySSP(dat(), partner = "x", type = type, cor = T, shiny = T, tau = tau()$x)
+        if (input$showSpilloverY && input$showSpilloverX) {
+          p <- mySSP(dat(),
+            type = "spillover", cor = T, shiny = T,
+            legend.position = c(.35, .9)
+          )
+        }
         return(p)
       })
 

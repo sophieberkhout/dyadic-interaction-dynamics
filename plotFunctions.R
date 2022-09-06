@@ -247,15 +247,15 @@ mySSP <- function(dat, type, tau, partner = NULL,
       corDat <- data.frame(x = c(tau, tau), y = c(Inf, Inf), hjust = c(1.25, -0.25), vjust = c(1.5, 1.5),
                            corCross = c(corxy1, corxy2))
       
-      p <- ggplot(dat, aes(x = spillover, y = value)) + geom_point(size = 2) +
+      p <- ggplot(dat, aes(x = spillover, y = value)) + geom_point(size = 2, col = pCols) +
         # scale_color_manual(values = c("black", "gray75")) +
         labs(x = bquote(italic(.(other)["t"])[-1]), y = bquote(italic(.(partner)["t"]))) +
         geom_smooth(data = dat[dat$regime == 1, ], method = "lm", se = F, 
                     xseq = seq(min(dat$spillover, na.rm = T), tau, 0.01), 
-                    color = "black") +
+                    color = pCols) +
         geom_smooth(data = dat[dat$regime == 2, ], method = "lm", se = F, 
                     xseq = seq(tau, max(dat$spillover, na.rm = T), 0.01),
-                    color = "black") +
+                    color = pCols) +
         geom_vline(xintercept = tau)
       if(cor){
         p <- p + geom_text(data = corDat, size = rSize, parse = T, 

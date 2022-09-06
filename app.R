@@ -606,7 +606,9 @@ server <- function(input, output, session) {
   })
   plotsServer("inputPlots", dataFormat, reactive({
     input$model
-  }), dat)
+  }), dat, tau = reactive({
+    list(y = input$tau_y, x = input$tau_x)
+  }))
   plotstvServer("tvPlots", method$t,
     tv = list(
       alpha_y = tv_alpha_y, phi_y = tv_phi_y, beta_y = tv_beta_y,
