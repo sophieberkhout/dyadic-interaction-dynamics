@@ -1,5 +1,7 @@
 # install required packages
-if (!("shinycssloaders" %in% installed.packages())) install.packages("shinycssloaders")
+if (!("shinycssloaders" %in% installed.packages())) {
+  install.packages("shinycssloaders")
+}
 if (!("ggplot2" %in% installed.packages())) install.packages("ggplot2")
 if (!("plotly" %in% installed.packages())) install.packages("plotly")
 if (!("DT" %in% installed.packages())) install.packages("DT")
@@ -49,12 +51,14 @@ ui <- tagList(
   navbarPage("Dyadic Interaction Dynamics",
     id = "topnavbar",
     selected = "simulate",
+# TERMS Of USAGE
     tabPanel(
       "By using this app you agree with the Terms of Usage.",
       fluidRow(
         column(6, includeMarkdown("Shiny/tou.Rmd"))
       )
     ),
+# SIMULATE TAB
     tabPanel("Simulate",
       value = "simulate",
       h4("Simulate Data"),
@@ -77,8 +81,8 @@ ui <- tagList(
           hr(),
           fluidRow(
             column(
-              style = "padding-top:2em",
               2,
+              style = "padding-top:2em",
               methodUI("method")
             ),
             column(
@@ -126,7 +130,8 @@ ui <- tagList(
                   hr(),
                   conditionalPanel(
                     condition = "input.model == 'T'",
-                    numericInput("tau_y", HTML("Threshold &#120591;"), 0, width = "30%"),
+                    numericInput("tau_y",
+                                 HTML("Threshold &#120591;"), 0, width = "30%"),
                   ),
                   formulaUI_y("formula_y")
                 ),
@@ -171,7 +176,8 @@ ui <- tagList(
                   hr(),
                   conditionalPanel(
                     condition = "input.model == 'T'",
-                    numericInput("tau_x", HTML("Threshold &#120591;"), 0, width = "30%"),
+                    numericInput("tau_x",
+                                 HTML("Threshold &#120591;"), 0, width = "30%"),
                   ),
                   formulaUI_x("formula_x")
                 ),
@@ -226,13 +232,16 @@ ui <- tagList(
                           style = "padding-top:5px",
                           column(
                             6,
-                            numericInput("pi_o", "Stay in 1", .5, 0, 1, .1, width = "60%"),
+                            numericInput("pi_o", "Stay in 1", .5, 0, 1, .1,
+                                         width = "60%"),
                             tableOutput("pi_ot")
                           ),
                           column(
                             6,
                             tableOutput("pi_to"),
-                            numericInput("pi_t", "Stay in 2", .5, 0, 1, .1, width = "60%")
+                            numericInput("pi_t", "Stay in 2", .5, 0, 1, .1,
+                                         width = "60%"
+                            )
                           )
                         )
                       )
@@ -457,14 +466,30 @@ server <- function(input, output, session) {
   params_x_2 <- inputVARServer("xSecondRegime")
 
   params <- reactive({
-    params_y <- list(alpha = params_y$alpha(), phi = params_y$phi(), beta = params_y$beta())
-    params_x <- list(alpha = params_x$alpha(), phi = params_x$phi(), beta = params_x$beta())
+    params_y <- list(
+      alpha = params_y$alpha(),
+      phi = params_y$phi(),
+      beta = params_y$beta()
+    )
+    params_x <- list(
+      alpha = params_x$alpha(),
+      phi = params_x$phi(),
+      beta = params_x$beta()
+    )
 
     innovations <- c(innovations$y(), innovations$c_yx(), innovations$x())
 
     if (input$model == "T" || input$model == "MS") {
-      params_y <- list(alpha = params_y_1$alpha(), phi = params_y_1$phi(), beta = params_y_1$beta())
-      params_x <- list(alpha = params_x_1$alpha(), phi = params_x_1$phi(), beta = params_x_1$beta())
+      params_y <- list(
+        alpha = params_y_1$alpha(),
+        phi = params_y_1$phi(),
+        beta = params_y_1$beta()
+      )
+      params_x <- list(
+        alpha = params_x_1$alpha(),
+        phi = params_x_1$phi(),
+        beta = params_x_1$beta()
+      )
 
       params_y$alpha[2] <- params_y_2$alpha()
       params_y$phi[2] <- params_y_2$phi()
@@ -476,8 +501,12 @@ server <- function(input, output, session) {
       params_x$beta[2] <- params_x_2$beta()
       if (input$model == "T") params_x$tau <- input$tau_x
 
-      innovations_1 <- c(innovations_1$y(), innovations_1$c_yx(), innovations_1$x())
-      innovations_2 <- c(innovations_2$y(), innovations_2$c_yx(), innovations_2$x())
+      innovations_1 <- c(
+        innovations_1$y(), innovations_1$c_yx(), innovations_1$x()
+      )
+      innovations_2 <- c(
+        innovations_2$y(), innovations_2$c_yx(), innovations_2$x()
+      )
       if (input$model == "T") innovations_1[2] <- input$yx_T
 
       innovations <- list(
@@ -505,8 +534,12 @@ server <- function(input, output, session) {
       )
     }
     if (input$model == "TV") {
-      params_y <- list(alpha = tv_alpha_y$p(), phi = tv_phi_y$p(), beta = tv_beta_y$p())
-      params_x <- list(alpha = tv_alpha_x$p(), phi = tv_phi_x$p(), beta = tv_beta_x$p())
+      params_y <- list(
+        alpha = tv_alpha_y$p(), phi = tv_phi_y$p(), beta = tv_beta_y$p()
+      )
+      params_x <- list(
+        alpha = tv_alpha_x$p(), phi = tv_phi_x$p(), beta = tv_beta_x$p()
+      )
     }
 
     indicators_y <- NULL
@@ -522,8 +555,9 @@ server <- function(input, output, session) {
     }
 
     probs <- NULL
-    if (input$model == "MS" || input$model == "HMM") probs <- c(input$pi_o, input$pi_t)
-
+    if (input$model == "MS" || input$model == "HMM") {
+      probs <- c(input$pi_o, input$pi_t)
+    }
 
     if (input$model != "L" & input$model != "HMM") measurement_errors <- NULL
 
@@ -622,11 +656,7 @@ server <- function(input, output, session) {
       rownames = FALSE,
       options = list(dom = "pt", pageLength = 15)
     )
-    # if (input$dataFormat == "wide") {
-    #   dtable <- DT::formatRound(dtable, columns = c("x", "y"), digits = 3)
-    # } else {
-    #   dtable <- DT::formatRound(dtable, columns = c("value"), digits = 3)
-    # }
+
     cols <- names(dplyr::select(dat(), where(is.numeric)))
     cols <- cols[-which(cols == "t" |
       cols == "regime" | cols == "regime_y" | cols == "regime_x")]
@@ -656,18 +686,6 @@ server <- function(input, output, session) {
     uploadedFile = uploaded$file
   )
 }
-
-# shinyApp(ui = tagList(
-#                 tags$style("
-#                   body {
-#                  -moz-transform: scale(0.8, 0.8); /* Moz-browsers */
-#                  zoom: 0.8; /* Other non-webkit browsers */
-#                  zoom: 80%; /* Webkit browsers */
-#                  }
-#                  "),
-#                 ui
-#               ),
-#          server = server)
 
 shinyApp(
   ui = ui,
