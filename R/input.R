@@ -85,8 +85,16 @@ inputVARServer <- function(id, params = NULL, model = NULL, nu = NULL,
         # c <- matrix(c(input$alpha, params$alpha()))
         # m <- solve(i - p) %*% c
         m <- .meanVar1(
-          coefs_y = list(alpha = input$alpha, phi = input$phi, beta = input$beta),
-          coefs_x = list(alpha = params$alpha(), phi = params$phi(), beta = params$beta())
+          coefs_y = list(
+            alpha = input$alpha,
+            phi = input$phi,
+            beta = input$beta
+          ),
+          coefs_x = list(
+            alpha = params()$coefs$alpha,
+            phi = params()$coefs$phi,
+            beta = params()$coefs$beta
+          )
         )
         m <- m[1, 1]
 
@@ -118,7 +126,7 @@ inputVARServer <- function(id, params = NULL, model = NULL, nu = NULL,
   )
 }
 
-errorsUI <- function(id) {
+inputErrorsUI <- function(id) {
   ns <- NS(id)
 
   fluidRow(
@@ -128,8 +136,7 @@ errorsUI <- function(id) {
       numericInput(ns("y"), "Variance y", .1, 0, 1, .05, width = "60%"),
       conditionalPanel(
         condition = "input.model != 'T'",
-        numericInput(ns("yx"), "Correlation", .3, -1, 1, .1, width = "60%"),
-        ns = NS("method")
+        numericInput(ns("yx"), "Correlation", .3, -1, 1, .1, width = "60%")
       )
     ),
     column(
@@ -139,7 +146,7 @@ errorsUI <- function(id) {
   )
 }
 
-errorsServer <- function(id) {
+inputErrorsServer <- function(id) {
   moduleServer(
     id,
     function(input, output, session) {

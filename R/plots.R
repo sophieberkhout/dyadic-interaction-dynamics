@@ -231,33 +231,33 @@ plotstvUI <- function(id){
   )
 }
 
-plotstvServer <- function(id, t, tv){
+plotstvServer <- function(id, t, x, y){
   moduleServer(
     id,
     function(input, output, session){
       output$alpha_y <- renderPlot({
-        p <- myTSsimple(1:t(), tv$alpha_y$p(), ylab = bquote(Intercept ~ italic(alpha["y,t"])), shiny = T)
+        p <- myTSsimple(1:t(), y()$coefs$alpha, ylab = bquote(Intercept ~ italic(alpha["y,t"])), shiny = T)
         return(p)
       })
       output$phi_y <- renderPlot({
-        p <- myTSsimple(1:t(), tv$phi_y$p(), ylab = bquote(Carryover ~ italic(phi["y,t"])), shiny = T)
+        p <- myTSsimple(1:t(), y()$coefs$phi, ylab = bquote(Carryover ~ italic(phi["y,t"])), shiny = T)
         return(p)
       })
       output$beta_y <- renderPlot({
-        p <- myTSsimple(1:t(), tv$beta_y$p(), ylab = bquote(Spillover ~ italic(beta["y,t"])), shiny = T)
+        p <- myTSsimple(1:t(), y()$coefs$beta, ylab = bquote(Spillover ~ italic(beta["y,t"])), shiny = T)
         return(p)
       })
       
       output$alpha_x <- renderPlot({
-        p <- myTSsimple(1:t(), tv$alpha_x$p(), ylab = bquote(Intercept ~ italic(alpha["x,t"])), shiny = T)
+        p <- myTSsimple(1:t(), x()$coefs$alpha, ylab = bquote(Intercept ~ italic(alpha["x,t"])), shiny = T)
         return(p)
       })
       output$phi_x <- renderPlot({
-        p <- myTSsimple(1:t(), tv$phi_x$p(), ylab = bquote(Carryover ~ italic(phi["x,t"])), shiny = T)
+        p <- myTSsimple(1:t(), x()$coefs$phi, ylab = bquote(Carryover ~ italic(phi["x,t"])), shiny = T)
         return(p)
       })
       output$beta_x <- renderPlot({
-        p <- myTSsimple(1:t(), tv$beta_x$p(), ylab = bquote(Spillover ~ italic(beta["x,t"])), shiny = T)
+        p <- myTSsimple(1:t(), x()$coefs$beta, ylab = bquote(Spillover ~ italic(beta["x,t"])), shiny = T)
         return(p)
       })
 
@@ -267,14 +267,14 @@ plotstvServer <- function(id, t, tv){
         for(i in 1:t()) {
           m <- .meanVar1(
             coefs_y = list(
-              alpha = tv$alpha_y$p()[i],
-              phi = tv$phi_y$p()[i],
-              beta = tv$beta_y$p()[i]
+              alpha = y()$coefs$alpha[i],
+              phi = y()$coefs$phi[i],
+              beta = y()$coefs$beta[i]
             ),
             coefs_x = list(
-              alpha = tv$alpha_x$p()[i],
-              phi = tv$phi_x$p()[i],
-              beta = tv$beta_x$p()[i]
+              alpha = x()$coefs$alpha[i],
+              phi = x()$coefs$phi[i],
+              beta = x()$coefs$beta[i]
             )
           )
           mean_y[i] <- m[1, 1]

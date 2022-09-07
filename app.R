@@ -91,126 +91,101 @@ ui <- tagList(
                 column(
                   4,
                   formulaModelUI("formula_model_y"),
-                  tabsetPanel(
-                    id = "yTabs",
-                    #  paramsUI("innerParams"),
-                    tabPanel(
-                      "Regression coefficients",
-                      inputVARUI("yParameters")
-                    ),
-                    tabPanel(
-                      HTML("Intercept &#120572;"),
-                      tvUI("intercept_y", type = "num")
-                    ),
-                    tabPanel(
-                      HTML("Carryover &#120601;"),
-                      tvUI("carryover_y")
-                    ),
-                    tabPanel(
-                      HTML("Spillover &#120573;"),
-                      tvUI("spillover_y")
-                    ),
-                    tabPanel(
-                      "Means",
-                      meansUI("means_y")
-                    ),
-                    tabPanel(
-                      "Indicator",
-                      indicatorUI("i_y")
-                    ),
-                    tabPanel(
-                      "Regime 1",
-                      inputVARUI("yFirstRegime")
-                    ),
-                    tabPanel(
-                      "Regime 2",
-                      inputVARUI("ySecondRegime")
-                    )
-                  ),
+                  paramsUI("innerParamsY"),
+                  # tabsetPanel(
+                  #   id = "yTabs",
+                  #   tabPanel(
+                  #     "Regression coefficients",
+                  #     inputVARUI("yParameters")
+                  #   ),
+                  #   tabPanel(
+                  #     HTML("Intercept &#120572;"),
+                  #     tvUI("intercept_y", type = "num")
+                  #   ),
+                  #   tabPanel(
+                  #     HTML("Carryover &#120601;"),
+                  #     tvUI("carryover_y")
+                  #   ),
+                  #   tabPanel(
+                  #     HTML("Spillover &#120573;"),
+                  #     tvUI("spillover_y")
+                  #   ),
+                  #   tabPanel(
+                  #     "Means",
+                  #     meansUI("means_y")
+                  #   ),
+                  #   tabPanel(
+                  #     "Indicator",
+                  #     indicatorUI("i_y")
+                  #   ),
+                  #   tabPanel(
+                  #     "Regime 1",
+                  #     inputVARUI("yFirstRegime")
+                  #   ),
+                  #   tabPanel(
+                  #     "Regime 2",
+                  #     inputVARUI("ySecondRegime")
+                  #   )
+                  # ),
                   hr(),
                   conditionalPanel(
                     condition = "input.model == 'T'",
                     numericInput("tau_y",
                                  HTML("Threshold &#120591;"), 0, width = "30%"),
                   ),
-                  formulaUI_y("formula_y")
+                  formulaUI("formula_y")
                 ),
                 column(
                   4,
                   formulaModelUI("formula_model_x"),
-                  tabsetPanel(
-                    id = "xTabs",
-                    tabPanel(
-                      "Regression coefficients",
-                      inputVARUI("xParameters")
-                    ),
-                    tabPanel(
-                      HTML("Intercept &#120572;"),
-                      tvUI("intercept_x", type = "num")
-                    ),
-                    tabPanel(
-                      HTML("Carryover &#120601;"),
-                      tvUI("carryover_x")
-                    ),
-                    tabPanel(
-                      HTML("Spillover &#120573;"),
-                      tvUI("spillover_x")
-                    ),
-                    tabPanel(
-                      "Means",
-                      meansUI("means_x")
-                    ),
-                    tabPanel(
-                      "Indicator",
-                      indicatorUI("i_x")
-                    ),
-                    tabPanel(
-                      "Regime 1",
-                      inputVARUI("xFirstRegime")
-                    ),
-                    tabPanel(
-                      "Regime 2",
-                      inputVARUI("xSecondRegime")
-                    )
-                  ),
+                  paramsUI("innerParamsX"),
+                  # tabsetPanel(
+                  #   id = "xTabs",
+                  #   tabPanel(
+                  #     "Regression coefficients",
+                  #     inputVARUI("xParameters")
+                  #   ),
+                  #   tabPanel(
+                  #     HTML("Intercept &#120572;"),
+                  #     tvUI("intercept_x", type = "num")
+                  #   ),
+                  #   tabPanel(
+                  #     HTML("Carryover &#120601;"),
+                  #     tvUI("carryover_x")
+                  #   ),
+                  #   tabPanel(
+                  #     HTML("Spillover &#120573;"),
+                  #     tvUI("spillover_x")
+                  #   ),
+                  #   tabPanel(
+                  #     "Means",
+                  #     meansUI("means_x")
+                  #   ),
+                  #   tabPanel(
+                  #     "Indicator",
+                  #     indicatorUI("i_x")
+                  #   ),
+                  #   tabPanel(
+                  #     "Regime 1",
+                  #     inputVARUI("xFirstRegime")
+                  #   ),
+                  #   tabPanel(
+                  #     "Regime 2",
+                  #     inputVARUI("xSecondRegime")
+                  #   )
+                  # ),
                   hr(),
                   conditionalPanel(
                     condition = "input.model == 'T'",
                     numericInput("tau_x",
                                  HTML("Threshold &#120591;"), 0, width = "30%"),
                   ),
-                  formulaUI_x("formula_x")
+                  formulaUI("formula_x")
                 ),
                 column(
                   4,
                   formulaModelUI("formula_model_z"),
-                  tabsetPanel(
-                    id = "errors",
-                    tabPanel(
-                      "Innovation parameters",
-                      errorsUI("innovations")
-                    ),
-                    tabPanel(
-                      "Measurement error parameters",
-                      errorsUI("measurementError")
-                    ),
-                    tabPanel(
-                      "Measurement error regime 1",
-                      errorsUI("measurementErrorFirstRegime")
-                    ),
-                    tabPanel(
-                      "Measurement error regime 2",
-                      errorsUI("measurementErrorSecondRegime")
-                    ),
-                    tabPanel(
-                      "Innovation regime 1",
-                      errorsUI("innovationsFirstRegime")
-                    ),
-                    tabPanel(
-                      "Innovation regime 2",
-                      errorsUI("innovationsSecondRegime")
-                    )
-                  ),
+                  errorsUI("errors"),
                   conditionalPanel(
                     condition = "input.model == 'T'",
                     hr(),
@@ -328,77 +303,77 @@ server <- function(input, output, session) {
     input$model
   }), "z")
 
-  observeEvent(input$model,
-    {
-      hideTab("yTabs", target = "Regime 1")
-      hideTab("xTabs", target = "Regime 1")
-      hideTab("yTabs", target = "Regime 2")
-      hideTab("xTabs", target = "Regime 2")
-      hideTab("yTabs", target = HTML("Intercept &#120572;"))
-      hideTab("yTabs", target = HTML("Carryover &#120601;"))
-      hideTab("yTabs", target = HTML("Spillover &#120573;"))
-      hideTab("xTabs", target = HTML("Intercept &#120572;"))
-      hideTab("xTabs", target = HTML("Carryover &#120601;"))
-      hideTab("xTabs", target = HTML("Spillover &#120573;"))
-      hideTab("yTabs", target = "Regression coefficients")
-      hideTab("xTabs", target = "Regression coefficients")
-      hideTab("yTabs", target = "Means")
-      hideTab("xTabs", target = "Means")
-      hideTab("yTabs", target = "Indicator")
-      hideTab("xTabs", target = "Indicator")
-      hideTab("errors", target = "Innovation parameters")
-      hideTab("errors", target = "Measurement error parameters")
-      hideTab("errors", target = "Innovation regime 1")
-      hideTab("errors", target = "Measurement error regime 1")
-      hideTab("errors", target = "Measurement error regime 2")
-      hideTab("errors", target = "Innovation regime 2")
+  # observeEvent(input$model,
+  #   {
+  #     # hideTab("yTabs", target = "Regime 1")
+  #     hideTab("xTabs", target = "Regime 1")
+  #     # hideTab("yTabs", target = "Regime 2")
+  #     hideTab("xTabs", target = "Regime 2")
+  #     # hideTab("yTabs", target = HTML("Intercept &#120572;"))
+  #     # hideTab("yTabs", target = HTML("Carryover &#120601;"))
+  #     # hideTab("yTabs", target = HTML("Spillover &#120573;"))
+  #     hideTab("xTabs", target = HTML("Intercept &#120572;"))
+  #     hideTab("xTabs", target = HTML("Carryover &#120601;"))
+  #     hideTab("xTabs", target = HTML("Spillover &#120573;"))
+  #     # hideTab("yTabs", target = "Regression coefficients")
+  #     hideTab("xTabs", target = "Regression coefficients")
+  #     # hideTab("yTabs", target = "Means")
+  #     hideTab("xTabs", target = "Means")
+  #     # hideTab("yTabs", target = "Indicator")
+  #     hideTab("xTabs", target = "Indicator")
+  #     hideTab("errors", target = "Innovation parameters")
+  #     hideTab("errors", target = "Measurement error parameters")
+  #     hideTab("errors", target = "Innovation regime 1")
+  #     hideTab("errors", target = "Measurement error regime 1")
+  #     hideTab("errors", target = "Measurement error regime 2")
+  #     hideTab("errors", target = "Innovation regime 2")
 
-      if (input$model == "VAR" || input$model == "L") {
-        showTab("yTabs", "Regression coefficients", select = TRUE)
-        showTab("xTabs", "Regression coefficients", select = TRUE)
-      }
+  #     if (input$model == "VAR" || input$model == "L") {
+  #       # showTab("yTabs", "Regression coefficients", select = TRUE)
+  #       showTab("xTabs", "Regression coefficients", select = TRUE)
+  #     }
 
-      if (input$model == "VAR" || input$model == "L" || input$model == "TV") {
-        showTab("errors", "Innovation parameters", select = TRUE)
-      }
+  #     if (input$model == "VAR" || input$model == "L" || input$model == "TV") {
+  #       showTab("errors", "Innovation parameters", select = TRUE)
+  #     }
 
-      if (input$model == "HMM") {
-        showTab("errors", "Measurement error regime 1", select = TRUE)
-        showTab("errors", "Measurement error regime 2")
-      }
+  #     if (input$model == "HMM") {
+  #       showTab("errors", "Measurement error regime 1", select = TRUE)
+  #       showTab("errors", "Measurement error regime 2")
+  #     }
 
-      if (input$model == "TV") {
-        showTab("yTabs", HTML("Intercept &#120572;"), select = TRUE)
-        showTab("yTabs", HTML("Carryover &#120601;"))
-        showTab("yTabs", HTML("Spillover &#120573;"))
+  #     if (input$model == "TV") {
+  #       # showTab("yTabs", HTML("Intercept &#120572;"), select = TRUE)
+  #       # showTab("yTabs", HTML("Carryover &#120601;"))
+  #       # showTab("yTabs", HTML("Spillover &#120573;"))
 
-        showTab("xTabs", HTML("Intercept &#120572;"), select = TRUE)
-        showTab("xTabs", HTML("Carryover &#120601;"))
-        showTab("xTabs", HTML("Spillover &#120573;"))
-      }
+  #       showTab("xTabs", HTML("Intercept &#120572;"), select = TRUE)
+  #       showTab("xTabs", HTML("Carryover &#120601;"))
+  #       showTab("xTabs", HTML("Spillover &#120573;"))
+  #     }
 
-      if (input$model == "HMM") {
-        showTab("yTabs", "Means", select = TRUE)
-        showTab("xTabs", "Means", select = TRUE)
-      }
+  #     if (input$model == "HMM") {
+  #       # showTab("yTabs", "Means", select = TRUE)
+  #       showTab("xTabs", "Means", select = TRUE)
+  #     }
 
-      if (input$model == "L") {
-        showTab("yTabs", "Indicator")
-        showTab("xTabs", "Indicator")
-        showTab("errors", "Measurement error parameters", select = FALSE)
-      }
+  #     if (input$model == "L") {
+  #       # showTab("yTabs", "Indicator")
+  #       showTab("xTabs", "Indicator")
+  #       showTab("errors", "Measurement error parameters", select = FALSE)
+  #     }
 
-      if (input$model == "T" || input$model == "MS") {
-        showTab("yTabs", "Regime 1")
-        showTab("xTabs", "Regime 1")
-        showTab("yTabs", "Regime 2")
-        showTab("xTabs", "Regime 2")
-        showTab("errors", "Innovation regime 1", select = TRUE)
-        showTab("errors", "Innovation regime 2")
-      }
-    },
-    priority = 1
-  )
+  #     if (input$model == "T" || input$model == "MS") {
+  #       # showTab("yTabs", "Regime 1")
+  #       showTab("xTabs", "Regime 1")
+  #       # showTab("yTabs", "Regime 2")
+  #       showTab("xTabs", "Regime 2")
+  #       showTab("errors", "Innovation regime 1", select = TRUE)
+  #       showTab("errors", "Innovation regime 2")
+  #     }
+  #   },
+  #   priority = 1
+  # )
 
   observeEvent(input$simulateTabs, {
     if (input$simulateTabs == "sim") {
@@ -427,156 +402,171 @@ server <- function(input, output, session) {
     align = "l"
   )
 
-  tv_alpha_y <- tvServer("intercept_y", method$t)
-  tv_phi_y <- tvServer("carryover_y", method$t)
-  tv_beta_y <- tvServer("spillover_y", method$t)
+  # tv_alpha_y <- tvServer("intercept_y", method$t)
+  # tv_phi_y <- tvServer("carryover_y", method$t)
+  # tv_beta_y <- tvServer("spillover_y", method$t)
 
-  tv_alpha_x <- tvServer("intercept_x", method$t)
-  tv_phi_x <- tvServer("carryover_x", method$t)
-  tv_beta_x <- tvServer("spillover_x", method$t)
+  # tv_alpha_x <- tvServer("intercept_x", method$t)
+  # tv_phi_x <- tvServer("carryover_x", method$t)
+  # tv_beta_x <- tvServer("spillover_x", method$t)
 
-  means_y <- meansServer("means_y")
-  means_x <- meansServer("means_x")
+  # means_y <- meansServer("means_y")
+  # means_x <- meansServer("means_x")
 
-  i_y <- indicatorServer("i_y")
-  i_x <- indicatorServer("i_x")
+  # i_y <- indicatorServer("i_y")
+  # i_x <- indicatorServer("i_x")
 
-  innovations <- errorsServer("innovations")
-  innovations_1 <- errorsServer("innovationsFirstRegime")
-  innovations_2 <- errorsServer("innovationsSecondRegime")
-  measurement_errors <- errorsServer("measurementError")
-  measurement_errors_1 <- errorsServer("measurementErrorFirstRegime")
-  measurement_errors_2 <- errorsServer("measurementErrorSecondRegime")
+  # innovations <- inputErrorsServer("innovations")
+  # innovations_1 <- inputErrorsServer("innovationsFirstRegime")
+  # innovations_2 <- inputErrorsServer("innovationsSecondRegime")
+  # measurement_errors <- inputErrorsServer("measurementError")
+  # measurement_errors_1 <- inputErrorsServer("measurementErrorFirstRegime")
+  # measurement_errors_2 <- inputErrorsServer("measurementErrorSecondRegime")
 
-  params_y <- inputVARServer("yParameters",
-    params = params_x,
-    model = reactive({
-      input$model
-    }), nu = i_y, partner = "y"
-  )
-  params_x <- inputVARServer("xParameters",
-    params = params_y,
-    model = reactive({
-      input$model
-    }), nu = i_x, partner = "x"
-  )
-  params_y_1 <- inputVARServer("yFirstRegime")
-  params_x_1 <- inputVARServer("xFirstRegime")
-  params_y_2 <- inputVARServer("ySecondRegime")
-  params_x_2 <- inputVARServer("xSecondRegime")
+  # params_y <- inputVARServer("yParameters",
+  #   params = params_x,
+  #   model = reactive({
+  #     input$model
+  #   }), nu = i_y, partner = "y"
+  # )
+  # params_x <- inputVARServer("xParameters",
+  #   params = params_y,
+  #   model = reactive({
+  #     input$model
+  #   }), nu = i_x, partner = "x"
+  # )
+  # params_y_1 <- inputVARServer("yFirstRegime")
+  # params_x_1 <- inputVARServer("xFirstRegime")
+  # params_y_2 <- inputVARServer("ySecondRegime")
+  # params_x_2 <- inputVARServer("xSecondRegime")
 
-  params <- reactive({
-    params_y <- list(
-      alpha = params_y$alpha(),
-      phi = params_y$phi(),
-      beta = params_y$beta()
-    )
-    params_x <- list(
-      alpha = params_x$alpha(),
-      phi = params_x$phi(),
-      beta = params_x$beta()
-    )
+  # params <- reactive({
+  #   params_y <- list(
+  #     alpha = params_y$alpha(),
+  #     phi = params_y$phi(),
+  #     beta = params_y$beta()
+  #   )
+  #   params_x <- list(
+  #     alpha = params_x$alpha(),
+  #     phi = params_x$phi(),
+  #     beta = params_x$beta()
+  #   )
 
-    innovations <- c(innovations$y(), innovations$c_yx(), innovations$x())
+  #   innovations <- c(innovations$y(), innovations$c_yx(), innovations$x())
 
-    if (input$model == "T" || input$model == "MS") {
-      params_y <- list(
-        alpha = params_y_1$alpha(),
-        phi = params_y_1$phi(),
-        beta = params_y_1$beta()
-      )
-      params_x <- list(
-        alpha = params_x_1$alpha(),
-        phi = params_x_1$phi(),
-        beta = params_x_1$beta()
-      )
+  #   if (input$model == "T" || input$model == "MS") {
+  #     params_y <- list(
+  #       alpha = params_y_1$alpha(),
+  #       phi = params_y_1$phi(),
+  #       beta = params_y_1$beta()
+  #     )
+  #     params_x <- list(
+  #       alpha = params_x_1$alpha(),
+  #       phi = params_x_1$phi(),
+  #       beta = params_x_1$beta()
+  #     )
 
-      params_y$alpha[2] <- params_y_2$alpha()
-      params_y$phi[2] <- params_y_2$phi()
-      params_y$beta[2] <- params_y_2$beta()
-      if (input$model == "T") params_y$tau <- input$tau_y
+  #     params_y$alpha[2] <- params_y_2$alpha()
+  #     params_y$phi[2] <- params_y_2$phi()
+  #     params_y$beta[2] <- params_y_2$beta()
+  #     if (input$model == "T") params_y$tau <- input$tau_y
 
-      params_x$alpha[2] <- params_x_2$alpha()
-      params_x$phi[2] <- params_x_2$phi()
-      params_x$beta[2] <- params_x_2$beta()
-      if (input$model == "T") params_x$tau <- input$tau_x
+  #     params_x$alpha[2] <- params_x_2$alpha()
+  #     params_x$phi[2] <- params_x_2$phi()
+  #     params_x$beta[2] <- params_x_2$beta()
+  #     if (input$model == "T") params_x$tau <- input$tau_x
 
-      innovations_1 <- c(
-        innovations_1$y(), innovations_1$c_yx(), innovations_1$x()
-      )
-      innovations_2 <- c(
-        innovations_2$y(), innovations_2$c_yx(), innovations_2$x()
-      )
-      if (input$model == "T") innovations_1[2] <- input$yx_T
+  #     innovations_1 <- c(
+  #       innovations_1$y(), innovations_1$c_yx(), innovations_1$x()
+  #     )
+  #     innovations_2 <- c(
+  #       innovations_2$y(), innovations_2$c_yx(), innovations_2$x()
+  #     )
+  #     if (input$model == "T") innovations_1[2] <- input$yx_T
 
-      innovations <- list(
-        firstRegime = innovations_1,
-        secondRegime = innovations_2
-      )
-    }
-    if (input$model == "HMM") {
-      params_y <- list(mu = c(means_y$mu_1(), means_y$mu_2()))
-      params_x <- list(mu = c(means_x$mu_1(), means_x$mu_2()))
+  #     innovations <- list(
+  #       firstRegime = innovations_1,
+  #       secondRegime = innovations_2
+  #     )
+  #   }
+  #   if (input$model == "HMM") {
+  #     params_y <- list(mu = c(means_y$mu_1(), means_y$mu_2()))
+  #     params_x <- list(mu = c(means_x$mu_1(), means_x$mu_2()))
 
-      measurement_errors_1 <- c(
-        measurement_errors_1$y(), measurement_errors_1$c_yx(),
-        measurement_errors_1$x()
-      )
+  #     measurement_errors_1 <- c(
+  #       measurement_errors_1$y(), measurement_errors_1$c_yx(),
+  #       measurement_errors_1$x()
+  #     )
 
-      measurement_errors_2 <- c(
-        measurement_errors_2$y(), measurement_errors_2$c_yx(),
-        measurement_errors_2$x()
-      )
+  #     measurement_errors_2 <- c(
+  #       measurement_errors_2$y(), measurement_errors_2$c_yx(),
+  #       measurement_errors_2$x()
+  #     )
 
-      measurement_errors <- list(
-        firstRegime = measurement_errors_1,
-        secondRegime = measurement_errors_2
-      )
-    }
-    if (input$model == "TV") {
-      params_y <- list(
-        alpha = tv_alpha_y$p(), phi = tv_phi_y$p(), beta = tv_beta_y$p()
-      )
-      params_x <- list(
-        alpha = tv_alpha_x$p(), phi = tv_phi_x$p(), beta = tv_beta_x$p()
-      )
-    }
+  #     measurement_errors <- list(
+  #       firstRegime = measurement_errors_1,
+  #       secondRegime = measurement_errors_2
+  #     )
+  #   }
+  #   if (input$model == "TV") {
+  #     params_y <- list(
+  #       alpha = tv_alpha_y$p(), phi = tv_phi_y$p(), beta = tv_beta_y$p()
+  #     )
+  #     params_x <- list(
+  #       alpha = tv_alpha_x$p(), phi = tv_phi_x$p(), beta = tv_beta_x$p()
+  #     )
+  #   }
 
-    indicators_y <- NULL
-    indicators_x <- NULL
-    if (input$model == "L") {
-      indicators_y <- list(m = i_y$mean(), l = 1)
-      indicators_x <- list(m = i_x$mean(), l = 1)
+  #   indicators_y <- NULL
+  #   indicators_x <- NULL
+  #   if (input$model == "L") {
+  #     indicators_y <- list(m = i_y$mean(), l = 1)
+  #     indicators_x <- list(m = i_x$mean(), l = 1)
 
-      measurement_errors <- c(
-        measurement_errors$y(), measurement_errors$c_yx(),
-        measurement_errors$x()
-      )
-    }
+  #     measurement_errors <- c(
+  #       measurement_errors$y(), measurement_errors$c_yx(),
+  #       measurement_errors$x()
+  #     )
+  #   }
 
-    probs <- NULL
+  #   probs <- NULL
+  #   if (input$model == "MS" || input$model == "HMM") {
+  #     probs <- c(input$pi_o, input$pi_t)
+  #   }
+
+  #   if (input$model != "L" & input$model != "HMM") measurement_errors <- NULL
+
+  #   return(
+  #     list(
+  #       y = params_y,
+  #       x = params_x,
+  #       innovations = innovations,
+  #       errors = measurement_errors,
+  #       indicators_y = indicators_y,
+  #       indicators_x = indicators_x,
+  #       probs = probs
+  #     )
+  #   )
+  # })
+
+  params_y <- paramsServer("innerParamsY", model = reactive({ input$model }),
+                           t = method$t, tau = reactive({ input$tau_y }),
+                           paramsOther = params_x)
+
+  params_x <- paramsServer("innerParamsX", model = reactive({ input$model }),
+                           t = method$t, tau = reactive({ input$tau_x }),
+                           paramsOther = params_y)
+
+  errors <- errorsServer("errors", model = reactive({ input$model }))
+
+  probs <- reactive({
+    p <- NULL
     if (input$model == "MS" || input$model == "HMM") {
-      probs <- c(input$pi_o, input$pi_t)
+      p <- c(input$pi_o, input$pi_t)
     }
-
-    if (input$model != "L" & input$model != "HMM") measurement_errors <- NULL
-
-    return(
-      list(
-        y = params_y,
-        x = params_x,
-        innovations = innovations,
-        errors = measurement_errors,
-        indicators_y = indicators_y,
-        indicators_x = indicators_x,
-        probs = probs
-      )
-    )
+    return(p)
   })
-
-  # params <- paramsServer("innerParams", model = input$model, t = method$t,
-  #                        pi_o = reactive({input$pi_o}), pi_t = reactive({input$pi_t}))
-
+  
   # GENERATE DATA
   dat <- reactive({
     ifelse(input$dataFormat == "long", longformat <- TRUE, longformat <- FALSE)
@@ -585,13 +575,13 @@ server <- function(input, output, session) {
     dat <- simVARS(
       occasions = method$t(), burnin = 100,
       type = input$model,
-      params_y = params()$y,
-      params_x = params()$x,
-      probs = params()$probs,
-      indicators_y = params()$indicators_y,
-      indicators_x = params()$indicators_x,
-      errors = params()$errors,
-      innovations = params()$innovations,
+      params_y = params_y()$coefs,
+      params_x = params_x()$coefs,
+      probs = probs(),
+      indicators_y = params_y()$indicator,
+      indicators_x = params_x()$indicator,
+      errors = errors()$measurement,
+      innovations = errors()$dynamic,
       longformat = longformat
     )
     dat
@@ -599,28 +589,14 @@ server <- function(input, output, session) {
 
   # estimationServer("estimation", dataFormat, dat, params, reactive({ input$model }))
 
-  formulaServer_y("formula_y", reactive({
-    input$model
-  }),
-  params_y, params_y_1, params_y_2,
-  reactive({
-    input$tau_y
-  }),
-  i_y,
-  means_y,
-  tv = list(alpha_y = tv_alpha_y, phi_y = tv_phi_y, beta_y = tv_beta_y)
+  formulaServer(
+    "formula_y", reactive({ input$model }), partner = "y",
+    params = params_y, reactive({ input$tau_y })
   )
 
-  formulaServer_x("formula_x", reactive({
-    input$model
-  }),
-  params_x, params_x_1, params_x_2,
-  reactive({
-    input$tau_x
-  }),
-  i_x,
-  means_x,
-  tv = list(alpha_x = tv_alpha_x, phi_x = tv_phi_x, beta_x = tv_beta_x)
+  formulaServer(
+    "formula_x", reactive({ input$model }), partner = "x",
+    params = params_x, reactive({ input$tau_x })
   )
 
   formulaServer_z(
@@ -630,8 +606,7 @@ server <- function(input, output, session) {
     reactive({
       input$yx_T
     }),
-    innovations, innovations_1, innovations_2,
-    measurement_errors, measurement_errors_1, measurement_errors_2
+    errors
   )
 
   # PLOTS
@@ -644,10 +619,7 @@ server <- function(input, output, session) {
     list(y = input$tau_y, x = input$tau_x)
   }))
   plotstvServer("tvPlots", method$t,
-    tv = list(
-      alpha_y = tv_alpha_y, phi_y = tv_phi_y, beta_y = tv_beta_y,
-      alpha_x = tv_alpha_x, phi_x = tv_phi_x, beta_x = tv_beta_x
-    )
+    y = params_y, x = params_x
   )
 
   # TABLE
