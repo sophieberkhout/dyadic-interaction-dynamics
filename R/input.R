@@ -3,9 +3,11 @@ methodUI <- function(id) {
 
   wellPanel(
     numericInput(ns("t"), "Measurement occasions", 300, min = 2, step = 50), # 1 does not work
-    numericInput(ns("seed"), "Seed", 1, min = 1, max = .Machine$integer.max),
     hr(),
-    actionButton(ns("randomSeed"), "Random seed", width = "100%")
+    numericInput(ns("seed"), "Reproducibility seed", 1,
+                 min = 1, max = .Machine$integer.max),
+    strong("Random seed"),
+    actionButton(ns("randomSeed"), "Refresh", width = "100%")
   )
 }
 

@@ -13,7 +13,6 @@ uploadInputUI <- function(id) {
           ".csv"
         )
       ),
-      hr(),
       radioButtons(ns("sep"), "Separator",
         choices = c(
           Comma = ",",
