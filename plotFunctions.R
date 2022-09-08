@@ -295,7 +295,7 @@ myCCF <- function(dat,
 
 myCF <- function(dat, type, partner = NULL,
                  filename = NULL, width = 5, height = 3,
-                 xlim = NULL, ylim = NULL, shiny = F){
+                 xlim = NULL, ylim = NULL, shiny = F, legend.position = NULL){
   dat$partner <- ifelse(dat$partner == dat$partner[1], "x", "y")
   ptrue <- !is.null(partner)
   if(ptrue) ifelse(partner == "y", other <- "x", other <- "y")
@@ -303,6 +303,11 @@ myCF <- function(dat, type, partner = NULL,
   if(type == "ACF"){
     ccy <- acf(subset(dat, partner == "y", select = "value"), plot = F)
     ccx <- acf(subset(dat, partner == "x", select = "value"), plot = F)
+    # remove lag zero since that is always one
+    ccy$lag <- ccy$lag[-1]
+    ccy$acf <- ccy$acf[-1]
+    ccx$lag <- ccx$lag[-1]
+    ccx$acf <- ccx$acf[-1]
     yLabs <- "ACF"
     if(ptrue){
       if(partner == "y"){
@@ -316,10 +321,14 @@ myCF <- function(dat, type, partner = NULL,
   }
   
   if(type == "CCF"){
-    ccy <- ccf(subset(dat, partner == "y", select = "value"), 
-               subset(dat, partner == "x", select = "value"), plot = F)
-    ccx <- ccf(subset(dat, partner == "x", select = "value"), 
-               subset(dat, partner == "y", select = "value"), plot = F)
+    ccy <- ccf(subset(dat, partner == "y", select = "value"),
+      subset(dat, partner == "x", select = "value"),
+      plot = F
+    )
+    ccx <- ccf(subset(dat, partner == "x", select = "value"),
+      subset(dat, partner == "y", select = "value"),
+      plot = F
+    )
     yLabs <- "CCF"
     if(ptrue){
       if(partner == "y"){
@@ -364,7 +373,10 @@ myCF <- function(dat, type, partner = NULL,
   p <- p + labs(x = "Lag", y = yLabs)
   if(is.null(xlim)) xlim <- cc$lag
   if(is.null(ylim)) ylim <- cc$cf
-  p <- myTheme(p, x = xlim, y = c(ylim, 0), shiny = shiny)
+  p <- myTheme(p,
+    x = xlim, y = c(ylim, 0), shiny = shiny,
+    legend.position = legend.position
+  )
   if(!is.null(filename))  ggsave(filename, p, width = width, height = height)
   return(p)
 }

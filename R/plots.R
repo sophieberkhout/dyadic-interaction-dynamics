@@ -179,9 +179,19 @@ plotsServer <- function(id, dataFormat, model, dat, uploaded = F, uploadedFile =
       output$acf <- renderPlot({
         if(!uploaded) req(dataFormat() == "long")
         if(uploaded) req(uploadedFile())
-        if(input$showACFy) p <- myCF(dat(), partner = "y", type = "ACF", shiny = T)
-        if(input$showACFx) p <- myCF(dat(), partner = "x", type = "ACF", shiny = T)
-        if(input$showACFy && input$showACFx) p <- myCF(dat(), type = "ACF", shiny = T)
+        legend.position <- c(.9, .9)
+        if (input$showACFy) {
+          p <- myCF(dat(), partner = "y", type = "ACF", shiny = T)
+        }
+        if (input$showACFx) {
+          p <- myCF(dat(), partner = "x", type = "ACF", shiny = T)
+        }
+        if (input$showACFy && input$showACFx) {
+          p <- myCF(dat(),
+            type = "ACF", shiny = T,
+            legend.position = legend.position
+          )
+        }
         return(p)
       })
 
