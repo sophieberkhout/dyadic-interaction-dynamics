@@ -67,6 +67,7 @@ ui <- tagList(
         tabPanel("Set up & Visualization",
           value = "sim",
           br(),
+# DATA GENERATING MODEL
           selectInput("model", "Choose a data generating model",
             list(
               "First-order vector autoregressive VAR(1)" = "VAR",
@@ -79,15 +80,17 @@ ui <- tagList(
             selected = "VAR"
           ),
           hr(),
+# INPUT DATA GENERATION
           fluidRow(
             column(
               2,
               style = "padding-top:2em",
-              methodUI("method")
+              methodUI("method") # measurement occasions and seed
             ),
             column(
               10,
               fluidRow(
+              # input y
                 column(
                   4,
                   formulaModelUI("formula_model_y"),
@@ -95,11 +98,14 @@ ui <- tagList(
                   hr(),
                   conditionalPanel(
                     condition = "input.model == 'T'",
-                    numericInput("tau_y",
-                                 HTML("Threshold &#120591;"), 0, width = "30%"),
+                    numericInput(
+                      "tau_y", HTML("Threshold &#120591;"),
+                      0, width = "30%"
+                    )
                   ),
                   formulaUI("formula_y")
                 ),
+              # input x
                 column(
                   4,
                   formulaModelUI("formula_model_x"),
@@ -107,11 +113,14 @@ ui <- tagList(
                   hr(),
                   conditionalPanel(
                     condition = "input.model == 'T'",
-                    numericInput("tau_x",
-                                 HTML("Threshold &#120591;"), 0, width = "30%"),
+                    numericInput(
+                      "tau_x", HTML("Threshold &#120591;"), 
+                      0, width = "30%"
+                    )
                   ),
                   formulaUI("formula_x")
                 ),
+              # input residuals
                 column(
                   4,
                   formulaModelUI("formula_model_z"),
@@ -127,6 +136,7 @@ ui <- tagList(
                       )
                     )
                   ),
+                # transition probabilities
                   conditionalPanel(
                     condition = "input.model == 'MS' || input.model == 'HMM'",
                     tabsetPanel(
@@ -137,15 +147,18 @@ ui <- tagList(
                           style = "padding-top:5px",
                           column(
                             6,
-                            numericInput("pi_o", "Stay in 1", .5, 0, 1, .1,
-                                         width = "60%"),
+                            numericInput(
+                              "pi_o", "Stay in 1", .5, 0, 1, .1,
+                              width = "60%"
+                            ),
                             tableOutput("pi_ot")
                           ),
                           column(
                             6,
                             tableOutput("pi_to"),
-                            numericInput("pi_t", "Stay in 2", .5, 0, 1, .1,
-                                         width = "60%"
+                            numericInput(
+                              "pi_t", "Stay in 2", .5, 0, 1, .1,
+                              width = "60%"
                             )
                           )
                         )
@@ -158,19 +171,22 @@ ui <- tagList(
               )
             )
           ),
+        # time-varying plots
           conditionalPanel(
             condition = "input.model == 'TV'",
             hr(),
             h4("Parameters plotted over time"),
-            plotstvUI("tvPlots"),
+            plotsTvUI("tvPlots"),
           ),
           hr(),
+        # generated data plots
           plotsInputUI("inputPlots")
         ),
         # tabPanel("Estimation",
         #   value = "estimation",
         #   estimationUI("estimation")
         # ),
+      # download generated data
         tabPanel("Download",
           value = "data",
           fluidRow(
@@ -181,7 +197,8 @@ ui <- tagList(
             ),
             column(
               3,
-              radioButtons("dataFormat", "Choose data format",
+              radioButtons(
+                "dataFormat", "Choose data format",
                 choices = list('"Wide"' = "wide", "Long" = "long")
               ),
               downloadButton("downloadData", "Download data")
@@ -190,6 +207,7 @@ ui <- tagList(
         )
       )
     ),
+# UPLOAD TAB
     tabPanel(
       "Upload",
       h4("Upload Data"),
@@ -197,6 +215,7 @@ ui <- tagList(
       hr(),
       plotsInputUI("uploadPlots")
     ),
+# INFO TAB
     tabPanel("Info",
       value = "info",
       fluidRow(
@@ -219,20 +238,14 @@ ui <- tagList(
 
 server <- function(input, output, session) {
 
-  #-------------------------------- SIMULATE ----------------------------------#
-  # DYNAMIC INPUT
+#--------------------------------- SIMULATE -----------------------------------#
   method <- methodServer("method")
 
-  formulaModelServer("formula_model_y", reactive({
-    input$model
-  }), "y")
-  formulaModelServer("formula_model_x", reactive({
-    input$model
-  }), "x")
-  formulaModelServer("formula_model_z", reactive({
-    input$model
-  }), "z")
+  formulaModelServer("formula_model_y", reactive({ input$model }), "y")
+  formulaModelServer("formula_model_x", reactive({ input$model }), "x")
+  formulaModelServer("formula_model_z", reactive({ input$model }), "z")
 
+  # the sim tab should have long format data for plotting
   observeEvent(input$simulateTabs, {
     if (input$simulateTabs == "sim") {
       updateRadioButtons(session, "dataFormat", selected = "long")
@@ -242,8 +255,8 @@ server <- function(input, output, session) {
     }
   })
 
-  output$pi_to <- renderTable(
-    {
+  # opposite transition probabilities
+  output$pi_to <- renderTable({
       pi_to <- data.frame(1 - input$pi_t)
       colnames(pi_to) <- "Switch to 1"
       return(pi_to)
@@ -251,21 +264,23 @@ server <- function(input, output, session) {
     align = "l"
   )
 
-  output$pi_ot <- renderTable(
-    {
+  output$pi_ot <- renderTable({
       pi_ot <- data.frame(1 - input$pi_o)
       colnames(pi_ot) <- "Switch to 2"
       return(pi_ot)
     },
     align = "l"
   )
-  params_y <- paramsServer("innerParamsY", model = reactive({ input$model }),
-                           t = method$t, tau = reactive({ input$tau_y }),
-                           paramsOther = params_x)
 
-  params_x <- paramsServer("innerParamsX", model = reactive({ input$model }),
-                           t = method$t, tau = reactive({ input$tau_x }),
-                           paramsOther = params_y)
+  params_y <- paramsServer(
+    "innerParamsY", model = reactive({ input$model }), t = method$t,
+    tau = reactive({ input$tau_y }), paramsOther = params_x
+  )
+
+  params_x <- paramsServer(
+    "innerParamsX", model = reactive({ input$model }), t = method$t,
+    tau = reactive({ input$tau_x }), paramsOther = params_y
+  )
 
   errors <- errorsServer("errors", model = reactive({ input$model }))
 
@@ -276,14 +291,15 @@ server <- function(input, output, session) {
     }
     return(p)
   })
-  
+
   # GENERATE DATA
   dat <- reactive({
     ifelse(input$dataFormat == "long", longformat <- TRUE, longformat <- FALSE)
 
     set.seed(method$seed())
     dat <- simVARS(
-      occasions = method$t(), burnin = 100,
+      occasions = method$t(),
+      burnin = 100,
       type = input$model,
       params_y = params_y()$coefs,
       params_x = params_x()$coefs,
@@ -310,27 +326,19 @@ server <- function(input, output, session) {
   )
 
   formulaServer_z(
-    "formula_z", reactive({
-      input$model
-    }),
-    reactive({
-      input$yx_T
-    }),
-    errors
+    "formula_z", reactive({ input$model }), reactive({ input$yx_T }), errors
   )
 
   # PLOTS
   dataFormat <- reactive({
     input$dataFormat
   })
-  plotsServer("inputPlots", dataFormat, reactive({
-    input$model
-  }), dat, tau = reactive({
-    list(y = input$tau_y, x = input$tau_x)
-  }))
-  plotstvServer("tvPlots", method$t,
-    y = params_y, x = params_x
+
+  plotsServer("inputPlots", dataFormat, reactive({ input$model }), dat, 
+    tau = reactive({ list(y = input$tau_y, x = input$tau_x) })
   )
+  
+  plotsTvServer("tvPlots", method$t, y = params_y, x = params_x)
 
   # TABLE
   output$table <- DT::renderDataTable({
@@ -340,12 +348,11 @@ server <- function(input, output, session) {
     )
 
     cols <- names(dplyr::select(dat(), where(is.numeric)))
-    cols <- cols[-which(cols == "t" |
-      cols == "regime" | cols == "regime_y" | cols == "regime_x")]
+    cols <- cols[-which(
+      cols == "t" | cols == "regime" | cols == "regime_y" | cols == "regime_x"
+    )]
 
-    dtable <- DT::formatRound(dtable,
-      columns = cols, digits = 3
-    )
+    dtable <- DT::formatRound(dtable, columns = cols, digits = 3)
     dtable
   })
 
@@ -357,13 +364,11 @@ server <- function(input, output, session) {
     }
   )
 
-  #---------------------------------- UPLOAD ----------------------------------#
+#----------------------------------- UPLOAD -----------------------------------#
   uploaded <- uploadInputServer("uploadData")
 
   plotsServer("uploadPlots", dataFormat,
-    model = function() {
-      "VAR"
-    },
+    model = function() { "VAR" },
     dat = uploaded$datLong, uploaded = TRUE,
     uploadedFile = uploaded$file
   )

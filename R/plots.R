@@ -208,7 +208,7 @@ plotsServer <- function(id, dataFormat, model, dat, uploaded = F, uploadedFile =
 }
 
 
-plotstvUI <- function(id){
+plotsTvUI <- function(id){
   ns <- NS(id)
 
   fluidRow(
@@ -241,7 +241,7 @@ plotstvUI <- function(id){
   )
 }
 
-plotstvServer <- function(id, t, x, y){
+plotsTvServer <- function(id, t, x, y){
   moduleServer(
     id,
     function(input, output, session){
