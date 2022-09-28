@@ -7,3 +7,4 @@ Poster/
 .Rhistory
 data.txt
 QID_exampleData.RData
+.rscignore

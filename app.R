@@ -9,6 +9,9 @@ if (!("viridis" %in% installed.packages())) install.packages("viridis")
 if (!("oddsratio" %in% installed.packages())) install.packages("oddsratio")
 if (!("MASS" %in% installed.packages())) install.packages("MASS")
 if (!("stringr" %in% installed.packages())) install.packages("stringr")
+if (!("tidyr" %in% installed.packages())) install.packages("tidyr")
+if (!("dplyr" %in% installed.packages())) install.packages("dplyr")
+if (!("Rcpp" %in% installed.packages())) install.packages("Rcpp")
 
 # load packages
 library("shiny")
