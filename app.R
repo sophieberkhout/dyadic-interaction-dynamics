@@ -19,7 +19,6 @@ library("plotly")
 # source required files
 source("simVARS.R")
 source("plotFunctions.R")
-source("analysesFunctions.R")
 
 # set options for app
 options(shiny.autoreload = TRUE)
