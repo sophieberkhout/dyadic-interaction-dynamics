@@ -42,12 +42,6 @@ ui <- tagList(
                             }
 
                             "))),
-  tags$div(HTML("<script type='text/x-mathjax-config' >
-                MathJax.Hub.Config({
-                tex2jax: {inlineMath: [['$','$']]}
-                });
-                </script >
-                ")),
   navbarPage("Dyadic Interaction Dynamics",
     id = "topnavbar",
     selected = "simulate",
@@ -216,16 +210,22 @@ ui <- tagList(
       plotsInputUI("uploadPlots")
     ),
 # INFO TAB
-    tabPanel("Info",
+    tabPanel(
+      "Info",
       value = "info",
+      h4("Info"),
       fluidRow(
         column(
-          4,
-          includeMarkdown("Shiny/help.Rmd")
-        ),
-        column(
-          4,
-          includeMarkdown("Shiny/help_data.Rmd")
+          8,
+          navlistPanel(
+            well = FALSE,
+            tabPanel("Plots", includeMarkdown("Shiny/plots.Rmd")),
+            "Simulate",
+            tabPanel("Set up & Visualization", includeMarkdown("Shiny/setup.Rmd")),
+            tabPanel("Download", includeMarkdown("Shiny/download.Rmd")),
+            "Upload",
+            tabPanel("Upload Data", includeMarkdown("Shiny/upload.Rmd"))
+          )
         ),
         column(
           4,
@@ -274,12 +274,12 @@ server <- function(input, output, session) {
 
   params_y <- paramsServer(
     "innerParamsY", model = reactive({ input$model }), t = method$t,
-    tau = reactive({ input$tau_y }), paramsOther = params_x
+    tau = reactive({ input$tau_y }), paramsOther = params_x, partner = "y"
   )
 
   params_x <- paramsServer(
     "innerParamsX", model = reactive({ input$model }), t = method$t,
-    tau = reactive({ input$tau_x }), paramsOther = params_y
+    tau = reactive({ input$tau_x }), paramsOther = params_y, partner = "x"
   )
 
   errors <- errorsServer("errors", model = reactive({ input$model }))

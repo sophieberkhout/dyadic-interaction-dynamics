@@ -4,15 +4,19 @@ output:
   html_fragment
 ---
 
-### Data
+### Download
 
-The *Data* tab shows the data generated in the *Simulation* tab, where these data are also visualized in the plots. By changing any of the options in the 'Simulation' tab, a new data set will be generated and therefore the data in this tab will change. You can recover any generated data set by using the same seed and options (and generate a new data set with the same options by setting a different seed).
+The *Download* tab shows the data generated in the *Set up & Visualization* tab, where these data are also visualized in the plots. By changing any of the options in the *Set up & Visualization* tab, a new data set will be generated and therefore the data in this tab will change. You can recover any generated data set by using the same seed and options (and generate a new data set with the same options by setting a different seed).
+
+***
 
 #### Data format
 
 * **"Wide"**: The columns *y* and *x* indicate each partner in the dyad and rows indicate the measurement occasion (also clarified by column *t*). This formats *y* and *x* as if they were two time-invariant variables so it is not really wide-format as in that case there would be two rows for *y* and *x* and separate columns for each measurement occasion per partner which would be rather unclear.
 
 * **Long**: The column *t* indicates the measurement occasion, the column *partner* indicates the partner of the dyad and the column *value* indicates the value of the generated measurement. This format is especially useful to plot data with `ggplot`.
+
+***
 
 **Model specific columns**
 
@@ -28,7 +32,9 @@ Threshold VAR(1)
 
 Hidden Markov model and Regime-switching VAR(1)
 
-* Regime: The regime where both entities are in at the current measurement occasion. 
+* Regime: The regime where both entities are in at the current measurement occasion.
+
+***
 
 #### Download data
 

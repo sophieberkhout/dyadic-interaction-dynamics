@@ -29,7 +29,7 @@ paramsUI <- function(id) {
   )
 }
 
-paramsServer <- function(id, model, t, tau, paramsOther) {
+paramsServer <- function(id, model, t, tau, paramsOther, partner) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -86,7 +86,7 @@ paramsServer <- function(id, model, t, tau, paramsOther) {
 
       coefs <- inputVARServer("parameters",
         params = paramsOther,
-        model = model, nu = indicator, partner = "y"
+        model = model, nu = indicator, partner = partner
       )
 
       coefs_1 <- inputVARServer("firstRegime")

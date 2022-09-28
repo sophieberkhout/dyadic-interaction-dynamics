@@ -107,8 +107,10 @@ inputVARServer <- function(id, params = NULL, model = NULL, nu = NULL,
       })
 
       output$meanTextVAR <- renderUI({
-        text <- sprintf("Mean $%s_t$", partner)
-        withMathJax(text)
+        text <- HTML(sprintf(
+          "Mean <span style='font-family:serif;'><i>%s<sub>t</sub></i></span>", 
+          partner
+        ))
       })
 
       return(

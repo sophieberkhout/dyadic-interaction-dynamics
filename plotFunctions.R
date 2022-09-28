@@ -296,13 +296,16 @@ myCCF <- function(dat,
 myCF <- function(dat, type, partner = NULL,
                  filename = NULL, width = 5, height = 3,
                  xlim = NULL, ylim = NULL, shiny = F, legend.position = NULL){
-  dat$partner <- ifelse(dat$partner == dat$partner[1], "x", "y")
+  # dat$partner <- ifelse(dat$partner == dat$partner[1], "x", "y")
   ptrue <- !is.null(partner)
   if(ptrue) ifelse(partner == "y", other <- "x", other <- "y")
   
+  datY <- subset(dat, partner == "y", select = "value")
+  datX <- subset(dat, partner == "x", select = "value")
+  
   if(type == "ACF"){
-    ccy <- acf(subset(dat, partner == "y", select = "value"), plot = F)
-    ccx <- acf(subset(dat, partner == "x", select = "value"), plot = F)
+    ccy <- acf(datY, plot = F, na.action = na.pass)
+    ccx <- acf(datX, plot = F, na.action = na.pass)
     # remove lag zero since that is always one
     ccy$lag <- ccy$lag[-1]
     ccy$acf <- ccy$acf[-1]
@@ -321,14 +324,8 @@ myCF <- function(dat, type, partner = NULL,
   }
   
   if(type == "CCF"){
-    ccy <- ccf(subset(dat, partner == "y", select = "value"),
-      subset(dat, partner == "x", select = "value"),
-      plot = F
-    )
-    ccx <- ccf(subset(dat, partner == "x", select = "value"),
-      subset(dat, partner == "y", select = "value"),
-      plot = F
-    )
+    ccy <- ccf(datY, datX, plot = F, na.action = na.pass)
+    ccx <- ccf(datX, datY, plot = F, na.action = na.pass)
     yLabs <- "CCF"
     if(ptrue){
       if(partner == "y"){

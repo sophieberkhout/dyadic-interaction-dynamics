@@ -4,14 +4,14 @@ output:
   html_fragment
 ---
 
-### Simulation
-The *Simulation* tab generates dyadic data according to the options on top. Below follow descriptions of each of the options. Be aware that some options change when a different model is selected because the models may use different parameters.
+### Set up & Visualization
+The *Set up & Visualization* tab generates dyadic data according to the options on top. Below follow descriptions of each of the options. Be aware that some options change when a different model is selected because the models may use different parameters.
 
 *Tip: Zoom out your browser to view the options and plots at the same time (press Ctrl/Cmd and -).*
 
-#### Method
+***
 
-* **Data generating model**:
+* **Choose a aata generating model**:
 Which model to generate data from. Some models use different parameters, so the input menus may change accordingly.
 
   - *First-order vector autoregressive VAR(1).* The VAR(1) model is a linear model where multiple variables are regressed on themselves and the other variables at previous measurement occasions.
@@ -19,15 +19,20 @@ Which model to generate data from. Some models use different parameters, so the 
   - *Time-varying VAR(1).* The time-varying VAR(1) model is similar to the linear VAR(1) model, except that now the parameters may vary over time. In this Shiny app, one can choose per regression coefficient per partner whether they stable or time-varying, where they can vary either linearly or according to a sine curve specified by the user.
   - *Threshold VAR(1).* In a threshold VAR(1) model (TVAR(1) model), there are two or more regimes with varying carryover processes and regime-switching takes place based on the current value of a variable.
   - *Hidden Markov model.* Hidden Markov modeling, also known as latent Markov modeling (LMM), involves a latent regime-switching process. Unlike the autoregressive models, HMM involves regime-switching with probabilities that determine which regime the system falls in given the regime of the previous observation.
-  - *Markov-switching VAR(1).* The Markov-switching VAR(1) model combines the HMM with the VAR(1) model, allowing for changes in parameters of the VAR(1) process according to Markov switches between states. <br>
-  ㅤ
+  - *Markov-switching VAR(1).* The Markov-switching VAR(1) model combines the HMM with the VAR(1) model, allowing for changes in parameters of the VAR(1) process according to Markov switches between states.
+  
+***
 
 * **Measurement occasions**: 
-The number of measurements over time ($t$). Note that at all times a burnin of 100 measurement occasions is used. This meanst that the first 100 generated data points are thrown away. This is used to eliminate influence of the initial value used to start the data generation (here the initial value is always $0$). 
+The number of measurements over time ($t$). Note that at all times a burnin of 100 measurement occasions is used. This means that the first 100 generated data points are thrown away. This is used to eliminate influence of the initial value used to start the data generation (here the initial value is always $0$). 
 
-* **Seed**:
+* **Reproducibility seed**:
 Sets the seed which is used to create reproducible results.
 
+* **Random seed**:
+Chooses a random seed so that a new data set is generated using the same set up.
+
+***
 #### Regression coefficients
 
 * **Intercept $\alpha$**:
@@ -53,7 +58,7 @@ The innovations represent the parts of a variable at time $t$ that cannot be pre
 #### Indicator
 Only for the latent VAR(1) model.
 
-* **Mean**: The mean of the indicator in the factor model. If one wants to specify a specific mean for the time-series of a partner then they should use this option and set the intercept in the regression coefficients to $0$.
+* **Intercept $\nu$**: The intercept of the indicator (measurement equation) in the factor model. If one wants to specify a specific mean for the time-series of a partner then they should use this option and set the intercept in the regression coefficients (transition equation)  to $0$.
 
 #### Second regime
 Only for the Threshold VAR(1), Hidden Markov, and Markov-switching VAR(1) models. A second set of parameters that are used to generate data when the system is in the second regime. If you do not want a parameter to be regime-switching, make sure that it has the same value as the first regime.
@@ -71,24 +76,3 @@ Only for the Hidden Markov and the Markov-switching VAR(1) model. The transition
 * **Stay in 1**: The probability of staying in the first regime, when the system was also in the first regime at the previous occasion. This probability automatically implies the probability **Switch to 2** as this is the probability of switching to the second regime when the system was in the first regime at the previous occasion (and there are only two regimes).
 
 * **Stay in 2**: The probability of staying in the second regime, when the system was also in the second regime at the previous occasion. This probability automatically implies the probability **Switch to 1** as this is the probability of switching to the first regime when the system was in the second regime at the previous occasion (and there are only two regimes).
-
-***
-#### Plots
-
-* **Time-series**:
-Plots the sequence of a partner's values against time.
-
-* **Scatter plot auto**:
-Plots a partner's value at time $t$ against itself at a previous occasion ($t - 1$). The autocorrelation $r$ is also shown.
-
-* **Scatter plot cross-lagged**:
-Plots a partner's value at time $t$ against the other partner's value at a previous occasion ($t - 1$). The cross-correlation $r$ is also shown.
-
-* **3D state-space**:
-A combination of the time-series plot and the carryover state-space. The line connects each occasion to the next occasion to show how the sequence develops over time.
-
-* **Autocorrelation function**:
-Plots the autocorrelation of a partner's values for different time lags.
-
-* **Cross-correlation function**:
-Plots the cross-correlation of both partner's values for different time lags.

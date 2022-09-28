@@ -1,0 +1,19 @@
+---
+title: "Info"
+output: 
+  html_fragment
+---
+
+### Upload Data
+
+The *Upload* tab allows users to upload their own intensive longitudinal dyadic data to visualize them with the plots provided by this app. This way, users can compare the data patterns in their observed data to the patterns in the generated data.
+
+***
+
+* **Choose CSV File**: Click on "Browse..." to choose a CSV file to upload. The data file should have three columns: t, x, and y (the "wide" format). The columns *y* and *x* indicate each partner in the dyad and rows indicate the measurement occasion (also clarified by column *t*).
+
+* **Separator**: The separator by which the columns in the uploaded CSV file are separated. This has to be either a comma, a semicolon, or a tab.
+
+***
+
+The uploaded data are shown in a table on the right. This way, users can check whether the data were uploaded correctly. Below, users can choose which plots to show of the uploaded data.

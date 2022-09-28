@@ -629,8 +629,6 @@ datMSVAR$predicted <- c(predMSVAR[1, ], predMSVAR[2, ])
 myTS(datMSVAR, regime = T, regimeType = "points", predicted = T, legend.position = c(.15, .20), filename = "Plots/Butler/Predictions/butler_MSVAR.pdf", width = 6.67, height = 4, textSize = c(18.67, 12))
 ```
 
-## Prediction Error Plots
-
 ```{r echo=F, fig.show="hold", out.width="50%"}
 errorY <- c(df$y - datTAR$predicted[datTAR$partner == "y"], 
             df$y - datHMM$predicted[datHMM$partner == "y"], 
@@ -640,18 +638,30 @@ errorX <- c(df$x - datTAR$predicted[datTAR$partner == "x"],
             df$x - datHMM$predicted[datHMM$partner == "x"], 
             df$x - datMSVAR$predicted[datMSVAR$partner == "x"])
 
-dfError <- data.frame(model = rep(c("TVAR", "HMM", "MSVAR"), 
-                                   each = nrow(df)),
+modelNames <- factor(rep(c("TVAR", "HMM", "MSVAR"), each = nrow(df)),
+                     levels = c("TVAR", "HMM", "MSVAR"))
+
+dfError <- data.frame(Model = modelNames,
                       t = rep(1:nrow(df), 3))
 
 dfError$errorY <- errorY
 dfError$errorX <- errorX
 
-ggplot(dfError) + geom_line(aes(x = t, y = errorY, color = model))
-ggplot(dfError) + geom_line(aes(x = t, y = abs(errorY), color = model))
+pY <- ggplot(dfError) + geom_hline(yintercept = 0) + 
+  geom_line(aes(x = t, y = errorY, color = Model)) +
+  scale_color_manual(values = c("black", "grey50", "grey80")) + 
+  labs(x = bquote(italic("t")), y = "Prediction Error y")
+pY <- myTheme(pY, x = dfError$t, y = c(dfError$errorY, dfError$errorX), legend.position = c(.15, .2))
 
-ggplot(dfError) + geom_line(aes(x = t, y = errorX, color = model))
-ggplot(dfError) + geom_line(aes(x = t, y = abs(errorX), color = model))
+ggsave("Plots/Butler/Predictions/errorPlotY.pdf", pY, width = 5, height = 3)
+
+pX <- ggplot(dfError) + geom_hline(yintercept = 0) +
+  geom_line(aes(x = t, y = errorX, color = Model)) +
+  scale_color_manual(values = c("black", "grey50", "grey80")) + 
+  labs(x = bquote(italic("t")), y = "Prediction Error x")
+pX <- myTheme(pX, x = dfError$t, y = c(dfError$errorY, dfError$errorX), legend.position = c(.15, .2))
+
+ggsave("Plots/Butler/Predictions/errorPlotX.pdf", pX, width = 5, height = 3)
 ```
 
 # Example 2: Daily Diary
@@ -968,8 +978,6 @@ datMSVAR$predicted <- c(predMSVAR[1, ], predMSVAR[2, ])
 myTS(datMSVAR, regime = T, regimeType = "points", predicted = T, legend.position = c(.75, .15), filename = "Plots/Bringmann/Predictions/bringmann_MSVAR.pdf", width = 6.67, height = 4, textSize = c(18.67, 12))
 ```
 
-## Prediction Error Plots
-
 ```{r echo=F, fig.show="hold", out.width="50%"}
 errorY <- c(df$y - datVAR$predicted[datVAR$partner == "y"], 
             df$y - datLVAR$predicted[datLVAR$partner == "y"], 
@@ -979,18 +987,30 @@ errorX <- c(df$x - datVAR$predicted[datVAR$partner == "x"],
             df$x - datLVAR$predicted[datLVAR$partner == "x"], 
             df$x - datTVVAR$predicted[datTVVAR$partner == "x"])
 
-dfError <- data.frame(model = rep(c("VAR", "LVAR", "TV-VAR"), 
-                                   each = nrow(df)),
+modelNames <- factor(rep(c("VAR", "LVAR", "TV-VAR"), each = nrow(df)),
+                     levels = c("VAR", "LVAR", "TV-VAR"))
+
+dfError <- data.frame(Model = modelNames,
                       t = rep(1:nrow(df), 3))
 
 dfError$errorY <- errorY
 dfError$errorX <- errorX
 
-ggplot(dfError) + geom_line(aes(x = t, y = errorY, color = model))
-ggplot(dfError) + geom_line(aes(x = t, y = abs(errorY), color = model))
+pY <- ggplot(dfError) + geom_hline(yintercept = 0) + 
+  geom_line(aes(x = t, y = errorY, color = Model)) +
+  scale_color_manual(values = c("black", "grey50", "grey80")) + 
+  labs(x = bquote(italic("t")), y = "Prediction Error y")
+pY <- myTheme(pY, x = dfError$t, y = c(dfError$errorY, dfError$errorX), legend.position = c(.9, .2))
 
-ggplot(dfError) + geom_line(aes(x = t, y = errorX, color = model))
-ggplot(dfError) + geom_line(aes(x = t, y = abs(errorX), color = model))
+ggsave("Plots/Bringmann/Predictions/errorPlotY.pdf", pY, width = 5, height = 3)
+
+pX <- ggplot(dfError) + geom_hline(yintercept = 0) +
+  geom_line(aes(x = t, y = errorX, color = Model)) +
+  scale_color_manual(values = c("black", "grey50", "grey80")) + 
+  labs(x = bquote(italic("t")), y = "Prediction Error x")
+pX <- myTheme(pX, x = dfError$t, y = c(dfError$errorY, dfError$errorX), legend.position = c(.9, .2))
+
+ggsave("Plots/Bringmann/Predictions/errorPlotX.pdf", pX, width = 5, height = 3)
 ```
 
 # References
