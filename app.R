@@ -1,23 +1,9 @@
-# install required packages
-if (!("shinycssloaders" %in% installed.packages())) {
-  install.packages("shinycssloaders")
-}
-if (!("ggplot2" %in% installed.packages())) install.packages("ggplot2")
-if (!("plotly" %in% installed.packages())) install.packages("plotly")
-if (!("DT" %in% installed.packages())) install.packages("DT")
-if (!("viridis" %in% installed.packages())) install.packages("viridis")
-if (!("oddsratio" %in% installed.packages())) install.packages("oddsratio")
-if (!("MASS" %in% installed.packages())) install.packages("MASS")
-if (!("stringr" %in% installed.packages())) install.packages("stringr")
-if (!("tidyr" %in% installed.packages())) install.packages("tidyr")
-if (!("dplyr" %in% installed.packages())) install.packages("dplyr")
-if (!("Rcpp" %in% installed.packages())) install.packages("Rcpp")
-
 # load packages
 library("shiny")
 library("shinycssloaders")
 library("ggplot2")
 library("plotly")
+library("markdown")
 
 # source required files
 source("simVARS.R")
@@ -221,12 +207,12 @@ ui <- tagList(
           8,
           navlistPanel(
             well = FALSE,
-            tabPanel("Plots", includeMarkdown("Shiny/plots.Rmd")),
+            tabPanel("Plots", shiny::includeMarkdown("Shiny/plots.Rmd")),
             "Simulate",
-            tabPanel("Set up & Visualization", includeMarkdown("Shiny/setup.Rmd")),
-            tabPanel("Download", includeMarkdown("Shiny/download.Rmd")),
+            tabPanel("Set up & Visualization", shiny::includeMarkdown("Shiny/setup.Rmd")),
+            tabPanel("Download", shiny::includeMarkdown("Shiny/download.Rmd")),
             "Upload",
-            tabPanel("Upload Data", includeMarkdown("Shiny/upload.Rmd"))
+            tabPanel("Upload Data", shiny::includeMarkdown("Shiny/upload.Rmd"))
           )
         ),
         column(
