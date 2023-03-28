@@ -33,7 +33,9 @@ p <- myTS(dat.hmm, ylim = lim, regime = T, partner = "y", regimeType = "shades")
 ggsave("Plots/HMM/HMM_ts.pdf", p, width = 5, height = 3)
 mySSP(dat.hmm, ylim = lim, xlim = lim, type = "carryover", filename = "Plots/HMM/HMM_ss.pdf")
 mySSP(dat.hmm, ylim = lim, xlim = lim, type = "spillover", filename = "Plots/HMM/HMM_sohw.pdf")
-myCCF(dat.hmm, xlim = c(-10, 10), filename = "Plots/HMM/HMM_ccf.pdf")
+myCF(dat.hmm, xlim = c(-10, 10), 
+     type = "CCF", partner = "y", filename = "Plots/HMM/HMM_ccf.pdf")
+
 
 p <- myTS(dat.msvar, ylim = lim, regime = T, partner = "y", regimeType = "shades") +
   geom_line(aes(x = t, y = value, color = partner), data = dat.msvar, size = 1) +
@@ -44,4 +46,5 @@ p <- myTS(dat.msvar, ylim = lim, regime = T, partner = "y", regimeType = "shades
 ggsave("Plots/MSVAR/MSVAR_ts.pdf", p, width = 5, height = 3)
 mySSP(dat.msvar, ylim = lim, xlim = lim, type = "carryover", filename = "Plots/MSVAR/MSVAR_ss.pdf")
 mySSP(dat.msvar, ylim = lim, xlim = lim, type = "spillover", filename = "Plots/MSVAR/MSVAR_sohw.pdf")
-myCCF(dat.msvar, xlim = c(-10, 10), ylim = c(-0.2, 0.8), filename = "Plots/MSVAR/MSVAR_ccf.pdf")
+myCF(dat.msvar, type = "CCF", partner = "y", 
+     xlim = c(-10, 10), ylim = c(-0.2, 0.8), filename = "Plots/MSVAR/MSVAR_ccf.pdf")

@@ -324,8 +324,8 @@ myCF <- function(dat, type, partner = NULL,
   }
   
   if(type == "CCF"){
-    ccy <- ccf(datY, datX, plot = F, na.action = na.pass)
-    ccx <- ccf(datX, datY, plot = F, na.action = na.pass)
+    ccy <- ccf(datX, datY, plot = F, na.action = na.pass)
+    ccx <- ccf(datY, datX, plot = F, na.action = na.pass)
     yLabs <- "CCF"
     if(ptrue){
       if(partner == "y"){
