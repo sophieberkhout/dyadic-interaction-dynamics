@@ -24,4 +24,4 @@ Berkhout, S. W., Schuurman, N. K., & Hamaker, E. L. (2022). *Dyadic Interaction 
 ```
 
 #### Reference
-Berkhout, S. W., Schuurman, N. K., & Hamaker, E. L. (2022). *A Tool to Simulate and Visualize Dyadic Interaction Dynamics*. Manuscript submitted for publication.
+Berkhout, S. W., Schuurman, N. K., & Hamaker, E. L. (in press). A Tool to Simulate and Visualize Dyadic Interaction Dynamics. *Psychological Methods*.
