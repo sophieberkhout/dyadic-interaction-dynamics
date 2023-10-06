@@ -26,7 +26,7 @@ Time-varying VAR(1)
 
 Threshold VAR(1)
 
-* Influence: The influence of a partner at a certain measurement occasion on the other partner for the next measurement occasion. This is computed by multiplying the value of a partner by the regime-specific spillover regression coefficient of the next measurement occasion ($\beta_{s_{t+1}}$). For example, `influence_y` is the influence that $y$ will have on $x$, i.e. $\beta_{x, s_{t+1}} y_{t}$.
+* Influence: The influence of a partner at a certain measurement occasion on the other partner for the next measurement occasion. This is computed by multiplying the value of a partner by the regime-specific spillover regression coefficient of the next measurement occasion $\beta_{s_{t+1}}$. For example, `influence_y` is the influence that $y$ will have on $x$, i.e. $\beta_{x, s_{t+1}} y_{t}$.
 
 * Regime: The regime of a partner at the current measurement occasion (can differ from the regime of the other partner in the dyad).
 

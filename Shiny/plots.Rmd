@@ -13,10 +13,10 @@ Plots the sequence of a partner's values against time.
 Plots a histogram and density of a partner's values.
 
 * **Scatter plot auto**:
-Plots a partner's value at time $t$ against itself at a previous occasion ($t - 1$). The autocorrelation $r$ is also shown.
+Plots a partner's value at time $t$ against itself at a previous occasion $t - 1$. The autocorrelation $r$ is also shown.
 
 * **Scatter plot cross-lagged**:
-Plots a partner's value at time $t$ against the other partner's value at a previous occasion ($t - 1$). The cross-correlation $r$ is also shown.
+Plots a partner's value at time $t$ against the other partner's value at a previous occasion $t - 1$. The cross-correlation $r$ is also shown.
 
 * **3D state-space**:
 A combination of the time-series plot and the carryover state-space. The line connects each occasion to the next occasion to show how the sequence develops over time.

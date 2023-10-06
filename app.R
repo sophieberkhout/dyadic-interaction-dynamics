@@ -206,7 +206,7 @@ ui <- tagList(
         column(
           8,
           navlistPanel(
-            well = FALSE,
+            well = FALSE, widths = c(3, 9),
             tabPanel("Plots", shiny::includeMarkdown("Shiny/plots.Rmd")),
             "Simulate",
             tabPanel("Set up & Visualization", shiny::includeMarkdown("Shiny/setup.Rmd")),

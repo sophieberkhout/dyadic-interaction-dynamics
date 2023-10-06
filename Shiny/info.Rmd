@@ -5,23 +5,24 @@ output:
 ---
 
 ### Dyadic Interaction Dynamics
-This Shiny app allows users to simulate and visualize data from the dyadic interaction dynamic models that are discussed in the paper "A Tool to Simulate and Visualize Dyadic Interaction Dynamics" by S.W. Berkhout, N.K. Schuurman, and E.L. Hamaker (2022). The source code can be found on <a href="https://github.com/sophieberkhout/dyadic-interaction-dynamics" target="_blank">GitHub</a>.
+This Shiny app allows users to simulate and visualize data from the dyadic interaction dynamic models that are discussed in the paper "A Tool to Simulate and Visualize Dyadic Interaction Dynamics" by S.W. Berkhout, N.K. Schuurman, and E.L. Hamaker (2023). The source code can be found on <a href="https://github.com/sophieberkhout/dyadic-interaction-dynamics" target="_blank">GitHub</a>.
 
 #### Contact information
 If you have any questions or comments, please contact Sophie W. Berkhout ([s.w.berkhout@uu.nl](mailto:s.w.berkhout@uu.nl)).
 
 #### Citation
-Berkhout, S. W., Schuurman, N. K., & Hamaker, E. L. (2022). *Dyadic Interaction Dynamics* [Shiny application version 1.0]. https://utrecht-university.shinyapps.io/dyadic-interaction-dynamics/
+Berkhout, S. W., Schuurman, N. K., & Hamaker, E. L. (2023). A tool to simulate and visualize dyadic interaction dynamics. *Psychological Methods*. https://doi.org/10.1037/met0000575
 
 ```{latex eval = F}
-@Manual{,
-  title = {Dyadic Interaction Dynamics},
-  author = {Sophie W Berkhout and Noémi K Schuurman and Ellen L Hamaker},
-  year = {2022},
-  note = {Shiny application version 1.0},
-  url = {https://utrecht-university.shinyapps.io/dyadic-interaction-dynamics/},
+
+@article{,
+  title = {A Tool to Simulate and Visualize Dyadic Interaction Dynamics.},
+  author = {Berkhout, Sophie W. and Schuurman, Noémi K. and Hamaker, Ellen L},
+  year = {2023},
+  journal = {Psychological Methods},
+  doi = {10.1037/met0000575}
 }
 ```
 
-#### Reference
-Berkhout, S. W., Schuurman, N. K., & Hamaker, E. L. (in press). A Tool to Simulate and Visualize Dyadic Interaction Dynamics. *Psychological Methods*.
+#### License
+[GPL-3.0 license](https://github.com/sophieberkhout/dyadic-interaction-dynamics/blob/main/LICENSE)
